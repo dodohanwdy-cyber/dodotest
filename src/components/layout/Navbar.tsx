@@ -8,15 +8,17 @@ export default function Navbar() {
   const { user, logout, isLoading } = useAuth();
 
   return (
-    <nav className="global-navbar sticky top-0 z-50 w-full glass border-b border-zinc-200 dark:border-zinc-800 px-6 py-4">
-      <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+    <nav className="global-navbar sticky top-0 z-50 w-full glass border-b border-slate-100 px-6 py-4">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-10">
-          <Link href="/" className="flex items-center gap-2 group transition-transform hover:scale-105 active:scale-95">
-            <img 
-              src="/logo_opcl.png" 
-              alt="열고닫기 OPCL" 
-              className="h-7 w-auto object-contain"
-            />
+          <Link href="/" className="flex items-center gap-3 group transition-transform hover:scale-105 active:scale-95">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center text-lg text-white font-black shadow-xl shadow-blue-100">열</div>
+              <div className="flex flex-col">
+                <h3 className="text-xl font-black text-slate-900 tracking-tight">열고닫기</h3>
+                <p className="text-[10px] font-black text-primary uppercase tracking-widest">Official Partner of Youth Center</p>
+              </div>
+            </div>
           </Link>
         </div>
 

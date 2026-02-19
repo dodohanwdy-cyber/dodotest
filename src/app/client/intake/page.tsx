@@ -332,20 +332,23 @@ function IntakeContent() {
           {/* 고도화된 프로그레스 바 */}
           <div className="pt-6">
              <div className="flex justify-between items-end mb-3">
-                <span className="text-xs font-black text-slate-400 tracking-wider">상담 진행률</span>
-                <span className="text-sm font-black text-primary">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Counseling Progress</span>
+                <span className="text-sm font-black text-primary flex items-center gap-1">
+                   <span className="animate-pulse w-1.5 h-1.5 bg-primary rounded-full" />
                    {completedSteps.length === 0 ? "0%" : completedSteps.length === 1 ? "25%" : completedSteps.length === 2 ? "50%" : completedSteps.length === 3 ? "75%" : "100%"}
                 </span>
              </div>
-             <div className="h-3 w-full bg-white rounded-full border border-slate-100 p-0.5 overflow-hidden shadow-inner">
+             <div className="h-4 w-full bg-white rounded-full border border-slate-100 p-1.5 overflow-hidden shadow-inner relative">
                 <div 
-                  className="h-full bg-gradient-to-r from-blue-500 to-primary rounded-full transition-all duration-1000 ease-out shadow-sm"
-                  style={{ width: `${completedSteps.length === 0 ? 5 : completedSteps.length === 1 ? 25 : completedSteps.length === 2 ? 50 : completedSteps.length === 3 ? 75 : 100}%` }}
-                />
+                  className="h-full bg-gradient-to-r from-blue-400 via-primary to-blue-600 rounded-full transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-sm relative overflow-hidden"
+                  style={{ width: `${completedSteps.length === 0 ? 3 : completedSteps.length === 1 ? 25 : completedSteps.length === 2 ? 50 : completedSteps.length === 3 ? 75 : 100}%` }}
+                >
+                   <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:24px_24px] animate-[progress-stripe_1s_linear_infinite]" />
+                </div>
              </div>
-             <div className="flex justify-between mt-3">
-                {["입력", "예약", "AI상담", "확인"].map((step, idx) => (
-                  <div key={idx} className={`text-[10px] font-black tracking-tighter ${completedSteps.length >= idx + 1 ? "text-primary" : "text-slate-300"}`}>
+             <div className="flex justify-between mt-3 px-1">
+                {["기본정보", "상담예약", "AI진단", "신청확인"].map((step, idx) => (
+                  <div key={idx} className={`text-[11px] font-black tracking-tighter transition-colors duration-500 ${completedSteps.length >= idx + 1 ? "text-primary" : "text-slate-300"}`}>
                     {step}
                   </div>
                 ))}
@@ -357,116 +360,132 @@ function IntakeContent() {
           type="single" 
           value={value} 
           onValueChange={setValue}
-          className="space-y-6"
+          className="space-y-8"
         >
-          <Accordion.Item value="section-1" className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden transition-all duration-500 data-[state=open]:ring-2 data-[state=open]:ring-primary/10">
+          <Accordion.Item value="section-1" className="bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 data-[state=open]:ring-4 data-[state=open]:ring-primary/5 data-[state=open]:-translate-y-1">
             <Accordion.Header className="flex">
-              <Accordion.Trigger className="flex-1 flex items-center justify-between p-8 text-left group">
-                <div className="flex items-center gap-6">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 ${completedSteps.includes("section-1") ? "bg-green-50 text-green-600 scale-110" : "bg-blue-50 text-primary group-hover:bg-primary group-hover:text-white"}`}>
-                    {completedSteps.includes("section-1") ? <CheckCircle size={28} /> : <Info size={28} />}
+              <Accordion.Trigger className="flex-1 flex items-center justify-between p-10 text-left group">
+                <div className="flex items-center gap-8">
+                  <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all duration-700 ${completedSteps.includes("section-1") ? "bg-green-50 text-green-600 scale-110 shadow-inner" : "bg-blue-50 text-primary group-hover:bg-primary group-hover:text-white"}`}>
+                    {completedSteps.includes("section-1") ? <CheckCircle size={32} /> : <Info size={32} />}
                   </div>
-                  <div>
-                    <h3 className="font-black text-slate-800 text-xl tracking-tight">STEP 1. 맞춤 데이터 입력</h3>
-                    <p className="text-sm text-slate-400 mt-1 font-bold">정확한 정책 추천을 위해 필요한 핵심 정보들입니다.</p>
+                  <div className="space-y-1">
+                    <h3 className="font-black text-slate-900 text-2xl tracking-tight">Step 01. 맞춤 데이터 입력</h3>
+                    <p className="text-[13px] text-slate-400 font-bold">당신을 더 잘 이해하기 위한 기초 정보를 수집합니다.</p>
                   </div>
                 </div>
-                <ChevronDown className="text-slate-300 group-data-[state=open]:rotate-180 transition-transform duration-500" />
+                <div className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center group-hover:bg-slate-50 transition-colors">
+                  <ChevronDown className="text-slate-400 group-data-[state=open]:rotate-180 transition-transform duration-500" size={20} />
+                </div>
               </Accordion.Trigger>
             </Accordion.Header>
-            <Accordion.Content className="px-10 pb-10 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
-              <BasicInfoForm data={intakeData} onNext={(data) => handleStepComplete("section-1", data)} />
+            <Accordion.Content className="px-12 pb-12 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
+               <div className="pt-8">
+                 <BasicInfoForm data={intakeData} onNext={(data) => handleStepComplete("section-1", data)} />
+               </div>
             </Accordion.Content>
           </Accordion.Item>
 
-          <Accordion.Item value="section-2" className={`bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden transition-all duration-500 data-[state=open]:ring-2 data-[state=open]:ring-primary/10 ${!completedSteps.includes("section-1") ? "opacity-50 grayscale pointer-events-none scale-95" : ""}`}>
+          <Accordion.Item value="section-2" className={`bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 data-[state=open]:ring-4 data-[state=open]:ring-primary/5 data-[state=open]:-translate-y-1 ${!completedSteps.includes("section-1") ? "opacity-40 grayscale pointer-events-none" : ""}`}>
             <Accordion.Header className="flex">
-              <Accordion.Trigger className="flex-1 flex items-center justify-between p-8 text-left group">
-                <div className="flex items-center gap-6">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 ${completedSteps.includes("section-2") ? "bg-green-50 text-green-600 scale-110" : "bg-blue-50 text-primary group-hover:bg-primary group-hover:text-white"}`}>
-                    {completedSteps.includes("section-2") ? <CheckCircle size={28} /> : <Calendar size={28} />}
+              <Accordion.Trigger className="flex-1 flex items-center justify-between p-10 text-left group">
+                <div className="flex items-center gap-8">
+                  <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all duration-700 ${completedSteps.includes("section-2") ? "bg-green-50 text-green-600 scale-110 shadow-inner" : "bg-blue-50 text-primary group-hover:bg-primary group-hover:text-white"}`}>
+                    {completedSteps.includes("section-2") ? <CheckCircle size={32} /> : <Calendar size={32} />}
                   </div>
-                  <div>
-                    <h3 className="font-black text-slate-800 text-xl tracking-tight">STEP 2. 상담 일정 선택</h3>
-                    <p className="text-sm text-slate-400 mt-1 font-bold">전문 상담사와 깊이 있는 대화를 나눌 시간을 골라주세요.</p>
+                  <div className="space-y-1">
+                    <h3 className="font-black text-slate-900 text-2xl tracking-tight">Step 02. 상담 일정 예약</h3>
+                    <p className="text-[13px] text-slate-400 font-bold">전문 상담사와 깊이 있는 대화를 나눌 시간을 조율합니다.</p>
                   </div>
                 </div>
-                <ChevronDown className="text-slate-300 group-data-[state=open]:rotate-180 transition-transform duration-500" />
+                <div className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center group-hover:bg-slate-50 transition-colors">
+                   <ChevronDown className="text-slate-400 group-data-[state=open]:rotate-180 transition-transform duration-500" size={20} />
+                </div>
               </Accordion.Trigger>
             </Accordion.Header>
-            <Accordion.Content className="px-10 pb-10 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
-              <ScheduleForm data={intakeData} onNext={(data) => handleStepComplete("section-2", data)} onPrev={() => setValue("section-1")} />
+            <Accordion.Content className="px-12 pb-12 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
+               <div className="pt-8">
+                 <ScheduleForm data={intakeData} onNext={(data) => handleStepComplete("section-2", data)} onPrev={() => setValue("section-1")} />
+               </div>
             </Accordion.Content>
           </Accordion.Item>
 
           <Accordion.Item 
             value="section-3" 
-            className={`bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden transition-all duration-500 data-[state=open]:ring-2 data-[state=open]:ring-primary/10 ${
-              !completedSteps.includes("section-2") ? "opacity-50 grayscale pointer-events-none scale-95" : ""
+            className={`bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 data-[state=open]:ring-4 data-[state=open]:ring-primary/5 data-[state=open]:-translate-y-1 ${
+              !completedSteps.includes("section-2") ? "opacity-40 grayscale pointer-events-none" : ""
             }`}
           >
             <Accordion.Header className="flex">
-              <Accordion.Trigger className="flex-1 flex items-center justify-between p-8 text-left group">
-                <div className="flex items-center gap-6">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 ${completedSteps.includes("section-3") ? "bg-green-50 text-green-600 scale-110" : "bg-blue-50 text-primary group-hover:bg-primary group-hover:text-white"}`}>
-                    {completedSteps.includes("section-3") ? <CheckCircle size={28} /> : <MessageCircle size={28} />}
+              <Accordion.Trigger className="flex-1 flex items-center justify-between p-10 text-left group">
+                <div className="flex items-center gap-8">
+                  <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all duration-700 ${completedSteps.includes("section-3") ? "bg-green-50 text-green-600 scale-110 shadow-inner" : "bg-blue-50 text-primary group-hover:bg-primary group-hover:text-white"}`}>
+                    {completedSteps.includes("section-3") ? <CheckCircle size={32} /> : <MessageCircle size={32} />}
                   </div>
-                  <div>
-                    <h3 className="font-black text-slate-800 text-xl tracking-tight">STEP 3. AI 사전 인터뷰</h3>
-                    <p className="text-sm text-slate-400 mt-1 font-bold">
+                  <div className="space-y-1">
+                    <h3 className="font-black text-slate-900 text-2xl tracking-tight">Step 03. AI 사전 인터뷰</h3>
+                    <p className="text-[13px] text-slate-400 font-bold">
                       {isChatFinished 
                         ? '✅ AI 상담이 완료되었습니다' 
-                        : '채팅을 통해 당신의 구체적인 상황을 AI에게 먼저 들려주세요.'}
+                        : '채팅을 통해 당신의 구체적인 상황을 AI에게 들려주세요.'}
                     </p>
                   </div>
                 </div>
-                <ChevronDown className="text-slate-300 group-data-[state=open]:rotate-180 transition-transform duration-500" />
+                <div className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center group-hover:bg-slate-50 transition-colors">
+                   <ChevronDown className="text-slate-400 group-data-[state=open]:rotate-180 transition-transform duration-500" size={20} />
+                </div>
               </Accordion.Trigger>
             </Accordion.Header>
-            <Accordion.Content className="px-10 pb-10 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
-              {isChatFinished && (
-                <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl mb-6 flex items-start gap-3">
-                  <AlertCircle className="text-amber-600 mt-0.5" size={20} />
-                  <div>
-                    <p className="text-sm font-bold text-amber-900 mb-1">
-                      ⚠️ AI 상담 내용은 수정할 수 없습니다
-                    </p>
-                    <p className="text-xs text-amber-700">
-                      AI 상담은 이미 완료되어 분석 결과가 생성되었습니다. 다른 섹션(기본 정보, 일정)은 수정 가능합니다.
-                    </p>
+            <Accordion.Content className="px-12 pb-12 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
+               <div className="pt-8">
+                {isChatFinished && (
+                  <div className="bg-amber-50/50 border border-amber-100 p-6 rounded-3xl mb-8 flex items-start gap-4 shadow-inner">
+                    <AlertCircle className="text-amber-500 mt-1" size={24} />
+                    <div>
+                      <p className="text-base font-black text-amber-900 mb-1">
+                        AI 상담 내용이 안전하게 저장되었습니다
+                      </p>
+                      <p className="text-sm text-amber-700 font-bold leading-relaxed">
+                        상담 결과가 분석되어 전문가에게 전달되었습니다. 세부 요청 사항은 'Step 4'에서 최종 확인 및 수정이 가능합니다.
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
-              <AIChatForm 
-                intakeData={intakeData} 
-                onComplete={() => handleStepComplete("section-3", {})} 
-                onUpdate={(data: any) => setIntakeData((prev: any) => ({ ...prev, ...data }))}
-                isChatFinished={isChatFinished}
-              />
+                )}
+                <AIChatForm 
+                  intakeData={intakeData} 
+                  onComplete={() => handleStepComplete("section-3", {})} 
+                  onUpdate={(data: any) => setIntakeData((prev: any) => ({ ...prev, ...data }))}
+                  isChatFinished={isChatFinished}
+                />
+              </div>
             </Accordion.Content>
           </Accordion.Item>
 
-          <Accordion.Item value="section-4" className={`bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden transition-all duration-500 data-[state=open]:ring-2 data-[state=open]:ring-primary/10 ${!isChatFinished ? "opacity-50 grayscale pointer-events-none scale-95" : ""}`}>
+          <Accordion.Item value="section-4" className={`bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 data-[state=open]:ring-4 data-[state=open]:ring-primary/5 data-[state=open]:-translate-y-1 ${!isChatFinished ? "opacity-40 grayscale pointer-events-none" : ""}`}>
             <Accordion.Header className="flex">
-              <Accordion.Trigger className="flex-1 flex items-center justify-between p-8 text-left group">
-                <div className="flex items-center gap-6">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 ${completedSteps.includes("section-4") ? "bg-green-50 text-green-600 scale-110" : "bg-blue-50 text-primary group-hover:bg-primary group-hover:text-white"}`}>
-                    {completedSteps.includes("section-4") ? <CheckCircle size={28} /> : <CheckCircle size={28} />}
+              <Accordion.Trigger className="flex-1 flex items-center justify-between p-10 text-left group">
+                <div className="flex items-center gap-8">
+                  <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all duration-700 ${completedSteps.includes("section-4") ? "bg-green-50 text-green-600 scale-110 shadow-inner" : "bg-blue-50 text-primary group-hover:bg-primary group-hover:text-white"}`}>
+                    {completedSteps.includes("section-4") ? <CheckCircle size={32} /> : <CheckCircle size={32} />}
                   </div>
-                  <div>
-                    <h3 className="font-black text-slate-800 text-xl tracking-tight">STEP 4. 최종 리포트 확인</h3>
-                    <p className="text-sm text-slate-400 mt-1 font-bold">작성된 모든 내용을 검토하고 상담 신청을 확정합니다.</p>
+                  <div className="space-y-1">
+                    <h3 className="font-black text-slate-900 text-2xl tracking-tight">Step 04. 최종 리포트 확인</h3>
+                    <p className="text-[13px] text-slate-400 font-bold">작성된 모든 내용을 검토하고 상담 신청을 확정합니다.</p>
                   </div>
                 </div>
-                <ChevronDown className="text-slate-300 group-data-[state=open]:rotate-180 transition-transform duration-500" />
+                <div className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center group-hover:bg-slate-50 transition-colors">
+                   <ChevronDown className="text-slate-400 group-data-[state=open]:rotate-180 transition-transform duration-500" size={20} />
+                </div>
               </Accordion.Trigger>
             </Accordion.Header>
-            <Accordion.Content className="px-10 pb-10 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
-              <ReviewForm 
-                data={intakeData} 
-                onEdit={(step) => setValue(step)} 
-                onSubmit={handleFinalSubmit} 
-              />
+            <Accordion.Content className="px-12 pb-12 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
+               <div className="pt-8">
+                <ReviewForm 
+                  data={intakeData} 
+                  onEdit={(step) => setValue(step)} 
+                  onSubmit={handleFinalSubmit} 
+                />
+              </div>
             </Accordion.Content>
           </Accordion.Item>
         </Accordion.Root>

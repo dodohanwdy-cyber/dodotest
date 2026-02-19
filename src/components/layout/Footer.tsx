@@ -3,15 +3,18 @@ export default function Footer() {
     <footer className="w-full bg-zinc-50 border-t border-zinc-200 py-16 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
         <div className="space-y-6 col-span-1 md:col-span-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center text-sm text-white font-bold shadow-lg shadow-blue-100">열</div>
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">열고닫기</h3>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center text-lg text-white font-black shadow-xl shadow-blue-100">열</div>
+            <div className="flex flex-col">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight">열고닫기</h3>
+              <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-none mt-0.5">Official Partner of Youth Center</p>
+            </div>
           </div>
-          <p className="text-sm text-slate-500 max-w-sm leading-relaxed font-medium">
-            청년들의 목소리를 데이터로 분석하여 실질적인 정책 수혜로 연결합니다. 
-            AI 기반 상담 지능화 서비스 '열고닫기'가 더 나은 미래를 만듭니다.
+          <p className="text-sm text-slate-500 max-w-sm leading-relaxed font-bold break-keep">
+            청년들의 고민을 데이터로 분석하여 가장 필요한 정책으로 연결합니다. 
+            청년센터와 함께하는 AI 기반 상담 매칭 웹앱 '열고닫기'입니다.
           </p>
-          <div className="pt-4 text-[11px] leading-6 text-zinc-400 font-medium border-t border-zinc-100/50 mt-6">
+          <div className="pt-6 text-[11px] leading-6 text-slate-400 font-bold border-t border-slate-100 mt-6">
             <p>도도한콜라보 주식회사 | 대표자: 원규희</p>
             <p>사업자등록번호: 462-88-01490</p>
             <p>서울특별시 영등포구 영등포로27길 7, 302호(당산동1가)</p>
