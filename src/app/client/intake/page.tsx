@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import * as Accordion from "@radix-ui/react-accordion";
 import { useAuth } from "@/context/AuthContext";
@@ -12,7 +12,7 @@ import ScheduleForm from "@/components/intake/ScheduleForm";
 import AIChatForm from "@/components/intake/AIChatForm";
 import ReviewForm from "@/components/intake/ReviewForm";
 
-export default function IntakePage() {
+function IntakeContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const applicationId = searchParams.get('id');
@@ -472,5 +472,20 @@ export default function IntakePage() {
         </Accordion.Root>
       </div>
     </main>
+  );
+}
+
+export default function IntakePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="font-bold text-slate-400">페이지를 불러오는 중입니다...</p>
+        </div>
+      </div>
+    }>
+      <IntakeContent />
+    </Suspense>
   );
 }

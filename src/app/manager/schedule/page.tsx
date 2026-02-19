@@ -1,12 +1,12 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Calendar, Clock, Save, X, Info, Loader2 } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
 
-export default function ScheduleAdjustPage() {
+function ScheduleAdjustContent() {
   const searchParams = useSearchParams();
   const requestId = searchParams.get("id");
   const [status, setStatus] = useState("idle");
@@ -95,7 +95,7 @@ export default function ScheduleAdjustPage() {
           </div>
 
           <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-2xl flex gap-3">
-            <Info size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
+            <span className="text-blue-500 mt-0.5 flex-shrink-0"><Info size={16} /></span>
             <p className="text-xs text-blue-600 leading-relaxed">
               본 요청 ID: <strong>{requestId}</strong>에 대한 일정을 수정합니다. 저장 시 내담자에게 즉시 알림이 발송되며 구글 시트 데이터가 업데이트됩니다.
             </p>
@@ -119,5 +119,17 @@ export default function ScheduleAdjustPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ScheduleAdjustPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+        <Loader2 className="animate-spin text-primary" size={32} />
+      </div>
+    }>
+      <ScheduleAdjustContent />
+    </Suspense>
   );
 }
