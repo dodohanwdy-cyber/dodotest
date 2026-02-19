@@ -15,17 +15,18 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative pt-20 pb-16 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center space-y-8 relative z-10">
-          <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white border border-blue-100 shadow-sm animate-fade-in">
-            <div className="flex -space-x-2">
-              <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[8px] text-white font-bold border-2 border-white">열</div>
-              <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white overflow-hidden">
-                <img src="/logo_opcl.png" className="w-4 h-4 object-contain opacity-50" alt="CO" />
+          <div className="inline-flex items-center gap-4 px-5 py-2.5 rounded-full bg-white border border-blue-50 shadow-sm animate-fade-in">
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5">
+                <div className="w-5 h-5 rounded-md bg-slate-800 flex items-center justify-center text-[7px] text-white font-bold">센터</div>
+                <span className="text-[11px] font-bold text-slate-800 tracking-tight">청년센터</span>
+              </div>
+              <div className="w-px h-3 bg-slate-200" />
+              <div className="flex items-center gap-1.5">
+                <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center text-[8px] text-white font-bold shadow-sm shadow-blue-100">열</div>
+                <span className="font-bold text-slate-900 text-[11px] tracking-tight">열고닫기</span>
               </div>
             </div>
-            <span className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              <span className="w-1 h-1 bg-blue-400 rounded-full animate-pulse" />
-              청년센터 공식 정책 상담 매칭 파트너
-            </span>
           </div>
 
           <div className="space-y-6 max-w-4xl">
@@ -149,16 +150,23 @@ export default function Home() {
 
            <div className="w-full md:w-[360px] space-y-4">
               <div className="bg-blue-50/50 p-8 rounded-[3rem] border border-blue-100 space-y-6">
-                 <p className="text-[11px] font-black text-primary uppercase tracking-widest text-center">In collaboration with</p>
+                 <p className="text-[11px] font-bold text-primary uppercase tracking-widest text-center">In collaboration with</p>
                  <div className="flex flex-col items-center gap-6">
-                    <div className="p-4 bg-white rounded-2xl shadow-sm w-full flex items-center justify-center">
-                       <img src="/logo_opcl.png" className="h-8 object-contain" alt="YOUTH CENTER" />
-                    </div>
-                    <div className="text-slate-300 font-black text-lg">X</div>
-                    <div className="p-4 bg-white rounded-2xl shadow-sm w-full flex items-center justify-center">
+                    {/* 청년센터 영역 */}
+                    <div className="p-5 bg-white rounded-2xl shadow-sm w-full flex items-center justify-center border border-blue-100/50">
                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-black">열</div>
-                          <span className="font-black text-slate-900">열고닫기</span>
+                          <div className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-[10px] text-white font-bold">센터</div>
+                          <span className="font-bold text-slate-800 text-lg tracking-tight">청년센터</span>
+                       </div>
+                    </div>
+                    
+                    <div className="text-slate-300 font-bold text-lg">X</div>
+                    
+                    {/* 열고닫기 영역 */}
+                    <div className="p-5 bg-white rounded-2xl shadow-sm w-full flex items-center justify-center border border-blue-100/50">
+                       <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">열</div>
+                          <span className="font-bold text-slate-900 text-lg tracking-tight">열고닫기</span>
                        </div>
                     </div>
                  </div>
