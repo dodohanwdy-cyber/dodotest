@@ -8,7 +8,7 @@
 
 export const WEBHOOK_URLS = {
   // 1단계: 인증 및 기본 정보
-  LOGIN: "https://webhook-processor-production-1f39e.up.railway.app/webhook/login", // 로그인 처리 및 사용자 정보 조회
+  LOGIN: "https://webhook-processor-production-1f39e.up.railway.app/webhook/login-id", // 로그인 처리 및 사용자 정보 조회
   SIGNUP: "https://webhook-processor-production-1f39e.up.railway.app/webhook/signup", // 회원가입 및 초기 데이터 생성
   UPDATE_USER: "https://webhook-processor-production-1f39e.up.railway.app/webhook/update-user", // 사용자 정보 수정
 
