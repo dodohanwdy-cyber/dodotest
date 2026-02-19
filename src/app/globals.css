@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 :root {
+  --font-pretendard: "Pretendard Variable", "Pretendard", -apple-system, "BlinkMacSystemFont", "system-ui", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
   --background: #ffffff;
   --foreground: #191f28; /* 토스 스타일 차분한 블랙 */
   --primary: #3182f6; /* 토스 블루 */

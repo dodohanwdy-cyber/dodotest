@@ -7,20 +7,23 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-pretendard)", "Pretendard", "-apple-system", "BlinkMacSystemFont", "system-ui", "sans-serif"],
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
         primary: {
-          DEFAULT: "#6366f1", // Indigo
-          foreground: "#ffffff",
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
         },
         secondary: {
-          DEFAULT: "#f4f4f5",
-          foreground: "#18181b",
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
         },
         accent: {
-          DEFAULT: "#fbcfe8", // Pink
-          foreground: "#18181b",
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
         },
       },
       keyframes: {

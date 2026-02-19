@@ -28,19 +28,14 @@ export default function Home() {
             </span>
           </div>
 
-          <div className="space-y-4 max-w-4xl">
-            <h1 className="text-5xl md:text-7xl font-black text-slate-900 leading-[1.1] tracking-tight break-keep">
-              청년의 내일을 위한<br/>
-              <span className="text-primary relative inline-block">
-                가장 든든한 상담 창구
-                <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 12" fill="none">
-                   <path d="M1 9.5C50 3.5 150 1.5 299 9.5" stroke="#FFAE00" strokeWidth="3" strokeLinecap="round"/>
-                </svg>
-              </span>
+          <div className="space-y-6 max-w-4xl">
+            <h1 className="text-4xl md:text-6xl font-bold text-slate-900 leading-[1.2] tracking-tight break-keep">
+              청년의 내일을 응원하는<br/>
+              <span className="text-primary">편안한 정책 상담소</span>
             </h1>
-            <p className="text-xl text-slate-500 font-bold max-w-2xl mx-auto leading-relaxed pt-4 break-keep">
-              청년센터가 검증한 '열고닫기'의 AI 기술과 전문 상담사가 만나,<br/>
-              당신에게 꼭 필요한 정책 솔루션을 안전하게 찾아드립니다.
+            <p className="text-lg text-slate-500 font-medium max-w-xl mx-auto leading-relaxed pt-2 break-keep">
+              청년센터와 함께하는 '열고닫기'가<br/>
+              당신에게 꼭 필요한 정책을 안전하게 찾아드립니다.
             </p>
           </div>
 
@@ -48,17 +43,17 @@ export default function Home() {
             {user ? (
               <Link 
                 href={user.role === "manager" ? "/manager/dashboard" : "/client/intake"}
-                className="group bg-primary text-white ml-0 sm:ml-4 px-12 py-5 rounded-[2rem] font-black text-lg flex items-center justify-center gap-3 transition-all hover:bg-primary/90 shadow-2xl shadow-blue-200 hover:scale-105 active:scale-95"
+                className="group bg-primary text-white ml-0 sm:ml-4 px-10 py-4 rounded-[2rem] font-bold text-lg flex items-center justify-center gap-2 transition-all hover:bg-primary/90 shadow-2xl shadow-blue-100 hover:scale-105 active:scale-95"
               >
                 {user.role === "manager" ? "관리자 대시보드" : "바로 상담 신청하기"} 
-                <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             ) : (
               <Link 
                 href="/login" 
-                className="group bg-primary text-white px-12 py-5 rounded-[2rem] font-black text-lg flex items-center justify-center gap-3 transition-all hover:bg-primary/90 shadow-2xl shadow-blue-200 hover:scale-105 active:scale-95"
+                className="group bg-primary text-white px-10 py-4 rounded-[2rem] font-bold text-lg flex items-center justify-center gap-2 transition-all hover:bg-primary/90 shadow-2xl shadow-blue-100 hover:scale-105 active:scale-95"
               >
-                상담 시작하기 <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
+                상담 시작하기 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             )}
           </div>
