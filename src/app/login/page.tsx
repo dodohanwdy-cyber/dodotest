@@ -29,10 +29,14 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      console.log("🚀 [Login] 시도:", email);
+      
       const response = await postToWebhook(WEBHOOK_URLS.LOGIN, {
         email,
         password,
       });
+
+      console.log("📩 [Login] 서버 응답 원본:", response);
 
       const resData = Array.isArray(response) ? response[0] : response;
 

@@ -247,7 +247,7 @@ export default function ScheduleAdjustPopup({
       console.log('[handleConfirm] 전송 데이터:', assignmentsData);
       
       // ADJUST_SCHEDULE 웹훅 호출
-      const response = await fetch('https://webhook-processor-production-1f39e.up.railway.app/webhook/schedule-confirm', {
+      const response = await fetch('https://primary-production-1f39e.up.railway.app/webhook/schedule-confirm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

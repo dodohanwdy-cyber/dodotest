@@ -272,7 +272,7 @@ export default function ManagerDashboard() {
       setShowDetailPopup(true);
       
       // send-preview-data 웹훅 호출
-      const response = await fetch('https://webhook-processor-production-1f39e.up.railway.app/webhook/send-preview-data', {
+      const response = await fetch('https://primary-production-1f39e.up.railway.app/webhook/send-preview-data', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -18,7 +18,11 @@ export async function postToWebhook(url: string, data: any) {
     const isJson = response.headers.get("content-type")?.includes("application/json");
     const resBody = isJson ? await response.json() : null;
 
-    console.log("🌐 [HTTP 상태]", response.status, "| [응답 본문]", resBody);
+    console.group(`🌐 API Request: ${url}`);
+    console.log("Payload:", data);
+    console.log("Status:", response.status);
+    console.log("Response Body:", resBody);
+    console.groupEnd();
 
     if (!response.ok) {
       // 응답 본문에 성공 표시가 있는지 확인 (n8n이 500 상태로 성공 응답을 보낼 수 있음)
