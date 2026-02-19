@@ -1,0 +1,585 @@
+{
+  "id": "2407",
+  "finished": true,
+  "mode": "manual",
+  "retryOf": null,
+  "retrySuccessId": null,
+  "status": "success",
+  "createdAt": "2026-02-10T01:55:24.238Z",
+  "startedAt": "2026-02-10T01:55:24.258Z",
+  "stoppedAt": "2026-02-10T01:55:24.701Z",
+  "deletedAt": null,
+  "workflowId": "Ba7MMSEfH3D0GRtT",
+  "waitTill": null,
+  "data": [
+    {
+      "version": 1,
+      "startData": "1",
+      "resultData": "2",
+      "executionData": "3"
+    },
+    {},
+    {
+      "runData": "4",
+      "pinData": "5",
+      "lastNodeExecuted": "6"
+    },
+    {
+      "contextData": "7",
+      "nodeExecutionStack": "8",
+      "metadata": "9",
+      "waitingExecution": "10",
+      "waitingExecutionSource": "11",
+      "runtimeData": "12"
+    },
+    {
+      "webhook": "13",
+      "Simple Memory": "14",
+      "Mistral Cloud Chat Model": "15",
+      "Tools Agent": "16",
+      "Respond to Webhook": "17"
+    },
+    {
+      "webhook": "18"
+    },
+    "Respond to Webhook",
+    {},
+    [],
+    {
+      "Simple Memory": "19",
+      "Mistral Cloud Chat Model": "20"
+    },
+    {},
+    {},
+    {
+      "version": 1,
+      "establishedAt": 1770688524263,
+      "source": "21",
+      "triggerNode": "22"
+    },
+    [
+      "23"
+    ],
+    [
+      "24"
+    ],
+    [
+      "25"
+    ],
+    [
+      "26"
+    ],
+    [
+      "27"
+    ],
+    [
+      "28"
+    ],
+    [
+      "29"
+    ],
+    [
+      "30"
+    ],
+    "manual",
+    {
+      "name": "31",
+      "type": "32"
+    },
+    {
+      "startTime": 1770688524264,
+      "executionIndex": 0,
+      "source": "33",
+      "hints": "34",
+      "executionTime": 0,
+      "executionStatus": "35",
+      "data": "36"
+    },
+    {
+      "startTime": 1770688524272,
+      "executionTime": 0,
+      "executionIndex": 2,
+      "executionStatus": "35",
+      "source": "37",
+      "data": "38",
+      "inputOverride": "39",
+      "metadata": "40"
+    },
+    {
+      "startTime": 1770688524280,
+      "executionTime": 417,
+      "executionIndex": 3,
+      "executionStatus": "35",
+      "source": "41",
+      "data": "42",
+      "inputOverride": "43",
+      "metadata": "44"
+    },
+    {
+      "startTime": 1770688524264,
+      "executionIndex": 1,
+      "source": "45",
+      "hints": "46",
+      "executionTime": 436,
+      "executionStatus": "35",
+      "data": "47"
+    },
+    {
+      "startTime": 1770688524700,
+      "executionIndex": 4,
+      "source": "48",
+      "hints": "49",
+      "executionTime": 1,
+      "executionStatus": "35",
+      "data": "50"
+    },
+    {
+      "json": "51",
+      "pairedItem": "52"
+    },
+    {
+      "subRun": "53"
+    },
+    {
+      "subRun": "54"
+    },
+    "webhook",
+    "n8n-nodes-base.webhook",
+    [],
+    [],
+    "success",
+    {
+      "main": "55"
+    },
+    [
+      "56"
+    ],
+    {
+      "ai_memory": "57"
+    },
+    {
+      "ai_memory": "58"
+    },
+    {
+      "subRun": "53"
+    },
+    [
+      "59"
+    ],
+    {
+      "ai_languageModel": "60"
+    },
+    {
+      "ai_languageModel": "61"
+    },
+    {
+      "subRun": "54"
+    },
+    [
+      "62"
+    ],
+    [],
+    {
+      "main": "63"
+    },
+    [
+      "64"
+    ],
+    [],
+    {
+      "main": "65"
+    },
+    {
+      "body": "66"
+    },
+    {
+      "item": 0
+    },
+    [
+      "67"
+    ],
+    [
+      "68"
+    ],
+    [
+      "18"
+    ],
+    {
+      "previousNode": "69",
+      "previousNodeRun": 0
+    },
+    [
+      "70"
+    ],
+    [
+      "71"
+    ],
+    {
+      "previousNode": "69",
+      "previousNodeRun": 0
+    },
+    [
+      "72"
+    ],
+    [
+      "73"
+    ],
+    {
+      "previousNode": "31"
+    },
+    [
+      "74"
+    ],
+    {
+      "previousNode": "69"
+    },
+    [
+      "75"
+    ],
+    {
+      "request_id": "76",
+      "email": "77",
+      "chatInput": "78",
+      "user_profile": "79"
+    },
+    {
+      "node": "80",
+      "runIndex": 0
+    },
+    {
+      "node": "81",
+      "runIndex": 0
+    },
+    "Tools Agent",
+    [
+      "82"
+    ],
+    [
+      "83"
+    ],
+    [
+      "84"
+    ],
+    [
+      "85"
+    ],
+    [
+      "86"
+    ],
+    [
+      "87"
+    ],
+    "CLEAN-TEST-001",
+    "new_tester@example.com",
+    "서울에 사는 25세 청년인데, 지금 신청 가능한 주거 지원 정책 3개만 알려줘.",
+    {
+      "name": "88",
+      "age": 25,
+      "gender": "89",
+      "city": "90",
+      "job_status": "91",
+      "income_level": "92",
+      "interest_areas": "93"
+    },
+    "Simple Memory",
+    "Mistral Cloud Chat Model",
+    {
+      "json": "94"
+    },
+    {
+      "json": "95"
+    },
+    {
+      "json": "96"
+    },
+    {
+      "json": "97"
+    },
+    {
+      "json": "98",
+      "pairedItem": "99"
+    },
+    {
+      "json": "98",
+      "pairedItem": "100"
+    },
+    "이몽룡",
+    "male",
+    "서울특별시",
+    "취업 준비 중",
+    "없음",
+    "주거",
+    {
+      "action": "101",
+      "chatHistory": "102"
+    },
+    {
+      "action": "101",
+      "values": "103"
+    },
+    {
+      "response": "104",
+      "tokenUsage": "105"
+    },
+    {
+      "messages": "106",
+      "estimatedTokens": 306,
+      "options": "107"
+    },
+    {
+      "output": "108"
+    },
+    {
+      "item": 0
+    },
+    {
+      "item": 0
+    },
+    "loadMemoryVariables",
+    [],
+    {},
+    {
+      "generations": "109"
+    },
+    {
+      "completionTokens": 26,
+      "promptTokens": 369,
+      "totalTokens": 395
+    },
+    [
+      "110"
+    ],
+    {
+      "mistral_api_key": "111",
+      "model": "112",
+      "temperature": 0.2,
+      "metadata": "113"
+    },
+    "안녕하세요!\n정책에 대해 궁금한 점이 있으시면 언제든 물어봐 주세요! 😊",
+    [
+      "114"
+    ],
+    "System: ## 페르소나\n당신은 대한민국 정부 및 지자체 지원 정책을 안내하는 '정책 전문 상담사'입니다. 사용자의 질문에 친절하고 이해하기 쉽게 답변해야 하며, 신뢰할 수 있는 정보만을 제공합니다.\n\n## 행동 지침\n1. 사용자가 특정 조건(지역, 나이, 상황 등)에 맞는 정책을 물어보면, 직접 추측하지 말고 반드시 'policy_search_expert' 도구를 호출하여 데이터를 확인하세요.\n2. 도구로부터 받은 정보가 있다면, 그 내용을 바탕으로 사용자에게 가독성 좋게(불렛포인트 등 사용) 요약하여 전달하세요.\n3. 만약 도구 결과에 사용자가 찾는 정책이 없다면, \"현재 확인 가능한 정책 중에는 해당 조건에 맞는 것이 없습니다.\"라고 솔직하게 안내하세요.\n4. 정책과 관련 없는 일상적인 대화(인사, 날씨 등)에는 가볍고 친절하게 응대하되, 대화의 끝에는 항상 \"정책에 대해 궁금한 점이 있으시면 언제든 물어봐 주세요!\"라고 덧붙이세요.\n\n## 출력 스타일\n- 가급적 높임말을 사용합니다.\n- 복잡한 정책 용어는 쉽게 풀어서 설명합니다.\n- 답변이 길어질 경우 가독성을 위해 적절한 줄바꿈과 이모지를 사용하세요.\nHuman: ",
+    {
+      "lc": 1,
+      "type": "115",
+      "id": "116"
+    },
+    "mistral-small-latest",
+    {},
+    [
+      "117"
+    ],
+    "secret",
+    [
+      "118"
+    ],
+    {
+      "text": "108",
+      "generationInfo": "119"
+    },
+    "MISTRAL_API_KEY",
+    {
+      "finishReason": "120"
+    },
+    "stop"
+  ],
+  "workflowData": {
+    "id": "Ba7MMSEfH3D0GRtT",
+    "name": "1-1. 채팅 호스트",
+    "nodes": [
+      {
+        "parameters": {
+          "notice": "",
+          "sessionIdType": "customKey",
+          "sessionKey": "my-test-session",
+          "contextWindowLength": 10
+        },
+        "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+        "typeVersion": 1.3,
+        "position": [
+          3152,
+          432
+        ],
+        "id": "d61b997c-7ce2-4060-806e-525a8e061683",
+        "name": "Simple Memory"
+      },
+      {
+        "parameters": {
+          "aiAgentStarterCallout": "",
+          "promptType": "define",
+          "text": "=",
+          "hasOutputParser": false,
+          "needsFallback": false,
+          "options": {
+            "systemMessage": "## 페르소나\n당신은 대한민국 정부 및 지자체 지원 정책을 안내하는 '정책 전문 상담사'입니다. 사용자의 질문에 친절하고 이해하기 쉽게 답변해야 하며, 신뢰할 수 있는 정보만을 제공합니다.\n\n## 행동 지침\n1. 사용자가 특정 조건(지역, 나이, 상황 등)에 맞는 정책을 물어보면, 직접 추측하지 말고 반드시 'policy_search_expert' 도구를 호출하여 데이터를 확인하세요.\n2. 도구로부터 받은 정보가 있다면, 그 내용을 바탕으로 사용자에게 가독성 좋게(불렛포인트 등 사용) 요약하여 전달하세요.\n3. 만약 도구 결과에 사용자가 찾는 정책이 없다면, \"현재 확인 가능한 정책 중에는 해당 조건에 맞는 것이 없습니다.\"라고 솔직하게 안내하세요.\n4. 정책과 관련 없는 일상적인 대화(인사, 날씨 등)에는 가볍고 친절하게 응대하되, 대화의 끝에는 항상 \"정책에 대해 궁금한 점이 있으시면 언제든 물어봐 주세요!\"라고 덧붙이세요.\n\n## 출력 스타일\n- 가급적 높임말을 사용합니다.\n- 복잡한 정책 용어는 쉽게 풀어서 설명합니다.\n- 답변이 길어질 경우 가독성을 위해 적절한 줄바꿈과 이모지를 사용하세요."
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3,
+        "position": [
+          3104,
+          208
+        ],
+        "id": "7649fa24-97f5-466f-a480-9e3be28e38ac",
+        "name": "Tools Agent",
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "notice": "",
+          "model": "mistral-small-latest",
+          "options": {
+            "temperature": 0.2
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+        "typeVersion": 1,
+        "position": [
+          2976,
+          416
+        ],
+        "id": "9bb96c9e-e95e-4fe4-a2c0-2ecde3b4e5c3",
+        "name": "Mistral Cloud Chat Model",
+        "credentials": {
+          "mistralCloudApi": {
+            "id": "DjHAtTpzcvFw3udV",
+            "name": "Mistral Cloud account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "multipleMethods": false,
+          "httpMethod": "POST",
+          "path": "chat-input",
+          "authentication": "none",
+          "responseMode": "responseNode",
+          "webhookNotice": "",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          2880,
+          208
+        ],
+        "id": "3a57baeb-957e-4121-bd88-61d48cbf060e",
+        "name": "webhook",
+        "webhookId": "7e1ec4af-19ee-4312-a960-12958f50e657"
+      },
+      {
+        "parameters": {
+          "enableResponseOutput": false,
+          "generalNotice": "",
+          "respondWith": "firstIncomingItem",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          3456,
+          208
+        ],
+        "id": "951d467f-40d6-4efd-b206-b950c5065736",
+        "name": "Respond to Webhook"
+      },
+      {
+        "parameters": {
+          "notice": "",
+          "noticeTemplateExample": "",
+          "description": "",
+          "executeNotice": "",
+          "source": "database",
+          "workflowId": {
+            "__rl": true,
+            "value": "eJmLofwMsTvbetEe",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/eJmLofwMsTvbetEe",
+            "cachedResultName": "1-1-1. 간단 정책 탐색"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+        "typeVersion": 2.2,
+        "position": [
+          3264,
+          416
+        ],
+        "id": "33acc94d-5b91-4baa-84fc-7294d716f906",
+        "name": "Call '1-1-1. 간단 정책 탐색'"
+      }
+    ],
+    "connections": {
+      "Simple Memory": {
+        "ai_memory": [
+          [
+            {
+              "node": "Tools Agent",
+              "type": "ai_memory",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Tools Agent": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mistral Cloud Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Tools Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "webhook": {
+        "main": [
+          [
+            {
+              "node": "Tools Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call '1-1-1. 간단 정책 탐색'": {
+        "ai_tool": [
+          [
+            {
+              "node": "Tools Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "timeSavedMode": "fixed",
+      "callerPolicy": "workflowsFromSameOwner",
+      "availableInMCP": false
+    }
+  },
+  "customData": {}
+}

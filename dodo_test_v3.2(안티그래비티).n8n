@@ -1,0 +1,470 @@
+{
+  "updatedAt": "2026-02-10T01:54:43.202Z",
+  "createdAt": "2026-01-29T08:08:31.836Z",
+  "id": "Ba7MMSEfH3D0GRtT",
+  "name": "1-1. 채팅 호스트",
+  "description": "",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "my-test-session",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        3152,
+        432
+      ],
+      "id": "d61b997c-7ce2-4060-806e-525a8e061683",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=",
+        "options": {
+          "systemMessage": "## 페르소나\n당신은 대한민국 정부 및 지자체 지원 정책을 안내하는 '정책 전문 상담사'입니다. 사용자의 질문에 친절하고 이해하기 쉽게 답변해야 하며, 신뢰할 수 있는 정보만을 제공합니다.\n\n## 행동 지침\n1. 사용자가 특정 조건(지역, 나이, 상황 등)에 맞는 정책을 물어보면, 직접 추측하지 말고 반드시 'policy_search_expert' 도구를 호출하여 데이터를 확인하세요.\n2. 도구로부터 받은 정보가 있다면, 그 내용을 바탕으로 사용자에게 가독성 좋게(불렛포인트 등 사용) 요약하여 전달하세요.\n3. 만약 도구 결과에 사용자가 찾는 정책이 없다면, \"현재 확인 가능한 정책 중에는 해당 조건에 맞는 것이 없습니다.\"라고 솔직하게 안내하세요.\n4. 정책과 관련 없는 일상적인 대화(인사, 날씨 등)에는 가볍고 친절하게 응대하되, 대화의 끝에는 항상 \"정책에 대해 궁금한 점이 있으시면 언제든 물어봐 주세요!\"라고 덧붙이세요.\n\n## 출력 스타일\n- 가급적 높임말을 사용합니다.\n- 복잡한 정책 용어는 쉽게 풀어서 설명합니다.\n- 답변이 길어질 경우 가독성을 위해 적절한 줄바꿈과 이모지를 사용하세요."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        3104,
+        208
+      ],
+      "id": "7649fa24-97f5-466f-a480-9e3be28e38ac",
+      "name": "Tools Agent",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "model": "mistral-small-latest",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        2976,
+        416
+      ],
+      "id": "9bb96c9e-e95e-4fe4-a2c0-2ecde3b4e5c3",
+      "name": "Mistral Cloud Chat Model",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "DjHAtTpzcvFw3udV",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat-input",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        2880,
+        208
+      ],
+      "id": "3a57baeb-957e-4121-bd88-61d48cbf060e",
+      "name": "webhook",
+      "webhookId": "7e1ec4af-19ee-4312-a960-12958f50e657"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3456,
+        208
+      ],
+      "id": "951d467f-40d6-4efd-b206-b950c5065736",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "eJmLofwMsTvbetEe",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/eJmLofwMsTvbetEe",
+          "cachedResultName": "1-1-1. 간단 정책 탐색"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        3264,
+        416
+      ],
+      "id": "33acc94d-5b91-4baa-84fc-7294d716f906",
+      "name": "Call '1-1-1. 간단 정책 탐색'"
+    }
+  ],
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Tools Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tools Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Tools Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "webhook": {
+      "main": [
+        [
+          {
+            "node": "Tools Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call '1-1-1. 간단 정책 탐색'": {
+      "ai_tool": [
+        [
+          {
+            "node": "Tools Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "webhook": [
+      {
+        "json": {
+          "body": {
+            "request_id": "CLEAN-TEST-001",
+            "email": "new_tester@example.com",
+            "chatInput": "서울에 사는 25세 청년인데, 지금 신청 가능한 주거 지원 정책 3개만 알려줘.",
+            "user_profile": {
+              "name": "이몽룡",
+              "age": 25,
+              "gender": "male",
+              "city": "서울특별시",
+              "job_status": "취업 준비 중",
+              "income_level": "없음",
+              "interest_areas": "주거"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "versionId": "d9828f43-bca2-490f-a486-e2a32736141c",
+  "activeVersionId": "37bf9059-29bb-4bba-bc55-63fae14c2f12",
+  "versionCounter": 424,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-01-29T08:08:31.836Z",
+      "createdAt": "2026-01-29T08:08:31.836Z",
+      "role": "workflow:owner",
+      "workflowId": "Ba7MMSEfH3D0GRtT",
+      "projectId": "0OFpcffOyNXtMqNr",
+      "project": {
+        "updatedAt": "2025-12-10T08:15:37.411Z",
+        "createdAt": "2025-12-10T08:12:47.685Z",
+        "id": "0OFpcffOyNXtMqNr",
+        "name": "collabo dodohan <helloworld@dodohancollabo.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "c9808ff3-7bbf-4ce4-a617-ce46f4c3ac58",
+        "projectRelations": [
+          {
+            "updatedAt": "2025-12-10T08:12:47.685Z",
+            "createdAt": "2025-12-10T08:12:47.685Z",
+            "userId": "c9808ff3-7bbf-4ce4-a617-ce46f4c3ac58",
+            "projectId": "0OFpcffOyNXtMqNr",
+            "user": {
+              "updatedAt": "2026-02-10T01:51:01.694Z",
+              "createdAt": "2025-12-10T08:12:45.736Z",
+              "id": "c9808ff3-7bbf-4ce4-a617-ce46f4c3ac58",
+              "email": "helloworld@dodohancollabo.com",
+              "firstName": "collabo",
+              "lastName": "dodohan",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-12-10T08:16:00.796Z",
+                "personalization_survey_n8n_version": "1.123.4",
+                "automationGoalDevops": [
+                  "ci-cd"
+                ],
+                "companySize": "<20",
+                "companyType": "saas",
+                "role": "it",
+                "reportedSource": "google"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "2mvBedTQrRARlYYY",
+                "userActivatedAt": 1769015760177,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1765962779620
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2026-02-09",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-02-10T01:51:03.995Z",
+    "createdAt": "2026-02-10T01:51:03.995Z",
+    "versionId": "37bf9059-29bb-4bba-bc55-63fae14c2f12",
+    "workflowId": "Ba7MMSEfH3D0GRtT",
+    "nodes": [
+      {
+        "parameters": {
+          "sessionIdType": "customKey",
+          "sessionKey": "my-test-session",
+          "contextWindowLength": 10
+        },
+        "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+        "typeVersion": 1.3,
+        "position": [
+          3152,
+          432
+        ],
+        "id": "d61b997c-7ce2-4060-806e-525a8e061683",
+        "name": "Simple Memory"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=",
+          "options": {
+            "systemMessage": "## 페르소나\n당신은 대한민국 정부 및 지자체 지원 정책을 안내하는 '정책 전문 상담사'입니다. 사용자의 질문에 친절하고 이해하기 쉽게 답변해야 하며, 신뢰할 수 있는 정보만을 제공합니다.\n\n## 행동 지침\n1. 사용자가 특정 조건(지역, 나이, 상황 등)에 맞는 정책을 물어보면, 직접 추측하지 말고 반드시 'policy_search_expert' 도구를 호출하여 데이터를 확인하세요.\n2. 도구로부터 받은 정보가 있다면, 그 내용을 바탕으로 사용자에게 가독성 좋게(불렛포인트 등 사용) 요약하여 전달하세요.\n3. 만약 도구 결과에 사용자가 찾는 정책이 없다면, \"현재 확인 가능한 정책 중에는 해당 조건에 맞는 것이 없습니다.\"라고 솔직하게 안내하세요.\n4. 정책과 관련 없는 일상적인 대화(인사, 날씨 등)에는 가볍고 친절하게 응대하되, 대화의 끝에는 항상 \"정책에 대해 궁금한 점이 있으시면 언제든 물어봐 주세요!\"라고 덧붙이세요.\n\n## 출력 스타일\n- 가급적 높임말을 사용합니다.\n- 복잡한 정책 용어는 쉽게 풀어서 설명합니다.\n- 답변이 길어질 경우 가독성을 위해 적절한 줄바꿈과 이모지를 사용하세요."
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3,
+        "position": [
+          3104,
+          208
+        ],
+        "id": "7649fa24-97f5-466f-a480-9e3be28e38ac",
+        "name": "Tools Agent",
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "model": "mistral-small-latest",
+          "options": {
+            "temperature": 0.2
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+        "typeVersion": 1,
+        "position": [
+          2976,
+          416
+        ],
+        "id": "9bb96c9e-e95e-4fe4-a2c0-2ecde3b4e5c3",
+        "name": "Mistral Cloud Chat Model",
+        "credentials": {
+          "mistralCloudApi": {
+            "id": "DjHAtTpzcvFw3udV",
+            "name": "Mistral Cloud account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "chat-input",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          2880,
+          208
+        ],
+        "id": "3a57baeb-957e-4121-bd88-61d48cbf060e",
+        "name": "webhook",
+        "webhookId": "7e1ec4af-19ee-4312-a960-12958f50e657"
+      },
+      {
+        "parameters": {
+          "description": "사용자가 \"청년 정책 알려줘\", \"경기도 지원금 있어?\", \"아이 키우기 좋은 혜택\" 등 특정 조건에 맞는 정책이나 혜택 정보를 찾을 때 사용합니다. 입력값으로는 사용자의 핵심 요구사항(지역, 연령대, 지원 분야 등)을 요약하여 전달하세요.",
+          "workflowId": {
+            "__rl": true,
+            "value": "bgwxocNFbUSvGZnw",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/bgwxocNFbUSvGZnw",
+            "cachedResultName": "dodo_test_v3.1.1. (안티그래비티 백엔드용)"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+        "typeVersion": 2.2,
+        "position": [
+          3264,
+          416
+        ],
+        "id": "760fe762-fd01-40f5-b5a9-3ff1a824040f",
+        "name": "Call 'dodo_test_v3.1.1. (안티그래비티 백엔드용)'"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          3456,
+          208
+        ],
+        "id": "951d467f-40d6-4efd-b206-b950c5065736",
+        "name": "Respond to Webhook"
+      }
+    ],
+    "connections": {
+      "Simple Memory": {
+        "ai_memory": [
+          [
+            {
+              "node": "Tools Agent",
+              "type": "ai_memory",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Tools Agent": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mistral Cloud Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Tools Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "webhook": {
+        "main": [
+          [
+            {
+              "node": "Tools Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'dodo_test_v3.1.1. (안티그래비티 백엔드용)'": {
+        "ai_tool": [
+          [
+            {
+              "node": "Tools Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "collabo dodohan",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-02-10T01:51:04.094Z",
+        "id": 101,
+        "workflowId": "Ba7MMSEfH3D0GRtT",
+        "versionId": "37bf9059-29bb-4bba-bc55-63fae14c2f12",
+        "event": "activated",
+        "userId": "c9808ff3-7bbf-4ce4-a617-ce46f4c3ac58"
+      }
+    ]
+  }
+}

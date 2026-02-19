@@ -1,0 +1,168 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #191f28; /* 토스 스타일 차분한 블랙 */
+  --primary: #3182f6; /* 토스 블루 */
+  --primary-foreground: #ffffff;
+  --secondary: #f2f4f6; /* 토스 스타일 배경 회색 */
+  --secondary-foreground: #191f28;
+  --accent: #ffd12d; /* 부드러운 옐로우 */
+  --accent-foreground: #191f28;
+  --radius: 1.5rem; /* 더 둥근 라운딩 */
+}
+
+.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  --accent: #fbbf24;
+  --accent-foreground: #020617;
+}
+
+* {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family:
+    "Pretendard Var",
+    "Pretendard",
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    Roboto,
+    "Helvetica Neue",
+    "Segoe UI",
+    "Apple SD Gothic Neo",
+    "Noto Sans KR",
+    "Malgun Gothic",
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    sans-serif;
+}
+
+/* 특정 페이지에서 글로벌 내비게이션 숨기기 기능 */
+body.hide-global-navbar .global-navbar {
+  display: none !important;
+}
+
+/* MZ 스타일 글래스모피즘 효과 */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glass {
+  background: rgba(24, 24, 27, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 부드러운 카드 스타일 */
+.card-premium {
+  @apply bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200;
+}
+
+/* 버튼 마이크로 애니메이션 */
+.btn-interactive {
+  @apply active:scale-95 transition-transform duration-100;
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s infinite ease-in-out;
+}
+
+/* 프린트 스타일 최적화: 리포트 출력 시 문서화 처리 */
+@media print {
+  /* 불필요한 UI 요소 숨기기 */
+  nav, footer, .navbar-container, .footer-container, button, .sticky {
+    display: none !important;
+  }
+
+  /* 배경색 및 그래픽 보존 */
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* 컨테이너 너비 조정 */
+  .max-w-6xl {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 20px !important;
+  }
+
+  /* 카드 스타일 문서 최적화: 디자인 미학 복구 + 정밀 간격 조정 */
+  section {
+    break-inside: avoid;
+    margin-bottom: 14px !important; /* 간격을 살짝 넓혀 미학 복구 */
+    border: 1px solid #eee !important;
+    box-shadow: none !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+  }
+
+  /* 그리드 레이아웃 유지하며 공간 효율 극대화 */
+  main {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+    margin-top: 8px !important;
+  }
+
+  /* 폰트 크기 복구 (가독성 및 미학 우선) */
+  h1 { font-size: 20pt !important; }
+  h2 { font-size: 14pt !important; margin-bottom: 8px !important; }
+  h3 { font-size: 11pt !important; margin-bottom: 6px !important; }
+  p, span, div, li { font-size: 9.5pt !important; line-height: 1.4 !important; }
+  
+  .text-lg { font-size: 12pt !important; }
+  .text-sm { font-size: 8.5pt !important; }
+  .text-xs { font-size: 7.5pt !important; }
+
+  /* 불필요한 공백만 제거 */
+  .mt-10 { margin-top: 8px !important; }
+  .mb-10 { margin-bottom: 8px !important; }
+  .mb-8 { margin-bottom: 6px !important; }
+  .mb-6 { margin-bottom: 4px !important; }
+  .p-10 { padding: 16px !important; }
+  .gap-10 { gap: 10px !important; }
+  .gap-8 { gap: 8px !important; }
+
+  /* 페이지 여백: 하단 여백을 특히 더 줄여서 3페이지 방지 */
+  @page {
+    size: A4;
+    margin: 10mm 10mm 5mm 10mm; /* 상 좌 하 우 순서 (하단 5mm로 최소화) */
+  }
+}
