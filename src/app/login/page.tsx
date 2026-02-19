@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const { login } = useAuth();
 
   // 회원가입에서 넘어온 이메일 자동 입력
@@ -61,18 +62,18 @@ export default function LoginPage() {
         };
         
         login(userData);
+        
+        // 커스텀 토스트 노출
+        setShowToast(true);
 
-        // 성공 팝업 안내 (Alert 대신 나중에 Toast UI로 고도화 가능)
-        alert(`🎉 ${resData.message || "로그인 성공! 대시보드로 이동합니다."}`);
-
-        // 1.5초 지연 후 페이지 전환 (사용자가 성공 메시지를 볼 시간 확보)
+        // 2초 지연 후 페이지 전환
         setTimeout(() => {
           if (userData.role === "manager" || userData.role === "admin") {
             window.location.href = "/manager/dashboard";
           } else {
             window.location.href = "/client/dashboard";
           }
-        }, 1500);
+        }, 2000);
         
         return; // 성공 시 여기서 중단
       } 
@@ -95,6 +96,20 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[calc(100vh-160px)] flex items-center justify-center p-6 bg-zinc-50/50">
+      {/* 커스텀 토스트 알림 */}
+      {showToast && (
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="bg-blue-50 border border-blue-100 px-8 py-4 rounded-[2rem] shadow-xl shadow-blue-900/5 flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white">
+              <ShieldCheck size={18} />
+            </div>
+            <p className="text-blue-700 font-bold text-sm whitespace-nowrap">
+              반가워요! 로그인이 완료되었습니다.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-md w-full bg-white border border-zinc-100 p-10 rounded-[2.5rem] shadow-2xl shadow-zinc-200/50 space-y-8">
           <div className="flex justify-center flex-col items-center gap-4">
             <div className="w-16 h-16 bg-blue-50 rounded-[2rem] flex items-center justify-center text-primary shadow-inner">
