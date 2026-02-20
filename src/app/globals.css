@@ -120,70 +120,144 @@ body.hide-global-navbar .global-navbar {
   animation: bounce-subtle 2s infinite ease-in-out;
 }
 
-/* 프린트 스타일 최적화: 리포트 출력 시 문서화 처리 */
+/* 프린트 스타일 최적화: 리포트 출력 최적화 */
 @media print {
-  /* 불필요한 UI 요소 숨기기 */
-  nav, footer, .navbar-container, .footer-container, button, .sticky {
-    display: none !important;
+  /* ── 페이지 설정: A4 가로(Landscape), 여백 최소화 ── */
+  @page {
+    size: A4 landscape;
+    margin: 8mm 10mm;
   }
 
-  /* 배경색 및 그래픽 보존 */
+  /* ── 불필요한 UI 숨기기 ── */
+  nav, footer, button,
+  .sticky, .navbar-container,
+  .footer-container,
+  .print\:hidden { display: none !important; }
+
+  /* ── 배경·색상 보존 ── */
   body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    background-color: white !important;
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 8.5pt !important;
+    line-height: 1.35 !important;
+  }
+
+  /* ── 전체 컨테이너: 100% 너비 사용 ── */
+  .max-w-6xl, .max-w-7xl, .max-w-5xl {
+    max-width: 100% !important;
+    width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
   }
 
-  /* 컨테이너 너비 조정 */
-  .max-w-6xl {
-    max-width: 100% !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 20px !important;
-  }
-
-  /* 카드 스타일 문서 최적화: 디자인 미학 복구 + 정밀 간격 조정 */
-  section {
-    break-inside: avoid;
-    margin-bottom: 14px !important; /* 간격을 살짝 넓혀 미학 복구 */
-    border: 1px solid #eee !important;
-    box-shadow: none !important;
-    border-radius: 12px !important;
-    padding: 16px !important;
-  }
-
-  /* 그리드 레이아웃 유지하며 공간 효율 극대화 */
-  main {
+  /* ── main 그리드: 2컬럼 (왼쪽 좁게, 오른쪽 넓게) ── */
+  main.grid {
     display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 12px !important;
-    margin-top: 8px !important;
+    grid-template-columns: 200pt 1fr !important;
+    gap: 10pt !important;
+    margin-top: 6pt !important;
+    padding: 0 !important;
   }
 
-  /* 폰트 크기 복구 (가독성 및 미학 우선) */
-  h1 { font-size: 20pt !important; }
-  h2 { font-size: 14pt !important; margin-bottom: 8px !important; }
-  h3 { font-size: 11pt !important; margin-bottom: 6px !important; }
-  p, span, div, li { font-size: 9.5pt !important; line-height: 1.4 !important; }
-  
-  .text-lg { font-size: 12pt !important; }
-  .text-sm { font-size: 8.5pt !important; }
-  .text-xs { font-size: 7.5pt !important; }
-
-  /* 불필요한 공백만 제거 */
-  .mt-10 { margin-top: 8px !important; }
-  .mb-10 { margin-bottom: 8px !important; }
-  .mb-8 { margin-bottom: 6px !important; }
-  .mb-6 { margin-bottom: 4px !important; }
-  .p-10 { padding: 16px !important; }
-  .gap-10 { gap: 10px !important; }
-  .gap-8 { gap: 8px !important; }
-
-  /* 페이지 여백: 하단 여백을 특히 더 줄여서 3페이지 방지 */
-  @page {
-    size: A4;
-    margin: 10mm 10mm 5mm 10mm; /* 상 좌 하 우 순서 (하단 5mm로 최소화) */
+  /* ── section 공통: 패딩 최소화, 페이지 분리 방지 ── */
+  section {
+    break-inside: avoid !important;
+    padding: 8pt !important;
+    margin-bottom: 8pt !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8pt !important;
+    box-shadow: none !important;
   }
+
+  /* ── 오른쪽 컬럼 섹션들: 조밀하게 ── */
+  .lg\:col-span-2 section {
+    padding: 7pt !important;
+    margin-bottom: 6pt !important;
+  }
+
+  /* ── 내부 그리드 (참여도 변화 + 특이사항 나란히) ── */
+  .grid.grid-cols-1.md\:grid-cols-2 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8pt !important;
+  }
+
+  /* ── 정책 실행 계획 그리드 ── */
+  .grid.grid-cols-1.md\:grid-cols-2.gap-8 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8pt !important;
+  }
+
+  /* ── min-height 전부 제거 ── */
+  [class*="min-h-"] {
+    min-height: 0 !important;
+  }
+
+  /* ── 여백·패딩 축소 ── */
+  .p-10  { padding: 8pt !important; }
+  .p-8   { padding: 7pt !important; }
+  .p-7   { padding: 6pt !important; }
+  .p-6   { padding: 5pt !important; }
+  .p-5   { padding: 4pt !important; }
+  .p-4   { padding: 3pt !important; }
+
+  .gap-10 { gap: 8pt !important; }
+  .gap-8  { gap: 6pt !important; }
+  .gap-6  { gap: 5pt !important; }
+
+  .mb-10 { margin-bottom: 6pt !important; }
+  .mb-8  { margin-bottom: 5pt !important; }
+  .mb-6  { margin-bottom: 4pt !important; }
+  .mt-10 { margin-top: 6pt !important; }
+  .mt-4  { margin-top: 3pt !important; }
+
+  .space-y-10 > * + * { margin-top: 6pt !important; }
+  .space-y-8  > * + * { margin-top: 5pt !important; }
+  .space-y-6  > * + * { margin-top: 4pt !important; }
+  .space-y-4  > * + * { margin-top: 3pt !important; }
+  .space-y-3  > * + * { margin-top: 2pt !important; }
+
+  /* ── 폰트 크기 ── */
+  h1 { font-size: 16pt !important; margin-bottom: 3pt !important; }
+  h2 { font-size: 11pt !important; margin-bottom: 4pt !important; }
+  h3 { font-size: 9.5pt !important; margin-bottom: 3pt !important; }
+  h4 { font-size: 8.5pt !important; margin-bottom: 2pt !important; }
+  p, span, div, li { font-size: 8pt !important; line-height: 1.35 !important; }
+
+  .text-2xl  { font-size: 14pt !important; }
+  .text-xl   { font-size: 12pt !important; }
+  .text-lg   { font-size: 10pt !important; }
+  .text-sm   { font-size: 7.5pt !important; }
+  .text-xs   { font-size: 7pt !important; }
+  .text-\[10px\], .text-\[11px\] { font-size: 6.5pt !important; }
+
+  /* ── 아이콘·프로필 이미지 크기 축소 ── */
+  .w-16.h-16 { width: 32pt !important; height: 32pt !important; }
+  .w-12.h-12 { width: 24pt !important; height: 24pt !important; }
+  .w-10.h-10 { width: 20pt !important; height: 20pt !important; }
+  .w-8.h-8   { width: 16pt !important; height: 16pt !important; }
+
+  /* ── 위기 점수 바 높이 ── */
+  .h-4 { height: 6pt !important; }
+
+  /* ── 키워드 태그 ── */
+  .px-4.py-2 { padding: 2pt 6pt !important; }
+  .rounded-2xl { border-radius: 5pt !important; }
+  .rounded-\[32px\] { border-radius: 8pt !important; }
+
+  /* ── 내담자 전달 메시지 박스 ── */
+  .border-dashed { border-style: dashed !important; }
+  .whitespace-pre-wrap { white-space: pre-wrap !important; }
+
+  /* ── 색상 배경 보존 ── */
+  .bg-zinc-900 { background-color: #18181b !important; color: white !important; }
+  .bg-primary\/5 { background-color: #eff6ff !important; }
+
+  /* ── pb-20 등 하단 여백 제거 ── */
+  .pb-20 { padding-bottom: 0 !important; }
+  .pb-10 { padding-bottom: 0 !important; }
 }
