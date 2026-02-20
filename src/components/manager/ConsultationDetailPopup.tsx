@@ -71,93 +71,116 @@ export default function ConsultationDetailPopup({
     if (val === null || val === undefined) return null;
     if (typeof val === 'string') return val.trim() || null;
     if (typeof val === 'number') return String(val);
-    return null; // 객체, 배열 등은 null 반환
+    return null;
+  };
+
+  // 객체에서 우선순위 필드명으로 값 추출, 없으면 모든 문자열 값 수집
+  const extractItemTexts = (item: any): { title: string; desc: string } | null => {
+    if (!item || typeof item !== 'object') return null;
+
+    const TITLE_KEYS = ['제목', 'title', 'name', '단계', 'step', '정책명', '항목', 'label', '이름'];
+    const DESC_KEYS  = ['추천이유', 'reason', '내용', 'description', 'desc', '설명', 'detail', 'summary', '요약', '이유'];
+    const SKIP_KEYS  = ['ID', 'id', '_id'];
+
+    let title = '';
+    let desc  = '';
+
+    for (const k of TITLE_KEYS) {
+      const v = extractString(item[k]);
+      if (v) { title = v; break; }
+    }
+    for (const k of DESC_KEYS) {
+      const v = extractString(item[k]);
+      if (v) { desc = v; break; }
+    }
+
+    if (!title && !desc) {
+      const allStrings: string[] = [];
+      for (const k of Object.keys(item)) {
+        if (SKIP_KEYS.includes(k)) continue;
+        const v = extractString(item[k]);
+        if (v) allStrings.push(v);
+      }
+      if (allStrings.length === 0) return null;
+      title = allStrings[0];
+      desc  = allStrings.slice(1).join(' | ');
+    }
+
+    return { title: title || '(항목)', desc };
   };
 
   // 정책 배열/JSON문자열을 카드 형태로 렌더링
-  const renderPolicyList = (rawData: any, title: string, emptyMsg: string) => {
-    if (!rawData) return null;
+  const renderPolicyList = (rawData: any, sectionTitle: string, emptyMsg: string) => {
+    if (rawData === null || rawData === undefined) return null;
 
     let items: any[] = [];
+    let parseFailed = false;
 
     try {
       if (Array.isArray(rawData)) {
         items = rawData;
       } else if (typeof rawData === 'string') {
         const trimmed = rawData.trim();
-        const parsed = JSON.parse(trimmed);
-        items = Array.isArray(parsed) ? parsed : [parsed];
+        if (!trimmed || trimmed === '[object Object]') { parseFailed = true; }
+        else {
+          const parsed = JSON.parse(trimmed);
+          items = Array.isArray(parsed) ? parsed : [parsed];
+        }
       } else if (typeof rawData === 'object') {
         items = [rawData];
       }
-    } catch (e) {
-      // JSON 파싱 실패 시 일반 텍스트로 표시
-      const str = String(rawData);
+    } catch {
+      parseFailed = true;
+    }
+
+    if (parseFailed) {
+      const str = typeof rawData === 'string' ? rawData.trim() : '';
       if (str && str !== '[object Object]') {
         return (
           <div className="space-y-2">
-            <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{title}</p>
-            <p className="text-zinc-700 leading-relaxed whitespace-pre-wrap">{str}</p>
+            <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{sectionTitle}</p>
+            <p className="text-zinc-700 leading-relaxed whitespace-pre-wrap text-sm">{str}</p>
           </div>
         );
       }
-      return null; // 표시 불가 시 숨김
+      return null;
     }
 
-    // 각 아이템에서 유효한 텍스트 필드 추출
     const renderableItems = items
-      .map((item: any, idx: number) => {
-        if (typeof item === 'string' && item.trim()) {
-          return { idx, titleText: item, descText: '' };
+      .map((item, idx) => {
+        if (typeof item === 'string') {
+          const v = item.trim();
+          if (!v || v === '[object Object]') return null;
+          return { idx, title: v, desc: '' };
         }
-        if (typeof item !== 'object' || item === null) return null;
-
-        // 한글/영문 필드명 순서대로 시도 (??는 null/undefined만 통과하므로 extractString 사용)
-        const titleText =
-          extractString(item['제목']) ??
-          extractString(item['title']) ??
-          extractString(item['name']) ??
-          extractString(item['단계']) ??
-          extractString(item['step']) ??
-          extractString(item['정책명']) ??
-          null;
-
-        const descText =
-          extractString(item['추천이유']) ??
-          extractString(item['reason']) ??
-          extractString(item['내용']) ??
-          extractString(item['description']) ??
-          extractString(item['desc']) ??
-          extractString(item['설명']) ??
-          '';
-
-        // 유효한 텍스트가 하나도 없으면 null (필터링)
-        if (!titleText && !descText) return null;
-
-        return { idx, id: item.ID, titleText: titleText || `항목 ${idx + 1}`, descText: descText || '' };
+        if (typeof item === 'number') {
+          return { idx, title: String(item), desc: '' };
+        }
+        const texts = extractItemTexts(item);
+        if (!texts) return null;
+        return { idx, title: texts.title, desc: texts.desc };
       })
-      .filter(Boolean);
+      .filter((r): r is { idx: number; title: string; desc: string } => r !== null);
 
-    // 렌더링 가능한 항목이 없으면 섹션 자체 숨김
     if (renderableItems.length === 0) return null;
 
     return (
       <div className="space-y-3">
-        <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{title}</p>
+        <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{sectionTitle}</p>
         <div className="space-y-3">
-          {renderableItems.map((r: any) => (
+          {renderableItems.map((r) => (
             <div
-              key={r.id ?? r.idx}
+              key={r.idx}
               className="bg-indigo-50/40 rounded-xl p-4 border border-indigo-100/60 hover:border-indigo-200 transition-colors"
             >
               <div className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold">
                   {r.idx + 1}
                 </div>
-                <div className="space-y-1.5 flex-1">
-                  <h4 className="font-bold text-zinc-900 text-base">{r.titleText}</h4>
-                  {r.descText && (
-                    <p className="text-zinc-600 text-sm leading-relaxed whitespace-pre-wrap">{r.descText}</p>
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <h4 className="font-bold text-zinc-900 text-sm leading-snug">{r.title}</h4>
+                  {r.desc && (
+                    <p className="text-zinc-600 text-sm leading-relaxed whitespace-pre-wrap">{r.desc}</p>
                   )}
                 </div>
               </div>
