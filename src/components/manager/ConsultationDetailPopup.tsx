@@ -66,6 +66,90 @@ export default function ConsultationDetailPopup({
     );
   };
 
+  // 정책 배열/JSON문자열을 카드 형태로 렌더링
+  const renderPolicyList = (rawData: any, title: string, emptyMsg: string) => {
+    if (!rawData) {
+      return (
+        <div className="space-y-2">
+          <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{title}</p>
+          <p className="text-zinc-400 italic text-sm">{emptyMsg}</p>
+        </div>
+      );
+    }
+
+    let items: any[] = [];
+
+    try {
+      if (Array.isArray(rawData)) {
+        items = rawData;
+      } else if (typeof rawData === 'string') {
+        const trimmed = rawData.trim();
+        const parsed = JSON.parse(trimmed);
+        items = Array.isArray(parsed) ? parsed : [parsed];
+      } else if (typeof rawData === 'object') {
+        items = [rawData];
+      }
+    } catch (e) {
+      // JSON 파싱 실패 시 문자열 그대로 표시
+      return (
+        <div className="space-y-2">
+          <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{title}</p>
+          <p className="text-zinc-700 leading-relaxed whitespace-pre-wrap">{String(rawData)}</p>
+        </div>
+      );
+    }
+
+    if (items.length === 0) {
+      return (
+        <div className="space-y-2">
+          <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{title}</p>
+          <p className="text-zinc-400 italic text-sm">{emptyMsg}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{title}</p>
+        <div className="space-y-3">
+          {items.map((item: any, idx: number) => {
+            // 문자열 아이템
+            if (typeof item === 'string') {
+              return (
+                <div key={idx} className="bg-indigo-50/40 rounded-xl p-4 border border-indigo-100/60">
+                  <div className="flex gap-3">
+                    <span className="text-indigo-500 font-bold flex-shrink-0">{idx + 1}.</span>
+                    <p className="text-zinc-700 leading-relaxed">{item}</p>
+                  </div>
+                </div>
+              );
+            }
+
+            // 객체 아이템
+            const policyTitle = item['제목'] ?? item['title'] ?? item['name'] ?? item['step'] ?? `항목 ${idx + 1}`;
+            const policyDesc = item['추천이유'] ?? item['reason'] ?? item['description'] ?? item['desc'] ?? '';
+
+            return (
+              <div key={item.ID ?? idx} className="bg-indigo-50/40 rounded-xl p-4 border border-indigo-100/60 hover:border-indigo-200 transition-colors">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold">
+                    {idx + 1}
+                  </div>
+                  <div className="space-y-1.5 flex-1">
+                    <h4 className="font-bold text-zinc-900 text-base">{String(policyTitle)}</h4>
+                    {policyDesc ? (
+                      <p className="text-zinc-600 text-sm leading-relaxed whitespace-pre-wrap">{String(policyDesc)}</p>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   const handleStartConsultation = async () => {
     if (!data?.request_id) {
       alert("상담 ID가 없어 상담을 시작할 수 없습니다.");
@@ -289,13 +373,15 @@ export default function ConsultationDetailPopup({
                       <Route size={20} className="text-indigo-400" />
                       <p className="font-bold text-zinc-800">맞춤 정책 로드맵 & 추천</p>
                     </div>
-                    <div className="bg-white p-6 rounded-[28px] border border-indigo-50 shadow-sm space-y-4">
-                      <div className="text-zinc-700 leading-relaxed">
-                        {renderJsonField(data.ai_analysis?.policy_roadmap)}
+                    <div className="bg-white p-6 rounded-[28px] border border-indigo-50 shadow-sm space-y-6">
+                      
+                      {/* 정책 데이터 렌더링 */}
+                      <div className="space-y-8">
+                        {renderPolicyList(data.ai_analysis?.policy_roadmap, "정책 로드맵", "로드맵 정보가 없습니다.")}
+                        <div className="border-t border-zinc-100"></div>
+                        {renderPolicyList(data.ai_analysis?.recommended_policies, "추천 정책 리스트", "추천 정책 정보가 없습니다.")}
                       </div>
-                      <div className="pt-4 border-t border-zinc-100">
-                        {renderJsonField(data.ai_analysis?.recommended_policies)}
-                      </div>
+
                     </div>
                   </div>
                 </div>
