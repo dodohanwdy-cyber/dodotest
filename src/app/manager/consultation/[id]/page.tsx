@@ -591,7 +591,7 @@ export default function ConsultationPage() {
                       {data?.ai_insights?.pre_consultation_brief || "추출된 인사이트가 없습니다."}
                     </p>
                     <div className="pt-2">
-                       <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold">🎯 핵심: {data?.ai_insights?.user_interest}</span>
+                       <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold">🎯 핵심: {(() => { const ui = data?.ai_insights?.user_interest; if (!ui) return ''; if (typeof ui === 'string') return ui; if (Array.isArray(ui)) return ui.join(', '); return JSON.stringify(ui); })()}</span>
                     </div>
                  </div>
               </div>
@@ -615,7 +615,22 @@ export default function ConsultationPage() {
                 </h2>
                 <div className="bg-white p-7 rounded-[2.5rem] border border-primary/10 shadow-sm border-dashed min-h-[150px]">
                    <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">
-                      {data?.ai_insights?.policy_roadmap || "설정된 로드맵이 없습니다."}
+                      {(() => {
+                         const pr = data?.ai_insights?.policy_roadmap;
+                         if (!pr) return '설정된 로드맵이 없습니다.';
+                         if (typeof pr === 'string') return pr;
+                         if (Array.isArray(pr)) {
+                           const txts = pr.map((item: any, i: number) => {
+                             if (typeof item === 'string') return (i+1)+'. '+item;
+                             const t = (item['제목'] || item['title'] || item['단계'] || '') as string;
+                             const d = (item['추천이유'] || item['reason'] || item['내용'] || item['description'] || '') as string;
+                             if (!t && !d) return null;
+                             return (i+1)+'. '+t+(d ? '\n   '+d : '');
+                           }).filter(Boolean);
+                           return txts.length ? txts.join('\n\n') : '설정된 로드맵이 없습니다.';
+                         }
+                         return JSON.stringify(pr, null, 2);
+                       })()}
                    </p>
                 </div>
               </div>
@@ -627,15 +642,25 @@ export default function ConsultationPage() {
                 <FileText size={18} className="text-primary" /> 추천 정책 솔루션
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {data?.ai_insights?.recommended_policies?.map((policy: any, i: number) => (
-                  <div key={i} className="bg-white p-5 rounded-3xl border border-zinc-100 shadow-sm hover:border-primary/30 hover:bg-primary/[0.01] transition-all group cursor-pointer">
-                    <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-4">
-                      <FileText size={20} />
-                    </div>
-                    <span className="text-sm font-bold text-zinc-700 block mb-2">{policy.title || policy}</span>
-                    <p className="text-[10px] text-zinc-400">정책 상세 정보 확인하기</p>
-                  </div>
-                ))}
+                {(() => {
+                   let policies = data?.ai_insights?.recommended_policies;
+                   if (!policies) return null;
+                   if (typeof policies === 'string') { try { policies = JSON.parse(policies); } catch(e) { policies = null; } }
+                   if (!Array.isArray(policies)) return null;
+                   return policies.map((policy: any, i: number) => {
+                     const title = typeof policy === 'string' ? policy : String(policy['제목'] || policy['title'] || policy['name'] || ('정책 '+(i+1)));
+                     const reason = typeof policy !== 'string' ? String(policy['추천이유'] || policy['reason'] || policy['description'] || '') : '';
+                     return (
+                       <div key={i} className="bg-white p-5 rounded-3xl border border-zinc-100 shadow-sm hover:border-primary/30 hover:bg-primary/[0.01] transition-all group cursor-pointer">
+                         <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-4">
+                           <FileText size={20} />
+                         </div>
+                         <span className="text-sm font-bold text-zinc-700 block mb-2">{title}</span>
+                         {reason ? <p className="text-[10px] text-zinc-400 leading-relaxed">{reason}</p> : <p className="text-[10px] text-zinc-400">정책 상세 정보 확인하기</p>}
+                       </div>
+                     );
+                   });
+                 })()}
                 {isEmpty(data?.ai_insights?.recommended_policies) && (
                    <div className="col-span-full py-12 text-center bg-zinc-50 rounded-3xl border border-dashed border-zinc-200">
                       <p className="text-zinc-300 font-medium">추천된 정책이 없습니다.</p>
