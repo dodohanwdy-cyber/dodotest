@@ -47,8 +47,8 @@ export default function ScheduleAdjustPopup({
   const [draggedRequest, setDraggedRequest] = useState<string | null>(null);
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'loading' | 'success' | 'error' }[]>([]);
 
-  // 시간대 생성 (9:00 ~ 18:00, 1시간 단위)
-  const timeSlots = Array.from({ length: 10 }, (_, i) => {
+  // 시간대 생성 (9:00 ~ 17:00, 1시간 단위)
+  const timeSlots = Array.from({ length: 9 }, (_, i) => {
     const hour = 9 + i;
     return `${hour.toString().padStart(2, '0')}:00`;
   });
