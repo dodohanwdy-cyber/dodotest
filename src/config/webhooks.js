@@ -26,6 +26,7 @@ export const WEBHOOK_URLS = {
   START_CONSULTATION: "https://primary-production-1f39e.up.railway.app/webhook/send-all-data", // 상담 시작 시 전체 데이터 로드
   CONSULTATION_SUMMARY: "https://primary-production-1f39e.up.railway.app/webhook/consultation-summary", // 상담 요약 및 정리 (STT 결과 전송)
   SUBMIT_FINAL_REPORT: "https://primary-production-1f39e.up.railway.app/webhook/consultation-summary", // 최종 상세 리포트 제출
+  CHECK_CASE: "https://primary-production-1f39e.up.railway.app/webhook/check-case", // 상담 데이터 즉시 준비 요청
 
   // 기타
   GET_DASHBOARD_APPLICATIONS: "https://primary-production-1f39e.up.railway.app/webhook/dashboard-applications", // 클라이언트 대시보드 데이터 조회 (이메일 기준 최근 5개)

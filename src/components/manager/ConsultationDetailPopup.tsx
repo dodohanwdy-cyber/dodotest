@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { X, User, MapPin, Briefcase, Heart, Calendar, Sparkles, FileText, Lightbulb, Route, AlertCircle, Play, Eye, EyeOff } from 'lucide-react';
+import { X, User, MapPin, Briefcase, Heart, Calendar, Sparkles, FileText, Lightbulb, Route, AlertCircle, Play, Eye, EyeOff, Zap, Loader2, CheckCircle2 } from 'lucide-react';
 import { postToWebhook } from '@/lib/api';
 import { WEBHOOK_URLS } from '@/config/webhooks';
 
@@ -59,6 +59,28 @@ export default function ConsultationDetailPopup({
 }: ConsultationDetailPopupProps) {
   const [showExample, setShowExample] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
+  const [isPreparing, setIsPreparing] = useState(false);
+  const [prepareStatus, setPrepareStatus] = useState<'idle' | 'ok' | 'error'>('idle');
+
+  const handlePrepare = async () => {
+    if (!data?.request_id) {
+      setPrepareStatus('error');
+      setTimeout(() => setPrepareStatus('idle'), 3000);
+      return;
+    }
+    setIsPreparing(true);
+    setPrepareStatus('idle');
+    try {
+      await postToWebhook(WEBHOOK_URLS.CHECK_CASE, { request_id: data.request_id });
+      setPrepareStatus('ok');
+      setTimeout(() => setPrepareStatus('idle'), 4000);
+    } catch {
+      setPrepareStatus('error');
+      setTimeout(() => setPrepareStatus('idle'), 4000);
+    } finally {
+      setIsPreparing(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -416,8 +438,8 @@ export default function ConsultationDetailPopup({
 
               {/* 6. AI 상담 가이드 */}
               <div className="bg-[#fff9eb] rounded-[32px] p-8 border border-amber-100/50">
-                {/* 섹션 헤더 + 예시 버튼 */}
-                <div className="flex items-center justify-between mb-8">
+                {/* 섹션 헤더 + 예시/준비 버튼 */}
+                <div className="flex items-start justify-between mb-8 flex-wrap gap-3">
                   <div className="flex items-center gap-3.5">
                     <div className="w-12 h-12 bg-white shadow-sm rounded-[20px] flex items-center justify-center">
                       <Sparkles className="text-amber-500" size={24} />
@@ -428,18 +450,43 @@ export default function ConsultationDetailPopup({
                     </div>
                   </div>
 
-                  {/* 예시 보기 / 실제 데이터 보기 토글 버튼 */}
-                  <button
-                    onClick={() => setShowExample((prev) => !prev)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold transition-all border ${
-                      showExample
-                        ? 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200'
-                        : 'bg-white text-zinc-500 border-zinc-200 hover:bg-zinc-50'
-                    }`}
-                  >
-                    {showExample ? <EyeOff size={16} /> : <Eye size={16} />}
-                    {showExample ? '실제 데이터 보기' : '예시 보기'}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {/* 바로 준비하기 버튼 */}
+                    <button
+                      onClick={handlePrepare}
+                      disabled={isPreparing}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold transition-all border ${
+                        prepareStatus === 'ok'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : prepareStatus === 'error'
+                          ? 'bg-red-50 text-red-600 border-red-200'
+                          : 'bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50'
+                      } disabled:opacity-60`}
+                    >
+                      {isPreparing ? (
+                        <><Loader2 size={15} className="animate-spin" /> 준비 중...</>
+                      ) : prepareStatus === 'ok' ? (
+                        <><CheckCircle2 size={15} /> 요청 완료!</>
+                      ) : prepareStatus === 'error' ? (
+                        <><AlertCircle size={15} /> 오류 발생</>
+                      ) : (
+                        <><Zap size={15} /> 바로 준비하기</>
+                      )}
+                    </button>
+
+                    {/* 예시 보기 / 실제 데이터 보기 토글 버튼 */}
+                    <button
+                      onClick={() => setShowExample((prev) => !prev)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold transition-all border ${
+                        showExample
+                          ? 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200'
+                          : 'bg-white text-zinc-500 border-zinc-200 hover:bg-zinc-50'
+                      }`}
+                    >
+                      {showExample ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {showExample ? '실제 데이터 보기' : '예시 보기'}
+                    </button>
+                  </div>
                 </div>
 
                 {/* 예시 모드 배너 */}
