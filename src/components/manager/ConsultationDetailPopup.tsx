@@ -61,22 +61,43 @@ export default function ConsultationDetailPopup({
   const [startError, setStartError] = useState<string | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
   const [prepareStatus, setPrepareStatus] = useState<'idle' | 'ok' | 'error'>('idle');
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'ok' | 'error'>('ok');
+
+  const showToast = (msg: string, type: 'ok' | 'error' = 'ok') => {
+    setToastMsg(msg);
+    setToastType(type);
+    setTimeout(() => setToastMsg(null), 6000);
+  };
+
+  const PREPARE_TIMEOUT_MS = 60_000; // 1분
 
   const handlePrepare = async () => {
     if (!data?.request_id) {
-      setPrepareStatus('error');
-      setTimeout(() => setPrepareStatus('idle'), 3000);
+      showToast('상담 ID가 없어 준비 요청을 할 수 없습니다.', 'error');
       return;
     }
     setIsPreparing(true);
     setPrepareStatus('idle');
     try {
-      await postToWebhook(WEBHOOK_URLS.CHECK_CASE, { request_id: data.request_id });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('TIMEOUT')), PREPARE_TIMEOUT_MS)
+      );
+      await Promise.race([
+        postToWebhook(WEBHOOK_URLS.CHECK_CASE, { request_id: data.request_id }),
+        timeoutPromise,
+      ]);
       setPrepareStatus('ok');
-      setTimeout(() => setPrepareStatus('idle'), 4000);
-    } catch {
+      showToast('AI 분석 데이터 준비 요청이 완료됐습니다. 잠시 후 데이터를 확인해 주세요.', 'ok');
+      setTimeout(() => setPrepareStatus('idle'), 5000);
+    } catch (err: any) {
       setPrepareStatus('error');
-      setTimeout(() => setPrepareStatus('idle'), 4000);
+      if (err?.message === 'TIMEOUT') {
+        showToast('1분이 지났지만 응답이 없습니다. 워크플로우 상태를 확인해 주세요.', 'error');
+      } else {
+        showToast('요청 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', 'error');
+      }
+      setTimeout(() => setPrepareStatus('idle'), 5000);
     } finally {
       setIsPreparing(false);
     }
@@ -608,6 +629,22 @@ export default function ConsultationDetailPopup({
             </button>
           )}
         </div>
+
+        {/* 토스트 메시지 */}
+        {toastMsg && (
+          <div
+            className={`absolute bottom-24 left-1/2 -translate-x-1/2 flex items-start gap-3 px-5 py-4 rounded-2xl shadow-xl text-sm font-bold max-w-sm w-full animate-in slide-in-from-bottom-4 duration-300 ${
+              toastType === 'ok'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-red-600 text-white'
+            }`}
+          >
+            {toastType === 'ok'
+              ? <CheckCircle2 size={18} className="flex-shrink-0 mt-0.5" />
+              : <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />}
+            <span className="leading-snug">{toastMsg}</span>
+          </div>
+        )}
       </div>
     </div>
   );
