@@ -66,16 +66,17 @@ export default function ConsultationDetailPopup({
     );
   };
 
+  // 어떤 값이든 안전하게 문자열로 추출 (객체면 null 반환)
+  const extractString = (val: any): string | null => {
+    if (val === null || val === undefined) return null;
+    if (typeof val === 'string') return val.trim() || null;
+    if (typeof val === 'number') return String(val);
+    return null; // 객체, 배열 등은 null 반환
+  };
+
   // 정책 배열/JSON문자열을 카드 형태로 렌더링
   const renderPolicyList = (rawData: any, title: string, emptyMsg: string) => {
-    if (!rawData) {
-      return (
-        <div className="space-y-2">
-          <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{title}</p>
-          <p className="text-zinc-400 italic text-sm">{emptyMsg}</p>
-        </div>
-      );
-    }
+    if (!rawData) return null;
 
     let items: any[] = [];
 
@@ -90,61 +91,78 @@ export default function ConsultationDetailPopup({
         items = [rawData];
       }
     } catch (e) {
-      // JSON 파싱 실패 시 문자열 그대로 표시
-      return (
-        <div className="space-y-2">
-          <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{title}</p>
-          <p className="text-zinc-700 leading-relaxed whitespace-pre-wrap">{String(rawData)}</p>
-        </div>
-      );
+      // JSON 파싱 실패 시 일반 텍스트로 표시
+      const str = String(rawData);
+      if (str && str !== '[object Object]') {
+        return (
+          <div className="space-y-2">
+            <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{title}</p>
+            <p className="text-zinc-700 leading-relaxed whitespace-pre-wrap">{str}</p>
+          </div>
+        );
+      }
+      return null; // 표시 불가 시 숨김
     }
 
-    if (items.length === 0) {
-      return (
-        <div className="space-y-2">
-          <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{title}</p>
-          <p className="text-zinc-400 italic text-sm">{emptyMsg}</p>
-        </div>
-      );
-    }
+    // 각 아이템에서 유효한 텍스트 필드 추출
+    const renderableItems = items
+      .map((item: any, idx: number) => {
+        if (typeof item === 'string' && item.trim()) {
+          return { idx, titleText: item, descText: '' };
+        }
+        if (typeof item !== 'object' || item === null) return null;
+
+        // 한글/영문 필드명 순서대로 시도 (??는 null/undefined만 통과하므로 extractString 사용)
+        const titleText =
+          extractString(item['제목']) ??
+          extractString(item['title']) ??
+          extractString(item['name']) ??
+          extractString(item['단계']) ??
+          extractString(item['step']) ??
+          extractString(item['정책명']) ??
+          null;
+
+        const descText =
+          extractString(item['추천이유']) ??
+          extractString(item['reason']) ??
+          extractString(item['내용']) ??
+          extractString(item['description']) ??
+          extractString(item['desc']) ??
+          extractString(item['설명']) ??
+          '';
+
+        // 유효한 텍스트가 하나도 없으면 null (필터링)
+        if (!titleText && !descText) return null;
+
+        return { idx, id: item.ID, titleText: titleText || `항목 ${idx + 1}`, descText: descText || '' };
+      })
+      .filter(Boolean);
+
+    // 렌더링 가능한 항목이 없으면 섹션 자체 숨김
+    if (renderableItems.length === 0) return null;
 
     return (
       <div className="space-y-3">
         <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{title}</p>
         <div className="space-y-3">
-          {items.map((item: any, idx: number) => {
-            // 문자열 아이템
-            if (typeof item === 'string') {
-              return (
-                <div key={idx} className="bg-indigo-50/40 rounded-xl p-4 border border-indigo-100/60">
-                  <div className="flex gap-3">
-                    <span className="text-indigo-500 font-bold flex-shrink-0">{idx + 1}.</span>
-                    <p className="text-zinc-700 leading-relaxed">{item}</p>
-                  </div>
+          {renderableItems.map((r: any) => (
+            <div
+              key={r.id ?? r.idx}
+              className="bg-indigo-50/40 rounded-xl p-4 border border-indigo-100/60 hover:border-indigo-200 transition-colors"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold">
+                  {r.idx + 1}
                 </div>
-              );
-            }
-
-            // 객체 아이템
-            const policyTitle = item['제목'] ?? item['title'] ?? item['name'] ?? item['step'] ?? `항목 ${idx + 1}`;
-            const policyDesc = item['추천이유'] ?? item['reason'] ?? item['description'] ?? item['desc'] ?? '';
-
-            return (
-              <div key={item.ID ?? idx} className="bg-indigo-50/40 rounded-xl p-4 border border-indigo-100/60 hover:border-indigo-200 transition-colors">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold">
-                    {idx + 1}
-                  </div>
-                  <div className="space-y-1.5 flex-1">
-                    <h4 className="font-bold text-zinc-900 text-base">{String(policyTitle)}</h4>
-                    {policyDesc ? (
-                      <p className="text-zinc-600 text-sm leading-relaxed whitespace-pre-wrap">{String(policyDesc)}</p>
-                    ) : null}
-                  </div>
+                <div className="space-y-1.5 flex-1">
+                  <h4 className="font-bold text-zinc-900 text-base">{r.titleText}</h4>
+                  {r.descText && (
+                    <p className="text-zinc-600 text-sm leading-relaxed whitespace-pre-wrap">{r.descText}</p>
+                  )}
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
     );
