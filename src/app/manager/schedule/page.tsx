@@ -9,14 +9,14 @@ import { WEBHOOK_URLS } from "@/config/webhooks";
 function ScheduleAdjustContent() {
   const searchParams = useSearchParams();
   const requestId = searchParams.get("id");
-  const [status, setStatus] = useState("idle");
+  const [status, setStatus] = useState<"idle" | "saving" | "success" | "error" | "no-date">("idle");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("오전 10:00");
   const [notes, setNotes] = useState("");
 
   const handleSave = async () => {
     if (!date) {
-      alert("날짜를 선택해 주세요.");
+      setStatus("no-date");
       return;
     }
     setStatus("saving");
@@ -32,9 +32,8 @@ function ScheduleAdjustContent() {
         setTimeout(() => window.close(), 1000);
       }
     } catch (err) {
-      console.error("Failed to adjust schedule:", err);
-      setStatus("idle");
-      alert("일정 저장에 실패했습니다.");
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 3000);
     }
   };
 
@@ -111,10 +110,14 @@ function ScheduleAdjustContent() {
           </button>
           <button 
             onClick={handleSave}
-            disabled={status !== "idle"}
+            disabled={status === "saving" || status === "success"}
             className="px-10 py-3.5 bg-zinc-900 text-white rounded-2xl font-bold flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
           >
-            {status === "saving" ? "저장 중..." : status === "success" ? "저장 완료!" : <><Save size={18} /> 설정 저장</>}
+            {status === "saving" ? "저장 중..."
+              : status === "success" ? "저장 완료!"
+              : status === "no-date" ? "⚠ 날짜를 선택해 주세요"
+              : status === "error" ? "저장 실패 - 다시 시도"
+              : <><Save size={18} /> 설정 저장</>}
           </button>
         </div>
       </div>

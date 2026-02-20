@@ -249,6 +249,12 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
   }, []);
   
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
+  const [isSent, setIsSent] = React.useState(false);
+
+  const handleSendReport = () => {
+    setIsSent(true);
+    setTimeout(() => setIsSent(false), 3000);
+  };
 
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -309,10 +315,11 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
               PDF 저장
             </button>
             <button 
-              onClick={() => alert("내담자에게 리포트가 전송되었습니다.")}
-              className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center gap-2"
+              onClick={handleSendReport}
+              disabled={isSent}
+              className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center gap-2 disabled:opacity-70"
             >
-              리포트 전송하기 <ArrowRight size={16} />
+              {isSent ? <><CheckCircle2 size={16} /> 전송 완료!</> : <>리포트 전송하기 <ArrowRight size={16} /></>}
             </button>
           </div>
         </div>

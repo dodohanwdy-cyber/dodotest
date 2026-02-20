@@ -30,16 +30,14 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      console.log("🚀 [Login] 시도:", email);
-      
+      console.group(`🌐 Login: ${email}`);
       const response = await postToWebhook(WEBHOOK_URLS.LOGIN, {
         email,
         password,
       });
 
-      console.log("📩 [Login] 서버 응답 원본:", response);
-
       const resData = Array.isArray(response) ? response[0] : response;
+      console.groupEnd();
 
       // 성공 케이스
       if (resData && (resData.status === "success" || resData.success)) {
@@ -80,9 +78,9 @@ export default function LoginPage() {
       
       // 실패 케이스 (400: 사용자 없음, 401: 비번 틀림)
       if (resData.status === 400 || resData.code === "USER_NOT_FOUND") {
-        alert(`❌ ${resData.message || "등록되지 않은 이메일입니다."}`);
+        setError(resData.message || "등록되지 않은 이메일입니다.");
       } else if (resData.status === 401 || resData.code === "INVALID_PASSWORD") {
-        alert(`🔑 ${resData.message || "비밀번호가 일치하지 않습니다."}`);
+        setError(resData.message || "비밀번호가 일치하지 않습니다.");
       } else {
         setError(resData?.message || "로그인에 실패했습니다. 정보를 확인해 주세요.");
       }

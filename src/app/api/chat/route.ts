@@ -67,7 +67,7 @@ export async function POST(req: Request) {
       parts: [{ text: msg.content }],
     }));
 
-    console.log("📝 [원본 히스토리]", JSON.stringify(history, null, 2));
+
 
     // Gemini API 제약: 히스토리는 반드시 'user'로 시작해야 함
     const sanitizedHistory: any[] = [];
@@ -90,8 +90,6 @@ export async function POST(req: Request) {
       sanitizedHistory.pop();
     }
 
-    console.log("🧹 [정제된 히스토리]", JSON.stringify(sanitizedHistory, null, 2));
-    console.log("💬 [전송할 메시지]", message);
 
     // 채팅 세션 시작
     const chat = model.startChat({
@@ -107,7 +105,6 @@ export async function POST(req: Request) {
     const response = await result.response;
     const text = response.text();
 
-    console.log("✅ [AI 응답 성공]", text.substring(0, 100));
 
     return NextResponse.json({ output: text });
 
