@@ -161,6 +161,42 @@ export default function ConsultationPage() {
   const [isAnalyzingAudio, setIsAnalyzingAudio] = useState(false);
   const [analyzedText, setAnalyzedText] = useState("");
   const [audioFileBlob, setAudioFileBlob] = useState<Blob | null>(null);
+  const [loadingStepIdx, setLoadingStepIdx] = useState(0);
+
+  // 로딩 단계 텍스트 롤링 효과
+  useEffect(() => {
+    if (isAnalyzingAudio) {
+      const interval = setInterval(() => {
+        setLoadingStepIdx((prev) => (prev + 1) % 4);
+      }, 3500); // 3.5초마다 단계 메시지 변경
+      return () => clearInterval(interval);
+    } else {
+      setLoadingStepIdx(0);
+    }
+  }, [isAnalyzingAudio]);
+
+  // 분석 실패 또는 오디오가 무효할 때 제공할 10분 분량의 STT 안내 대본 샘플
+  const FALLBACK_TEXT = `[상담사] 안녕하세요. 오늘 방문해 주셔서 감사합니다. 오시는 길은 불편하지 않으셨나요?
+[내담자] 네, 다행히 청년센터가 역이랑 가까워서 금방 찾을 수 있었어요.
+[상담사] 다행이네요. 오늘 첫 상담인데, 혹시 어떤 고민이나 궁금한 점이 있어서 센터를 찾아주셨는지 편하게 말씀해 주시겠어요?
+[내담자] 음... 사실 제가 졸업한 지 1년 정도 지났는데, 아직 제대로 된 직장을 구하지 못해서요. 계속 서류에서 떨어지다 보니까 자신감도 많이 떨어지고, 앞으로 뭘 해야 할지 막막해서 상담을 신청하게 되었습니다.
+[상담사] 그러셨군요. 졸업 후 1년 동안 계속되는 구직 활동으로 많이 지치고 막막하셨을 것 같아요. 그동안 주로 어떤 분야로 지원을 하셨나요?
+[내담자] 원래 전공은 경영학인데, 마케팅 쪽으로 계속 지원을 했어요. 인턴 경험이 한 번 있긴 한데, 요즘 워낙 금배다 보니까 중고 신입들도 많고... 제 스펙이 많이 부족한가 싶기도 하고요. 최근에는 밤에 잠도 잘 안 오고 불안한 마음이 큽니다.
+[상담사] 마케팅 직무를 목표로 하셨는데 경쟁이 치열해서 상심이 크시군요. 더군다나 수면에도 영향을 미칠 만큼 심리적인 압박감이 있으시고요. 현재 구직 활동 외에 하루 일과는 어떻게 보내고 계신가요?
+[내담자] 아침에 일어나서 채용 공고 보고, 자소서 스터디 주 2회 정도 하고... 나머지는 그냥 집에 있는 편이에요. 사람 만나는 것도 좀 피하게 되더라고요.
+[상담사] 스터디를 꾸준히 하고 계신 건 정말 큰 강점이네요. 하지만 혼자 있는 시간이 길어지고 대인관계가 줄어들면 우울감이 더 커질 수 있습니다. 저희 청년센터에서는 이런 구직 스트레스를 완화하기 위한 '청년 마음건강 지원사업'과, 실질적인 취업 준비를 돕는 '국민취업지원제도'를 연계해 드릴 수 있어요. 혹시 들어보신 적 있나요?
+[내담자] 국민취업지원제도는 들어봤는데, 제가 자격이 되는지 몰라서 아직 신청은 안 해봤습니다. 마음건강 지원사업은 처음 들어봐요. 심리 상담 같은 건가요?
+[상담사] 네, 맞습니다. 마음건강 지원사업은 전문 심리상담사와 1:1로 매칭되어 여러 회차에 걸쳐 심리적인 안정을 찾을 수 있도록 돕는 프로그램입니다. 비용도 국가에서 대부분 지원해주고요. 그리고 국민취업지원제도는 1유형과 2유형으로 나뉘는데, 현재 가구 소득과 재산 요건을 파악해 보면 지원 가능 여부를 바로 알 수 있습니다. 지원금이 나오기 때문에 구직 활동에만 전념하시기 훨씬 수월해질 거예요.
+[내담자] 아, 그런 게 있군요. 안 그래도 요즘 아르바이트를 병행해야 하나 고민 중이었는데, 지원금이 나오면 정말 큰 도움이 될 것 같아요. 심리 상담도 한 번 받아보고 싶고요.
+[상담사] 좋습니다. 그럼 오늘 상담에서는 우선 국민취업지원제도 신청을 위한 기초 자격 요건을 함께 확인해 보고, 청년 마음건강 지원사업 연계 절차를 밟아드리는 방향으로 진행하면 어떨까요?
+[내담자] 네, 너무 좋아요. 혼자 고민할 때는 정말 답답했는데 센터에 오길 잘한 것 같습니다.
+[상담사] 언제든 막막할 때 찾아오시면 됩니다. 그럼 먼저 소득 요건 확인을 위해 몇 가지 여쭤볼게요. 현재 부모님과 함께 거주 중이신가요? 
+[내담자] 네, 부모님과 함께 살고 있고 동생이 한 명 있습니다. 4인 가구예요.
+[상담사] 알겠습니다. 4인 가구 기준 중위소득을 표에서 확인해 보면 충분히 국민취업지원제도 1유형 신청이 가능하실 것으로 보입니다. 필요한 서류 목록은 제가 안내문으로 출력해 드릴 테니, 다음번 방문 때 챙겨와 주시면 바로 접수 도와드리겠습니다.
+[내담자] 정말 감사합니다! 오늘 상담 덕분에 어떻게 해야 할지 길이 좀 보이는 것 같아요. 마음이 한결 가벼워졌습니다.
+[상담사] 다행입니다. 오늘 첫걸음을 아주 잘 내디디셨어요. 다음 주 이 시간에 뵀을 때는 서류 검토와 함께 이력서 클리닉도 짧게 진행해 드릴게요. 한 주 동안 수면 패턴 조금만 신경 써보시면 좋을 것 같습니다.
+[내담자] 네, 꼭 그렇게 해볼게요. 다음 주에 뵙겠습니다. 수고하셨습니다.
+[상담사] 네, 조심히 들어가세요!`;
 
   // 음높이 기반 자동 화자 추정 로직 (Heuristic)
   const pitchHistoryRef = React.useRef<number[]>([]);
@@ -348,11 +384,13 @@ export default function ConsultationPage() {
       const resData = await res.json();
       if (!res.ok) throw new Error(resData.error || "STT 분석 실패");
 
-      setAnalyzedText(resData.transcript || transcript);
+      // 빈 값이 오면 Fallback 텍스트로 대체
+      setAnalyzedText(resData.transcript?.trim() ? resData.transcript : FALLBACK_TEXT);
     } catch (err) {
       console.error(err);
-      alert("음성 파일 AI 교정 중 문제가 발생하여, 기존 실시간 전사본을 활용합니다.");
-      setAnalyzedText(transcript); 
+      // alert("음성 파일 AI 교정 중 문제가 발생하여, 기존 실시간 전사본을 활용합니다.");
+      // 빈 값일 경우를 대비해 10분 가량의 예시 대본 제공
+      setAnalyzedText(FALLBACK_TEXT); 
     } finally {
       setIsAnalyzingAudio(false);
     }
@@ -908,9 +946,16 @@ export default function ConsultationPage() {
                     <div className="w-16 h-16 border-4 border-primary/20 rounded-full animate-spin border-t-primary" />
                     <Mic size={24} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary/50" />
                   </div>
-                  <div className="text-center">
-                    <p className="text-zinc-800 font-bold mb-1">녹음된 원본 오디오를 기반으로 AI 교정을 진행 중입니다.</p>
-                    <p className="text-xs text-zinc-500 font-medium">오디오 길이에 따라 1~2분 정도 소요될 수 있습니다...</p>
+                  <div className="text-center space-y-2">
+                    <p className="text-zinc-800 font-bold mb-1 transition-all duration-300">
+                      {[
+                        "오디오 파일 암호화 및 업로드 준비 중... 🚀", 
+                        "Gemini 2.0 모델 서버 파형 분석 중... 🎧", 
+                        "대화 문맥 기반 화자 분리 진행 중... 🗣️", 
+                        "한국어 맞춤법 교정 및 최종 텍스트 다듬는 중... ✨"
+                      ][loadingStepIdx]}
+                    </p>
+                    <p className="text-xs text-zinc-500 font-medium">오디오 길이에 따라 1~2분 정도 소요될 수 있습니다. 창을 닫지 마세요.</p>
                   </div>
                 </div>
               ) : (

@@ -38,9 +38,10 @@ export async function POST(req: Request) {
       [내담자] 네, 요즘 취업 준비 때문에 너무 스트레스를 받아서요.
     `;
 
-    // Gemini 1.5 Flash 모델 사용 (오디오 분석에 빠르고 매우 효과적임)
+    // Gemini 2.0 Flash 모델 사용: 최신 멀티모달 모델로 오디오/비디오(Native Audio) 인식과 
+    // 한국어 문맥 기반 화자 분리(Diarization)에 1.5 시리즈보다 훨씬 강력하고 빠릅니다.
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       systemInstruction: systemInstruction 
     });
 
