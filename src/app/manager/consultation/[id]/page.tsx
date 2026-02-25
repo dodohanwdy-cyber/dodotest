@@ -816,11 +816,11 @@ export default function ConsultationPage() {
 
                 {useSpeakerLabels && (
                   <div className="flex items-center animate-in slide-in-from-right-2 duration-300 gap-2">
-                    {/* 실시간 음높이 모니터 (Hz) */}
+                    {/* 실시간 음높이 모니터 (Hz) - 너비 고정으로 주변 레이아웃 밀림 방지 */}
                     {currentPitch > 0 && (
-                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-zinc-50 rounded-lg border border-zinc-100">
-                        <Activity size={10} className="text-zinc-400" />
-                        <span className="text-[9px] font-bold text-zinc-500">{currentPitch} Hz</span>
+                      <div className="flex items-center justify-center gap-1.5 w-[70px] py-0.5 bg-zinc-50 rounded-lg border border-zinc-100">
+                        <Activity size={10} className="text-zinc-400 shrink-0" />
+                        <span className="text-[9px] font-bold text-zinc-500 tabular-nums">{currentPitch} Hz</span>
                       </div>
                     )}
 
@@ -920,7 +920,7 @@ export default function ConsultationPage() {
       {/* 상담 검토 및 STT 분석 모달 */}
       {showReviewModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-3xl w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
               <div>
                 <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2">
