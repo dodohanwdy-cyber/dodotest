@@ -3,25 +3,25 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { 
-  Sparkles, 
-  MessageSquare, 
-  Lightbulb, 
-  ChevronRight, 
+  Mic, 
   User, 
+  MapPin, 
+  Briefcase, 
+  Wallet, 
   Clock, 
-  FileText, 
-  Map, 
+  AlertCircle, 
+  ChevronRight,
   ArrowRight,
-  AlertCircle,
-  Mic,
-  Activity,
-  UserCheck,
-  Briefcase,
-  Wallet,
-  Compass,
+  Sparkles,
   RotateCcw,
   Users,
-  MapPin
+  Activity,
+  MessageSquare,
+  Lightbulb,
+  Compass,
+  FileText,
+  Loader2,
+  Save
 } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
@@ -154,6 +154,14 @@ export default function ConsultationPage() {
   const [useSpeakerLabels, setUseSpeakerLabels] = useState(true); // 화자 구분 사용 여부
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
+  // 백그라운드 오디오 녹음을 위한 Ref 및 State
+  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const audioChunksRef = React.useRef<Blob[]>([]);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [isAnalyzingAudio, setIsAnalyzingAudio] = useState(false);
+  const [analyzedText, setAnalyzedText] = useState("");
+  const [audioFileBlob, setAudioFileBlob] = useState<Blob | null>(null);
+
   // 음높이 기반 자동 화자 추정 로직 (Heuristic)
   const pitchHistoryRef = React.useRef<number[]>([]);
   const lastSwitchTimeRef = React.useRef<number>(0);
@@ -283,7 +291,7 @@ export default function ConsultationPage() {
     }
   }, []); // 초기 1회만 실행
 
-  const toggleRecording = () => {
+  const toggleRecording = async () => {
     if (!recognition) {
       alert("이 브라우저는 음성 인식을 지원하지 않습니다. 크롬 브라우저를 권장합니다.");
       return;
@@ -291,29 +299,73 @@ export default function ConsultationPage() {
 
     if (isRecording) {
       recognition.stop();
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+      }
       setIsRecording(false);
     } else {
-      recognition.start();
-      setIsRecording(true);
+      try {
+        // 브라우저 마이크 스트림을 받아 MediaRecorder 시작
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        audioChunksRef.current = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunksRef.current.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          setAudioFileBlob(blob);
+          stream.getTracks().forEach(track => track.stop()); // 스트림 종료
+        };
+
+        mediaRecorderRef.current = mediaRecorder;
+        mediaRecorder.start(1000); // 1초 단위로 청크 생성
+
+        // 실시간 전사용 Recognition 동시 시작
+        recognition.start();
+        setIsRecording(true);
+      } catch (err) {
+        console.error("마이크 접근에 실패했습니다:", err);
+        alert("원활한 STT 및 녹음을 위해 마이크 권한이 필요합니다.");
+      }
     }
   };
 
-  const handleEndConsultation = async () => {
-    if (!confirm("상담을 종료하고 최종 보고서 작성 단계로 이동하시겠습니까?")) return;
-    
-    // 전사 내용이나 메모가 전혀 없는 경우 웹훅을 쏘지 않고 바로 이동
-    if (!transcript.trim() && !notes.trim()) {
-      router.push(`/manager/consultation/${id}/report`);
-      return;
-    }
+  const analyzeAudio = async (blob: Blob) => {
+    setIsAnalyzingAudio(true);
+    setAnalyzedText(""); // 초기화
+    try {
+      const formData = new FormData();
+      formData.append("audio", blob, "consultation_audio.webm");
 
+      const res = await fetch("/api/stt", {
+        method: "POST",
+        body: formData
+      });
+      
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error || "STT 분석 실패");
+
+      setAnalyzedText(resData.transcript || transcript);
+    } catch (err) {
+      console.error(err);
+      alert("음성 파일 AI 교정 중 문제가 발생하여, 기존 실시간 전사본을 활용합니다.");
+      setAnalyzedText(transcript); 
+    } finally {
+      setIsAnalyzingAudio(false);
+    }
+  };
+
+  const submitConsultation = async (finalText: string) => {
     setIsSaving(true);
     try {
       await postToWebhook(WEBHOOK_URLS.CONSULTATION_SUMMARY, {
         request_id: id,
         email: data?.email,
         user_name: data?.name || data?.user_name,
-        full_text: transcript, // 요청하신 필드명 full_text로 변경
+        full_text: finalText,
         manager_notes: notes,
         timestamp: new Date().toISOString()
       });
@@ -324,6 +376,32 @@ export default function ConsultationPage() {
       router.push(`/manager/consultation/${id}/report`);
     } finally {
       setIsSaving(false);
+      setShowReviewModal(false);
+    }
+  };
+
+  const handleEndConsultation = async () => {
+    if (!confirm("상담을 종료하고 최종 보고서 작성 단계로 이동하시겠습니까?")) return;
+    
+    // 내용이 없으면 바로 이동
+    if (!transcript.trim() && !notes.trim()) {
+      router.push(`/manager/consultation/${id}/report`);
+      return;
+    }
+
+    // 녹음 중이었다면 종료 처리
+    if (isRecording) {
+      toggleRecording();
+    }
+
+    // 녹음 데이터가 존재하면 교정 모달을 띄우고 분석 시작
+    if (audioFileBlob || audioChunksRef.current.length > 0) {
+      setShowReviewModal(true);
+      const blob = audioFileBlob || new Blob(audioChunksRef.current, { type: "audio/webm" });
+      analyzeAudio(blob);
+    } else {
+      // 녹음 데이터가 없으면 기존 실시간 전사본으로 바로 전송
+      submitConsultation(transcript);
     }
   };
 
@@ -800,6 +878,71 @@ export default function ConsultationPage() {
           </div>
         </aside>
       </main>
+
+      {/* 상담 검토 및 STT 분석 모달 */}
+      {showReviewModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
+              <div>
+                <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2">
+                  <Sparkles size={20} className="text-primary" />
+                  상담 STT 최종 교정 및 전송
+                </h2>
+                <p className="text-xs font-bold text-zinc-500 mt-1">
+                  AI가 백그라운드에서 녹음된 오디오를 분석하여 화자를 분리하고 내용을 교정한 결과입니다.
+                </p>
+              </div>
+              {isAnalyzingAudio && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full">
+                  <Loader2 size={14} className="animate-spin" />
+                  <span className="text-xs font-bold uppercase tracking-widest">분석 중...</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 p-6 overflow-hidden flex flex-col">
+              {isAnalyzingAudio ? (
+                <div className="flex-1 flex flex-col items-center justify-center bg-zinc-50 rounded-2xl border border-zinc-100 gap-4">
+                  <div className="relative">
+                    <div className="w-16 h-16 border-4 border-primary/20 rounded-full animate-spin border-t-primary" />
+                    <Mic size={24} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary/50" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-zinc-800 font-bold mb-1">녹음된 원본 오디오를 기반으로 AI 교정을 진행 중입니다.</p>
+                    <p className="text-xs text-zinc-500 font-medium">오디오 길이에 따라 1~2분 정도 소요될 수 있습니다...</p>
+                  </div>
+                </div>
+              ) : (
+                <textarea 
+                  value={analyzedText}
+                  onChange={(e) => setAnalyzedText(e.target.value)}
+                  className="flex-1 w-full p-6 text-sm text-zinc-800 leading-relaxed font-medium bg-zinc-50 rounded-2xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none custom-scrollbar"
+                  placeholder="분석된 텍스트가 이곳에 표시됩니다. 리포트 생성 전 내용을 직접 편집할 수 있습니다."
+                />
+              )}
+            </div>
+
+            <div className="p-6 border-t border-zinc-100 flex justify-end gap-3 bg-white">
+              <button 
+                onClick={() => setShowReviewModal(false)}
+                disabled={isSaving || isAnalyzingAudio}
+                className="px-6 py-2.5 rounded-xl text-sm font-bold text-zinc-500 hover:bg-zinc-100 transition-colors disabled:opacity-50"
+              >
+                닫기
+              </button>
+              <button 
+                onClick={() => submitConsultation(analyzedText)}
+                disabled={isSaving || isAnalyzingAudio || !analyzedText.trim()}
+                className="px-8 py-2.5 rounded-xl text-sm font-bold bg-zinc-900 text-white shadow-lg flex items-center gap-2 hover:bg-zinc-800 transition-all disabled:opacity-50"
+              >
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                위 내용으로 최종 리포트 생성하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
