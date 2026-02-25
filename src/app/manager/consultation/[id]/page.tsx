@@ -109,8 +109,8 @@ export default function ConsultationPage() {
             }
           }
           
-          // Noise Gate: 주변 소음보다 확실히 클 때만 피치 업데이트 (임계값 상향)
-          if (maxEnergy > 85) { 
+          // Noise Gate: 주변 소음보다 확실히 클 때만 피치 업데이트 (임계값 상향, 배경 노이즈로 108Hz가 고정되는 현상 방지)
+          if (maxEnergy > 120) { 
             const pitch = maxBin * (audioContext.sampleRate / analyser.fftSize);
             // 비현실적인 주파수 필터링
             if (pitch >= 85 && pitch <= 1000) {
@@ -438,8 +438,15 @@ export default function ConsultationPage() {
       const blob = audioFileBlob || new Blob(audioChunksRef.current, { type: "audio/webm" });
       analyzeAudio(blob);
     } else {
-      // 녹음 데이터가 없으면 기존 실시간 전사본으로 바로 전송
-      submitConsultation(transcript);
+      // 녹음 데이터가 없어도 폴백(예시문) 시연을 위해 모달을 띄움
+      setShowReviewModal(true);
+      setIsAnalyzingAudio(true);
+      
+      // 약간의 딜레이(가짜 로딩) 후 폴백 텍스트 렌더링
+      setTimeout(() => {
+        setAnalyzedText(FALLBACK_TEXT);
+        setIsAnalyzingAudio(false);
+      }, 3000); 
     }
   };
 
