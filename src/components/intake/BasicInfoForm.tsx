@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, MapPin, Briefcase, Heart, Star, ChevronRight, Info, AlertCircle } from "lucide-react";
+import { User, MapPin, Briefcase, Heart, Star, ChevronRight, Info, AlertCircle, X } from "lucide-react";
 
 export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (data: any) => void }) {
   const [formData, setFormData] = useState({
@@ -20,6 +20,7 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
   });
 
   const [showBenefitedInput, setShowBenefitedInput] = useState(!!formData.benefited_policy);
+  const [showIncomeInfo, setShowIncomeInfo] = useState(false);
   const [toast, setToast] = useState<string>("");
 
   const showToast = (message: string) => {
@@ -178,13 +179,17 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
                 <Info size={14} className="text-blue-500" />
               </div>
               <div className="space-y-1.5 flex-1">
-                <p className="text-[11px] font-black text-slate-500 uppercase tracking-tighter">2026년 기준 중위소득 100% 정보</p>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] text-slate-400 font-bold">
-                  <div className="flex justify-between"><span>1인 가구:</span> <span className="text-slate-600">256.4만원</span></div>
-                  <div className="flex justify-between"><span>2인 가구:</span> <span className="text-slate-600">419.9만원</span></div>
-                  <div className="flex justify-between"><span>3인 가구:</span> <span className="text-slate-600">535.9만원</span></div>
-                  <div className="flex justify-between"><span>4인 가구:</span> <span className="text-slate-600">649.5만원</span></div>
-                </div>
+                <p className="text-[11px] font-black text-slate-500 uppercase tracking-tighter">소득 구간이란 무엇인가요?</p>
+                <p className="text-[10px] text-slate-400 font-bold leading-relaxed">
+                  청년 정책 지원 기준이 되는 가구 소득 비율입니다. 정확한 월소득이 헷갈리신다면 
+                  건강보험료 본인부담금 액수로도 대략적인 확인이 가능합니다.
+                </p>
+                <button 
+                  onClick={() => setShowIncomeInfo(true)}
+                  className="mt-2 text-[10px] font-bold text-primary flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-50 hover:border-primary/30 transition-all shadow-sm"
+                >
+                  💡 2026년 기준 중위소득 / 건보료 기준 확인하기 <ChevronRight size={12} />
+                </button>
               </div>
             </div>
           </div>
@@ -291,6 +296,97 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
           <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 py-4 rounded-2xl shadow-2xl border-2 border-white flex items-center gap-3">
             <AlertCircle size={20} className="flex-shrink-0" />
             <span className="font-bold text-sm">{toast}</span>
+          </div>
+        </div>
+      )}
+
+      {/* 소득 구간(중위소득/건보료) 정보 모달 */}
+      {showIncomeInfo && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowIncomeInfo(false)} />
+          <div className="bg-white w-full max-w-lg rounded-[2.5rem] p-8 relative z-10 shadow-2xl animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+            <button 
+              onClick={() => setShowIncomeInfo(false)}
+              className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
+            >
+              <X size={20} />
+            </button>
+            
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mb-5 shadow-inner">
+              <Info size={24} />
+            </div>
+            
+            <h3 className="text-xl font-black text-slate-900 mb-2">2026년 기준 중위소득 100% 정보</h3>
+            <p className="text-xs text-slate-500 font-bold mb-8 leading-relaxed">
+              본인 가구의 <b>세전 월평균 소득</b> 또는 자신이 납부하는 <b>건강보험료 본인부담금 액수</b>로 
+              자신의 소득 구간을 더 편하게 확인할 수 있습니다.
+            </p>
+
+            <div className="space-y-6">
+              {/* 월소득 기준표 */}
+              <div>
+                <h4 className="text-[13px] font-black text-slate-800 mb-3 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" /> 가구별 월소득 기준 (세전)
+                </h4>
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden">
+                  <table className="w-full text-xs text-center border-collapse">
+                    <thead>
+                      <tr className="bg-slate-100 text-slate-500 font-bold border-b border-slate-200">
+                        <th className="p-3">가구원 수</th>
+                        <th className="p-3">기준 중위소득 100%</th>
+                      </tr>
+                    </thead>
+                    <tbody className="font-bold text-slate-700">
+                      <tr className="border-b border-slate-100"><td className="p-3 bg-white">1인 가구</td><td className="p-3 bg-white">2,564,000원</td></tr>
+                      <tr className="border-b border-slate-100"><td className="p-3 bg-white">2인 가구</td><td className="p-3 bg-white">4,199,000원</td></tr>
+                      <tr className="border-b border-slate-100"><td className="p-3 bg-white">3인 가구</td><td className="p-3 bg-white">5,359,000원</td></tr>
+                      <tr><td className="p-3 bg-white">4인 가구</td><td className="p-3 bg-white">6,495,000원</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* 건보료 기준표 */}
+              <div>
+                <h4 className="text-[13px] font-black text-slate-800 mb-3 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> 건강보험료 본인부담금 기준 (월액)
+                </h4>
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden">
+                  <table className="w-full text-[11px] text-center border-collapse">
+                    <thead>
+                      <tr className="bg-slate-100 text-slate-500 font-bold border-b border-slate-200">
+                        <th className="p-2.5">가구원 수</th>
+                        <th className="p-2.5 border-l border-slate-200">직장가입자</th>
+                        <th className="p-2.5 border-l border-slate-200">지역가입자</th>
+                      </tr>
+                    </thead>
+                    <tbody className="font-bold text-slate-700">
+                      <tr className="border-b border-slate-100">
+                        <td className="p-2.5 bg-white">1인 가구</td><td className="p-2.5 bg-white border-l border-slate-100">89,200원</td><td className="p-2.5 bg-white border-l border-slate-100">80,300원</td>
+                      </tr>
+                      <tr className="border-b border-slate-100">
+                        <td className="p-2.5 bg-white">2인 가구</td><td className="p-2.5 bg-white border-l border-slate-100">146,100원</td><td className="p-2.5 bg-white border-l border-slate-100">133,500원</td>
+                      </tr>
+                      <tr className="border-b border-slate-100">
+                        <td className="p-2.5 bg-white">3인 가구</td><td className="p-2.5 bg-white border-l border-slate-100">186,400원</td><td className="p-2.5 bg-white border-l border-slate-100">170,400원</td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 bg-white">4인 가구</td><td className="p-2.5 bg-white border-l border-slate-100">225,900원</td><td className="p-2.5 bg-white border-l border-slate-100">206,500원</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <button 
+                onClick={() => setShowIncomeInfo(false)}
+                className="w-full bg-slate-900 text-white rounded-2xl py-4 font-bold text-sm shadow-xl active:scale-[0.98] transition-transform"
+              >
+                확인했습니다
+              </button>
+            </div>
           </div>
         </div>
       )}
