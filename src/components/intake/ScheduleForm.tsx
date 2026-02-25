@@ -48,9 +48,13 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
   // 기존 데이터 복원
   useEffect(() => {
     if (data) {
-      if (data.request_time_1) setRank1(data.request_time_1);
-      if (data.request_time_2) setRank2(data.request_time_2);
-      if (data.request_time_3) setRank3(data.request_time_3);
+      // n8n 등에서 넘어오는 쓰레기값이나 포맷이 맞지 않는 빈 문자열 방지
+      const isValidTime = (t: any) => typeof t === 'string' && /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}$/.test(t.trim());
+
+      if (isValidTime(data.request_time_1)) setRank1(data.request_time_1.trim());
+      if (isValidTime(data.request_time_2)) setRank2(data.request_time_2.trim());
+      if (isValidTime(data.request_time_3)) setRank3(data.request_time_3.trim());
+      
       if (data.preferred_method) setPreferredMethod(data.preferred_method);
       if (data.preferred_location) {
         if (data.preferred_location === 'center') {
@@ -363,9 +367,9 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
                           onClick={() => handleDateClick(day)}
                           disabled={isDisabled}
                           title={day.isHoliday ? day.holidayName : undefined}
-                          className={`aspect-square p-2 rounded-xl text-sm font-bold transition-all relative ${
+                          className={`aspect-square p-2 rounded-xl transition-all relative flex flex-col items-center justify-center ${
                             isSelected
-                              ? "bg-gradient-to-br from-primary to-blue-600 text-white shadow-xl shadow-blue-200 scale-105"
+                              ? "bg-gradient-to-br from-primary to-blue-600 text-white shadow-xl shadow-blue-200 scale-105 z-10"
                               : isDisabled
                               ? day.isHoliday
                                 ? "bg-red-50 text-red-400 cursor-not-allowed border-2 border-red-200"
@@ -373,8 +377,10 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
                               : "bg-white border-2 border-slate-200 text-slate-700 hover:border-primary hover:shadow-md hover:scale-105"
                           }`}
                         >
-                          <div className="text-[9px] opacity-70 mb-0.5">{day.dayOfWeek}</div>
-                          <div className="text-base">{day.date.split('-')[2]}</div>
+                          <div className="text-[10px] font-bold opacity-70 leading-none mb-1">{day.dayOfWeek}</div>
+                          <div className="text-base font-black leading-none tracking-tighter whitespace-nowrap">
+                            {parseInt(day.date.split('-')[2], 10)}
+                          </div>
                           {day.isHoliday && (
                             <div className="absolute bottom-0 left-0 right-0 text-[8px] text-red-500 font-black">
                               {day.holidayName}
