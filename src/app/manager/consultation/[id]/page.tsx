@@ -466,6 +466,53 @@ export default function ConsultationPage() {
     fetchConsultationData();
   }, [fetchConsultationData]);
 
+  // 안전한 문자열 추출 헬퍼
+  const extractStr = (val: any): string | null => {
+    if (val === null || val === undefined) return null;
+    if (typeof val === 'string') return val.trim() || null;
+    if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+    return null;
+  };
+
+  // 정책 항목 객체에서 제목과 내용을 안전하게 추출
+  const extractItemTexts = (item: any): { title: string; desc: string } | null => {
+    if (!item || typeof item !== 'object') return null;
+
+    const TITLE_KEYS = ['제목', 'title', 'name', '단계', 'step', '정책명', '항목', 'label', '이름', '단계명'];
+    const DESC_KEYS  = ['추천이유', 'reason', '내용', 'description', 'desc', '설명', 'detail', 'summary', '요약', '이유', '효과'];
+    const SKIP_KEYS  = ['ID', 'id', '_id'];
+
+    let title = '';
+    let desc  = '';
+
+    for (const k of TITLE_KEYS) {
+      const v = extractStr(item[k]);
+      if (v) { title = v; break; }
+    }
+    for (const k of DESC_KEYS) {
+      const v = extractStr(item[k]);
+      if (v) { desc = v; break; }
+    }
+
+    if (!title && !desc) {
+      const allVals: string[] = [];
+      for (const k of Object.keys(item)) {
+        if (SKIP_KEYS.includes(k)) continue;
+        const v = extractStr(item[k]);
+        if (v) allVals.push(v);
+      }
+      if (allVals.length === 0) {
+        const raw = JSON.stringify(item);
+        if (raw && raw !== '{}') return { title: raw, desc: '' };
+        return null;
+      }
+      title = allVals[0];
+      desc  = allVals.slice(1).join(' | ');
+    }
+
+    return { title: title || '(항목)', desc };
+  };
+
   // 빈 값 체크 헬퍼
   const isEmpty = (value: any) => {
     if (!value) return true;
@@ -729,54 +776,85 @@ export default function ConsultationPage() {
                 <h2 className="text-sm font-extrabold text-zinc-900 flex items-center gap-2">
                    <Compass size={18} className="text-primary" /> 추천 정책 로드맵
                 </h2>
-                <div className="bg-white p-7 rounded-[2.5rem] border border-primary/10 shadow-sm border-dashed min-h-[150px]">
-                   <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">
-                      {(() => {
-                         const pr = data?.ai_insights?.policy_roadmap;
-                         if (!pr) return '설정된 로드맵이 없습니다.';
-                         if (typeof pr === 'string') return pr;
-                         if (Array.isArray(pr)) {
-                           const txts = pr.map((item: any, i: number) => {
-                             if (typeof item === 'string') return (i+1)+'. '+item;
-                             const t = (item['제목'] || item['title'] || item['단계'] || '') as string;
-                             const d = (item['추천이유'] || item['reason'] || item['내용'] || item['description'] || '') as string;
-                             if (!t && !d) return null;
-                             return (i+1)+'. '+t+(d ? '\n   '+d : '');
-                           }).filter(Boolean);
-                           return txts.length ? txts.join('\n\n') : '설정된 로드맵이 없습니다.';
-                         }
-                         return JSON.stringify(pr, null, 2);
-                       })()}
-                   </p>
-                </div>
-              </div>
-            </section>
-            
-            {/* 3. 추천 정책 솔루션 카드 */}
-            <section>
-              <h2 className="text-sm font-extrabold text-zinc-900 mb-6 flex items-center gap-2">
-                <FileText size={18} className="text-primary" /> 추천 정책 솔루션
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {(() => {
-                   let policies = data?.ai_insights?.recommended_policies;
-                   if (!policies) return null;
-                   if (typeof policies === 'string') { try { policies = JSON.parse(policies); } catch(e) { policies = null; } }
-                   if (!Array.isArray(policies)) return null;
-                   return policies.map((policy: any, i: number) => {
-                     const title = typeof policy === 'string' ? policy : String(policy['제목'] || policy['title'] || policy['name'] || ('정책 '+(i+1)));
-                     const reason = typeof policy !== 'string' ? String(policy['추천이유'] || policy['reason'] || policy['description'] || '') : '';
-                     return (
-                       <div key={i} className="bg-white p-5 rounded-3xl border border-zinc-100 shadow-sm hover:border-primary/30 hover:bg-primary/[0.01] transition-all group cursor-pointer">
-                         <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-4">
-                           <FileText size={20} />
-                         </div>
-                         <span className="text-sm font-bold text-zinc-700 block mb-2">{title}</span>
-                         {reason ? <p className="text-[10px] text-zinc-400 leading-relaxed">{reason}</p> : <p className="text-[10px] text-zinc-400">정책 상세 정보 확인하기</p>}
-                       </div>
-                     );
-                   });
-                 })()}
+                 <div className="bg-white p-7 rounded-[2.5rem] border border-primary/10 shadow-sm border-dashed min-h-[150px]">
+                    <div className="space-y-4">
+                       {(() => {
+                          let pr = data?.ai_insights?.policy_roadmap;
+                          if (!pr) return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">설정된 로드맵이 없습니다.</p>;
+                          
+                          if (typeof pr === 'string') {
+                            try { pr = JSON.parse(pr); } catch(e) { /* ignore */ }
+                          }
+                          // 단일 객체면 배열로 래핑
+                          if (pr && typeof pr === 'object' && !Array.isArray(pr)) {
+                            pr = [pr];
+                          }
+
+                          if (Array.isArray(pr)) {
+                            const validItems = pr.map((item: any, i: number) => {
+                              if (typeof item === 'string') {
+                                if (item === '[object Object]') return null;
+                                return { idx: i, title: item, desc: '' };
+                              }
+                              if (typeof item === 'object' && item !== null) {
+                                return { idx: i, ...extractItemTexts(item) };
+                              }
+                              return null;
+                            }).filter(Boolean);
+
+                            if (validItems.length === 0) return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">설정된 로드맵 형식을 읽을 수 없습니다.</p>;
+
+                            return validItems.map((item: any) => (
+                              <div key={item.idx} className="flex flex-col">
+                                <span className="text-sm font-extrabold text-zinc-800">{item.idx + 1}. {item.title}</span>
+                                {item.desc && <span className="text-sm text-zinc-600 mt-1 pl-4 border-l-2 border-zinc-100 ml-1">{item.desc}</span>}
+                              </div>
+                            ));
+                          }
+
+                          return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">{typeof pr === 'string' ? pr : JSON.stringify(pr)}</p>;
+                        })()}
+                    </div>
+                 </div>
+               </div>
+             </section>
+             
+             {/* 3. 추천 정책 솔루션 카드 */}
+             <section>
+               <h2 className="text-sm font-extrabold text-zinc-900 mb-6 flex items-center gap-2">
+                 <FileText size={18} className="text-primary" /> 추천 정책 솔루션
+               </h2>
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                 {(() => {
+                    let policies = data?.ai_insights?.recommended_policies;
+                    if (!policies) return null;
+                    if (typeof policies === 'string') { try { policies = JSON.parse(policies); } catch(e) { /* ignore */ } }
+                    if (policies && typeof policies === 'object' && !Array.isArray(policies)) {
+                      policies = [policies];
+                    }
+                    if (!Array.isArray(policies)) return null;
+
+                    const validPolicies = policies.map((policy: any, i: number) => {
+                      if (typeof policy === 'string') {
+                        if (policy === '[object Object]') return null;
+                        return { idx: i, title: policy, desc: '' };
+                      }
+                      if (typeof policy === 'object' && policy !== null) {
+                        return { idx: i, ...extractItemTexts(policy) };
+                      }
+                      return null;
+                    }).filter(Boolean);
+
+                    return validPolicies.map((policy: any) => (
+                      <div key={policy.idx} className="bg-white p-5 rounded-3xl border border-zinc-100 shadow-sm hover:border-primary/30 hover:bg-primary/[0.01] transition-all group cursor-pointer flex flex-col">
+                        <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-4 shrink-0">
+                          <FileText size={20} />
+                        </div>
+                        <span className="text-sm font-bold text-zinc-700 block mb-2">{policy.title}</span>
+                        {policy.desc ? <p className="text-[10px] text-zinc-400 leading-relaxed line-clamp-3">{policy.desc}</p> : <p className="text-[10px] text-zinc-400">정책 상세 정보 확인하기</p>}
+                      </div>
+                    ));
+                  })()}
                 {isEmpty(data?.ai_insights?.recommended_policies) && (
                    <div className="col-span-full py-12 text-center bg-zinc-50 rounded-3xl border border-dashed border-zinc-200">
                       <p className="text-zinc-300 font-medium">추천된 정책이 없습니다.</p>
