@@ -119,9 +119,9 @@ function IntakeContent() {
     }
   };
 
-  // 2. 상태 변경 시마다 localStorage에 자동 저장
+  // 2. 상태 변경 시마다 localStorage에 자동 저장 (신규 작성(isEditMode=false)일 때만!)
   React.useEffect(() => {
-    if (isHydrated) {
+    if (isHydrated && !isEditMode) {
       const persistence = {
         data: intakeData,
         activeStep: value,
@@ -130,7 +130,7 @@ function IntakeContent() {
       };
       localStorage.setItem("intake_persistence", JSON.stringify(persistence));
     }
-  }, [intakeData, value, completedSteps, isChatFinished, isHydrated]);
+  }, [intakeData, value, completedSteps, isChatFinished, isHydrated, isEditMode]);
 
   // 유저 정보가 뒤늦게 로드되거나 변경될 경우 intakeData에 동기화
   React.useEffect(() => {
