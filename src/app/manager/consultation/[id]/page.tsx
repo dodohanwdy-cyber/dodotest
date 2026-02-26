@@ -544,7 +544,18 @@ export default function ConsultationPage() {
   }
 
   const isOffline = data?.schedule?.method === "offline" || data?.confirmed_method === "offline";
-  const hasChatData = !isEmpty(data?.ai_insights?.chat_summary) || !isEmpty(data?.ai_insights?.pre_consultation_brief);
+  
+  // API에서 빈 값 대신 실패/안내 문구를 반환하는 경우를 필터링
+  const isChatSummaryEmpty = isEmpty(data?.ai_insights?.chat_summary) || 
+    String(data?.ai_insights?.chat_summary).includes("제공된 대화 스크립트가 없어") || 
+    String(data?.ai_insights?.chat_summary).includes("요약된 내용이 없습") ||
+    String(data?.ai_insights?.chat_summary).includes("정보가 부족합니다");
+
+  const isBriefEmpty = isEmpty(data?.ai_insights?.pre_consultation_brief) || 
+    String(data?.ai_insights?.pre_consultation_brief).includes("추출된 인사이트가 없습") ||
+    String(data?.ai_insights?.pre_consultation_brief).includes("결과가 없습");
+
+  const hasChatData = !isChatSummaryEmpty || !isBriefEmpty;
   const specialNote = data?.special_note || data?.ai_insights?.special_notes || data?.message;
 
   return (
