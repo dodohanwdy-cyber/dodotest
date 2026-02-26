@@ -42,11 +42,21 @@ function IntakeContent() {
       const savedData = localStorage.getItem("intake_persistence");
       if (savedData) {
         try {
-          const { data, activeStep, completed, chatFinished } = JSON.parse(savedData);
-          if (data) setIntakeData(data);
-          if (activeStep) setValue(activeStep);
-          if (completed) setCompletedSteps(completed);
-          if (chatFinished) setIsChatFinished(chatFinished);
+          const { data, activeStep, completed, chatFinished, timestamp } = JSON.parse(savedData);
+          
+          // 지난번 세션이 비정상 종료되어 chatFinished가 true인 상태로 남아있거나, 하루가 지난 데이터면 초기화
+          const now = new Date().getTime();
+          const isStale = timestamp ? (now - timestamp > 24 * 60 * 60 * 1000) : false;
+          
+          if (chatFinished || isStale) {
+            console.log("기존 임시 저장 데이터가 완료 상태이거나 오래되어 초기화합니다.");
+            localStorage.removeItem("intake_persistence");
+          } else {
+            if (data) setIntakeData((prev: any) => ({ ...prev, ...data, request_id: prev.request_id })); // request_id는 새로 생성된 것 유지
+            if (activeStep) setValue(activeStep);
+            if (completed) setCompletedSteps(completed);
+            if (chatFinished) setIsChatFinished(chatFinished);
+          }
         } catch (e) {
           console.error("Failed to restore intake data:", e);
         }
@@ -126,7 +136,8 @@ function IntakeContent() {
         data: intakeData,
         activeStep: value,
         completed: completedSteps,
-        chatFinished: isChatFinished
+        chatFinished: isChatFinished,
+        timestamp: new Date().getTime()
       };
       localStorage.setItem("intake_persistence", JSON.stringify(persistence));
     }
