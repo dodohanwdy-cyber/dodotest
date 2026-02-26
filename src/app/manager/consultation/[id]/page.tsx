@@ -154,7 +154,7 @@ export default function ConsultationPage() {
   const [speakerRole, setSpeakerRole] = useState<"counselor" | "client">("counselor"); // 현재 화자
   const [currentPitch, setCurrentPitch] = useState(0); // 실시간 주파수
   const [autoDiarization, setAutoDiarization] = useState(false); // 자동 감지 활성화 여부
-  const [useSpeakerLabels, setUseSpeakerLabels] = useState(true); // 화자 구분 사용 여부
+  const [useSpeakerLabels, setUseSpeakerLabels] = useState(false); // 화자 구분 사용 여부 (기본 꺼짐)
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
   // 백그라운드 오디오 녹음을 위한 Ref 및 State
@@ -882,121 +882,128 @@ export default function ConsultationPage() {
 
         {/* 우측: 상담 기록장 & 실시간 STT */}
         <aside className="w-[450px] bg-white border-l border-zinc-100 flex flex-col shadow-2xl shadow-zinc-200/50 z-[5]">
-          {/* 실시간 STT 전사 영역 */}
-          {showSTT && (
-            <div className="h-[45%] border-b border-zinc-100 flex flex-col shrink-0">
-            <div className="p-5 border-b border-zinc-50 bg-white flex items-center justify-between">
-              <h2 className="text-[11px] font-black text-zinc-900 uppercase tracking-widest flex items-center gap-2">
-                <Sparkles size={14} className="text-primary animate-pulse" />
-                실시간 상담 전사 기록 (STT)
-              </h2>
-              <div className="flex items-center gap-2">
-                {/* 화자 구분 전체 Toggle */}
-                <button 
-                  onClick={() => {
-                    setUseSpeakerLabels(!useSpeakerLabels);
-                    if (useSpeakerLabels) setAutoDiarization(false); // 구분 끌 때 자동감지도 해제
-                  }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-all ${
-                    useSpeakerLabels 
-                      ? "bg-zinc-900 border-zinc-900 text-white shadow-md shadow-zinc-200" 
-                      : "bg-white border-zinc-200 text-zinc-400 hover:border-zinc-400"
-                  }`}
-                  title="화자 구분 기능 켜기/끄기"
-                >
-                  <Users size={12} />
-                  <span className="text-[10px] font-bold">{useSpeakerLabels ? "구분 중" : "일반 모드"}</span>
-                </button>
-
-                {useSpeakerLabels && (
-                  <div className="flex items-center animate-in slide-in-from-right-2 duration-300 gap-2">
-                    {/* 실시간 음높이 모니터 (Pitch Vertical Gauge) - 항상 렌더링하여 UI 밀림 완벽 방지 */}
-                    <div className="flex items-center justify-center gap-1.5 px-2 py-1 bg-zinc-50 rounded-lg border border-zinc-100 shrink-0" title={currentPitch > 0 ? `Pitch: ${currentPitch} Hz` : "음성 대기 중"}>
-                      <Activity size={10} className={currentPitch > 0 ? "text-indigo-400 animate-pulse" : "text-zinc-300"} />
-                      <div className="w-1.5 h-3.5 bg-zinc-200 rounded-full relative overflow-hidden">
-                        <div 
-                          className="absolute bottom-0 left-0 right-0 bg-indigo-500 transition-all duration-75 ease-out rounded-full"
-                          style={{ height: currentPitch > 0 ? `${Math.min((currentPitch / 300) * 100, 100)}%` : '0%' }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* 자동 화자 감지 스위치 */}
-                    <button 
-                      onClick={() => setAutoDiarization(!autoDiarization)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-lg border transition-all ${
-                        autoDiarization 
-                          ? "bg-amber-50 border-amber-200 text-amber-600 shadow-sm" 
-                          : "bg-white border-zinc-100 text-zinc-400 hover:border-zinc-200"
-                      }`}
-                      title="음높이 기반 자동 감지"
-                    >
-                      <Sparkles size={10} className={autoDiarization ? "animate-pulse" : ""} />
-                      <span className="text-[9px] font-bold">자동 감지</span>
-                    </button>
-
-                    {/* 화자 전환 컨트롤러 */}
-                    <div className="flex items-center bg-zinc-50 p-0.5 rounded-lg border border-zinc-100">
+          {/* 실시간 STT 전사 (헤더 및 컨텐츠 영역) */}
+          <div className={`border-b border-zinc-100 flex flex-col shrink-0 transition-all duration-300 ${showSTT ? 'h-[50%]' : 'h-auto bg-zinc-50/50'}`}>
+            <div className="p-5 border-b border-zinc-50 bg-white flex flex-col gap-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-[11px] font-black text-zinc-900 uppercase tracking-widest flex items-center gap-2 mb-2">
+                    <Sparkles size={14} className="text-primary animate-pulse" />
+                    실시간 상담 전사 기록 (STT)
+                  </h2>
+                  <div className="flex items-center gap-3 ml-6 text-[10px] font-bold text-zinc-400">
+                    <span className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${isRecording ? 'bg-rose-500 animate-pulse' : 'bg-zinc-300'}`} />
+                      {isRecording ? '녹음 진행 중' : '대기 중'}
+                    </span>
+                    <button onClick={resetTranscript} className="hover:text-rose-500 transition-colors flex items-center gap-1"><RotateCcw size={10}/> 기록 초기화</button>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col gap-3 items-end">
+                   {/* STT 화면 표시 Toggle Row */}
+                   <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-zinc-500">화면 표시</span>
+                      <button 
+                        onClick={() => setShowSTT(!showSTT)}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${showSTT ? 'bg-indigo-500' : 'bg-zinc-200'}`}
+                      >
+                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${showSTT ? 'translate-x-5' : 'translate-x-1'}`} />
+                      </button>
+                   </div>
+                   
+                   {/* 화자 구분 기능 Toggle Row */}
+                   <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-zinc-500">화자 구분</span>
                       <button 
                         onClick={() => {
-                          setSpeakerRole("counselor");
-                          setAutoDiarization(false); // 수동 조작 시 자동 감지 해제
+                          setUseSpeakerLabels(!useSpeakerLabels);
+                          if (useSpeakerLabels) setAutoDiarization(false); 
                         }}
-                        className={`px-2 py-0.5 text-[9px] font-bold rounded-md transition-all ${
-                          speakerRole === "counselor" ? "bg-white text-primary shadow-sm" : "text-zinc-400"
-                        }`}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${useSpeakerLabels ? 'bg-primary' : 'bg-zinc-200'}`}
                       >
-                        상담사
+                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${useSpeakerLabels ? 'translate-x-5' : 'translate-x-1'}`} />
                       </button>
-                      <button 
-                        onClick={() => {
-                          setSpeakerRole("client");
-                          setAutoDiarization(false); // 수동 조작 시 자동 감지 해제
-                        }}
-                        className={`px-2 py-0.5 text-[9px] font-bold rounded-md transition-all ${
-                          speakerRole === "client" ? "bg-white text-primary shadow-sm" : "text-zinc-400"
-                        }`}
-                      >
-                        내담자
-                      </button>
-                    </div>
-                  </div>
-                )}
+                   </div>
+                </div>
+              </div>
 
-                <button 
-                  onClick={resetTranscript}
-                  className="p-1.5 hover:bg-zinc-50 rounded-lg text-zinc-300 hover:text-rose-400 transition-all flex items-center gap-1 group"
-                  title="전사 내용 초기화"
-                >
-                  <span className="text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">기록 초기화</span>
-                  <RotateCcw size={14} />
-                </button>
-                {isRecording && (
-                  <div className="flex items-center gap-1.5 px-3 py-1 bg-rose-50 rounded-full">
-                    <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
-                    <span className="text-[10px] font-bold text-rose-500 uppercase tracking-tighter">Live Recording</span>
-                  </div>
-                )}
+              {/* Speaker Diarization Tools Row */}
+              {showSTT && useSpeakerLabels && (
+                <div className="flex items-center gap-2 pt-3 border-t border-zinc-50 animate-in fade-in slide-in-from-top-2 duration-300">
+                   {/* 실시간 음높이 모니터 (Pitch Vertical Gauge) */}
+                   <div className="flex items-center justify-center gap-1.5 px-2 py-1 bg-zinc-50 rounded-lg border border-zinc-100 shrink-0" title={currentPitch > 0 ? `Pitch: ${currentPitch} Hz` : "음성 대기 중"}>
+                     <Activity size={10} className={currentPitch > 0 ? "text-indigo-400 animate-pulse" : "text-zinc-300"} />
+                     <div className="w-1.5 h-3.5 bg-zinc-200 rounded-full relative overflow-hidden">
+                       <div 
+                         className="absolute bottom-0 left-0 right-0 bg-indigo-500 transition-all duration-75 ease-out rounded-full"
+                         style={{ height: currentPitch > 0 ? `${Math.min((currentPitch / 300) * 100, 100)}%` : '0%' }}
+                       />
+                     </div>
+                   </div>
+
+                   {/* 자동 화자 감지 스위치 */}
+                   <button 
+                     onClick={() => setAutoDiarization(!autoDiarization)}
+                     className={`flex items-center gap-1 px-2 py-1 rounded-lg border transition-all ${
+                       autoDiarization 
+                         ? "bg-amber-50 border-amber-200 text-amber-600 shadow-sm" 
+                         : "bg-white border-zinc-100 text-zinc-400 hover:border-zinc-200"
+                     }`}
+                   >
+                     <Sparkles size={10} className={autoDiarization ? "animate-pulse" : ""} />
+                     <span className="text-[9px] font-bold">자동 감지</span>
+                   </button>
+
+                   {/* 화자 전환 컨트롤러 */}
+                   <div className="flex items-center bg-zinc-50 p-0.5 rounded-lg border border-zinc-100 ml-auto">
+                     <button 
+                       onClick={() => {
+                         setSpeakerRole("counselor");
+                         setAutoDiarization(false); 
+                       }}
+                       className={`px-2 py-0.5 text-[9px] font-bold rounded-md transition-all ${
+                         speakerRole === "counselor" ? "bg-white text-primary shadow-sm" : "text-zinc-400"
+                       }`}
+                     >
+                       상담사
+                     </button>
+                     <button 
+                       onClick={() => {
+                         setSpeakerRole("client");
+                         setAutoDiarization(false); 
+                       }}
+                       className={`px-2 py-0.5 text-[9px] font-bold rounded-md transition-all ${
+                         speakerRole === "client" ? "bg-white text-primary shadow-sm" : "text-zinc-400"
+                       }`}
+                     >
+                       내담자
+                     </button>
+                   </div>
+                </div>
+              )}
+            </div>
+
+            {/* STT Transcript Body */}
+            {showSTT && (
+              <div 
+                ref={scrollRef}
+                className="flex-1 overflow-y-auto p-6 bg-zinc-50/30 custom-scrollbar"
+              >
+                <div className="space-y-4">
+                   <div className="bg-white p-5 rounded-2xl border border-zinc-100 shadow-sm min-h-[100px] relative">
+                      <p className="text-[13px] text-zinc-700 leading-[1.8] font-medium tracking-tight whitespace-pre-wrap">
+                        {transcript}
+                        <span className="text-primary font-bold animate-pulse inline-block ml-1 border-b-2 border-primary/30">{interimTranscript}</span>
+                        {!transcript && !interimTranscript && (
+                          <span className="text-zinc-300 italic text-sm">상담이 시작되면 대화 내용이 실시간으로 이곳에 기록됩니다...</span>
+                        )}
+                      </p>
+                   </div>
+                </div>
               </div>
-            </div>
-            <div 
-              ref={scrollRef}
-              className="flex-1 overflow-y-auto p-6 bg-zinc-50/30 custom-scrollbar"
-            >
-              <div className="space-y-4">
-                 <div className="bg-white p-5 rounded-2xl border border-zinc-100 shadow-sm min-h-[100px] relative">
-                    <p className="text-[13px] text-zinc-700 leading-[1.8] font-medium tracking-tight whitespace-pre-wrap">
-                      {transcript}
-                      <span className="text-primary font-bold animate-pulse inline-block ml-1 border-b-2 border-primary/30">{interimTranscript}</span>
-                      {!transcript && !interimTranscript && (
-                        <span className="text-zinc-300 italic text-sm">상담이 시작되면 대화 내용이 실시간으로 이곳에 기록됩니다...</span>
-                      )}
-                    </p>
-                 </div>
-              </div>
-            </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* 수동 메모 영역 */}
           <div className="flex-1 flex flex-col">
@@ -1004,17 +1011,6 @@ export default function ConsultationPage() {
               <h2 className="text-[11px] font-black text-zinc-900 uppercase tracking-widest flex items-center gap-2">
                 <MessageSquare size={12} className="text-zinc-400" /> 상담사 관찰 정보 및 요약 메모
               </h2>
-              <button
-                onClick={() => setShowSTT(!showSTT)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 bg-white text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50 transition-colors shadow-sm ml-auto"
-                title="실시간 전사 기록장 켜기/끄기"
-              >
-                {showSTT ? (
-                  <><EyeOff size={14} /> <span className="text-[10px] font-bold">STT 숨기기</span></>
-                ) : (
-                  <><Eye size={14} className="text-primary" /> <span className="text-[10px] font-bold text-primary">STT 보기</span></>
-                )}
-              </button>
             </div>
             <textarea
               value={notes}
