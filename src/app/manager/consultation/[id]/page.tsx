@@ -23,7 +23,8 @@ import {
   Loader2,
   Save,
   Eye,
-  EyeOff
+  EyeOff,
+  ListTodo
 } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
@@ -543,6 +544,8 @@ export default function ConsultationPage() {
   }
 
   const isOffline = data?.schedule?.method === "offline" || data?.confirmed_method === "offline";
+  const hasChatData = !isEmpty(data?.ai_insights?.chat_summary) || !isEmpty(data?.ai_insights?.pre_consultation_brief);
+  const specialNote = data?.special_note || data?.ai_insights?.special_notes || data?.message;
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col">
@@ -750,133 +753,207 @@ export default function ConsultationPage() {
         <div className="flex-1 flex flex-col overflow-y-auto bg-zinc-50/30">
           <div className="p-8 max-w-5xl mx-auto w-full space-y-12">
             
-            {/* 1. 사전 상담 요약 */}
-            <section>
-               <h2 className="text-[11px] font-black text-primary uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                <Sparkles size={14} className="animate-pulse" />
-                사전 상담 분석 및 주요 신호
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div className="bg-white p-6 rounded-[2rem] border border-zinc-100 shadow-sm space-y-4">
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Chat Summary</p>
-                    <p className="text-sm text-zinc-700 leading-relaxed font-medium">
-                      {data?.ai_insights?.chat_summary || "요약된 내용이 없습니다."}
-                    </p>
-                 </div>
-                 <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 rounded-[2rem] shadow-xl text-white space-y-4">
-                    <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">Key Insights</p>
-                    <p className="text-sm font-bold leading-relaxed">
-                      {data?.ai_insights?.pre_consultation_brief || "추출된 인사이트가 없습니다."}
-                    </p>
-                    <div className="pt-2">
-                       <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold">🎯 핵심: {(() => { const ui = data?.ai_insights?.user_interest; if (!ui) return ''; if (typeof ui === 'string') return ui; if (Array.isArray(ui)) return ui.join(', '); return JSON.stringify(ui); })()}</span>
-                    </div>
-                 </div>
-              </div>
-            </section>
-
-            {/* 2. 맞춤형 상담 전략 및 로드맵 */}
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div className="space-y-6">
-                <h2 className="text-sm font-extrabold text-zinc-900 flex items-center gap-2">
-                  <Lightbulb size={18} className="text-amber-500" /> 커스터마이징 전략
-                </h2>
-                <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[150px]">
-                   <p className="text-sm text-zinc-700 leading-relaxed font-medium whitespace-pre-wrap">
-                      {data?.ai_insights?.consultation_guide || "분석된 가이드라인이 없습니다."}
-                   </p>
-                </div>
-              </div>
-              <div className="space-y-6">
-                <h2 className="text-sm font-extrabold text-zinc-900 flex items-center gap-2">
-                   <Compass size={18} className="text-primary" /> 추천 정책 로드맵
-                </h2>
-                 <div className="bg-white p-7 rounded-[2.5rem] border border-primary/10 shadow-sm border-dashed min-h-[150px]">
-                    <div className="space-y-4">
-                       {(() => {
-                          let pr = data?.ai_insights?.policy_roadmap;
-                          if (!pr) return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">설정된 로드맵이 없습니다.</p>;
-                          
-                          if (typeof pr === 'string') {
-                            try { pr = JSON.parse(pr); } catch(e) { /* ignore */ }
-                          }
-                          // 단일 객체면 배열로 래핑
-                          if (pr && typeof pr === 'object' && !Array.isArray(pr)) {
-                            pr = [pr];
-                          }
-
-                          if (Array.isArray(pr)) {
-                            const validItems = pr.map((item: any, i: number) => {
-                              if (typeof item === 'string') {
-                                if (item === '[object Object]') return null;
-                                return { idx: i, title: item, desc: '' };
-                              }
-                              if (typeof item === 'object' && item !== null) {
-                                return { idx: i, ...extractItemTexts(item) };
-                              }
-                              return null;
-                            }).filter(Boolean);
-
-                            if (validItems.length === 0) return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">설정된 로드맵 형식을 읽을 수 없습니다.</p>;
-
-                            return validItems.map((item: any) => (
-                              <div key={item.idx} className="flex flex-col">
-                                <span className="text-sm font-extrabold text-zinc-800">{item.idx + 1}. {item.title}</span>
-                                {item.desc && <span className="text-sm text-zinc-600 mt-1 pl-4 border-l-2 border-zinc-100 ml-1">{item.desc}</span>}
-                              </div>
-                            ));
-                          }
-
-                          return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">{typeof pr === 'string' ? pr : JSON.stringify(pr)}</p>;
-                        })()}
-                    </div>
-                 </div>
-               </div>
-             </section>
-             
-             {/* 3. 추천 정책 솔루션 카드 */}
-             <section>
-               <h2 className="text-sm font-extrabold text-zinc-900 mb-6 flex items-center gap-2">
-                 <FileText size={18} className="text-primary" /> 추천 정책 솔루션
-               </h2>
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                 {(() => {
-                    let policies = data?.ai_insights?.recommended_policies;
-                    if (!policies) return null;
-                    if (typeof policies === 'string') { try { policies = JSON.parse(policies); } catch(e) { /* ignore */ } }
-                    if (policies && typeof policies === 'object' && !Array.isArray(policies)) {
-                      policies = [policies];
-                    }
-                    if (!Array.isArray(policies)) return null;
-
-                    const validPolicies = policies.map((policy: any, i: number) => {
-                      if (typeof policy === 'string') {
-                        if (policy === '[object Object]') return null;
-                        return { idx: i, title: policy, desc: '' };
-                      }
-                      if (typeof policy === 'object' && policy !== null) {
-                        return { idx: i, ...extractItemTexts(policy) };
-                      }
-                      return null;
-                    }).filter(Boolean);
-
-                    return validPolicies.map((policy: any) => (
-                      <div key={policy.idx} className="bg-white p-5 rounded-3xl border border-zinc-100 shadow-sm hover:border-primary/30 hover:bg-primary/[0.01] transition-all group cursor-pointer flex flex-col">
-                        <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-4 shrink-0">
-                          <FileText size={20} />
+            {hasChatData ? (
+              <>
+                {/* 1. 사전 상담 요약 */}
+                <section>
+                   <h2 className="text-[11px] font-black text-primary uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                    <Sparkles size={14} className="animate-pulse" />
+                    사전 상담 분석 및 주요 신호
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div className="bg-white p-6 rounded-[2rem] border border-zinc-100 shadow-sm space-y-4">
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Chat Summary</p>
+                        <p className="text-sm text-zinc-700 leading-relaxed font-medium">
+                          {data?.ai_insights?.chat_summary || "요약된 내용이 없습니다."}
+                        </p>
+                     </div>
+                     <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 rounded-[2rem] shadow-xl text-white space-y-4">
+                        <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">Key Insights</p>
+                        <p className="text-sm font-bold leading-relaxed">
+                          {data?.ai_insights?.pre_consultation_brief || "추출된 인사이트가 없습니다."}
+                        </p>
+                        <div className="pt-2">
+                           <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold">🎯 핵심: {(() => { const ui = data?.ai_insights?.user_interest; if (!ui) return ''; if (typeof ui === 'string') return ui; if (Array.isArray(ui)) return ui.join(', '); return JSON.stringify(ui); })()}</span>
                         </div>
-                        <span className="text-sm font-bold text-zinc-700 block mb-2">{policy.title}</span>
-                        {policy.desc ? <p className="text-[10px] text-zinc-400 leading-relaxed line-clamp-3">{policy.desc}</p> : <p className="text-[10px] text-zinc-400">정책 상세 정보 확인하기</p>}
-                      </div>
-                    ));
-                  })()}
-                {isEmpty(data?.ai_insights?.recommended_policies) && (
-                   <div className="col-span-full py-12 text-center bg-zinc-50 rounded-3xl border border-dashed border-zinc-200">
-                      <p className="text-zinc-300 font-medium">추천된 정책이 없습니다.</p>
+                     </div>
+                  </div>
+                </section>
+
+                {/* 2. 맞춤형 상담 전략 및 로드맵 */}
+                <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="space-y-6">
+                    <h2 className="text-sm font-extrabold text-zinc-900 flex items-center gap-2">
+                      <Lightbulb size={18} className="text-amber-500" /> 커스터마이징 전략
+                    </h2>
+                    <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[150px]">
+                       <p className="text-sm text-zinc-700 leading-relaxed font-medium whitespace-pre-wrap">
+                          {data?.ai_insights?.consultation_guide || "분석된 가이드라인이 없습니다."}
+                       </p>
+                    </div>
+                  </div>
+                  <div className="space-y-6">
+                    <h2 className="text-sm font-extrabold text-zinc-900 flex items-center gap-2">
+                       <Compass size={18} className="text-primary" /> 추천 정책 로드맵
+                    </h2>
+                     <div className="bg-white p-7 rounded-[2.5rem] border border-primary/10 shadow-sm border-dashed min-h-[150px]">
+                        <div className="space-y-4">
+                           {(() => {
+                              let pr = data?.ai_insights?.policy_roadmap;
+                              if (!pr) return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">설정된 로드맵이 없습니다.</p>;
+                              
+                              if (typeof pr === 'string') {
+                                try { pr = JSON.parse(pr); } catch(e) { /* ignore */ }
+                              }
+                              // 단일 객체면 배열로 래핑
+                              if (pr && typeof pr === 'object' && !Array.isArray(pr)) {
+                                pr = [pr];
+                              }
+
+                              if (Array.isArray(pr)) {
+                                const validItems = pr.map((item: any, i: number) => {
+                                  if (typeof item === 'string') {
+                                    if (item === '[object Object]') return null;
+                                    return { idx: i, title: item, desc: '' };
+                                  }
+                                  if (typeof item === 'object' && item !== null) {
+                                    return { idx: i, ...extractItemTexts(item) };
+                                  }
+                                  return null;
+                                }).filter(Boolean);
+
+                                if (validItems.length === 0) return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">설정된 로드맵 형식을 읽을 수 없습니다.</p>;
+
+                                return validItems.map((item: any) => (
+                                  <div key={item.idx} className="flex flex-col">
+                                    <span className="text-sm font-extrabold text-zinc-800">{item.idx + 1}. {item.title}</span>
+                                    {item.desc && <span className="text-sm text-zinc-600 mt-1 pl-4 border-l-2 border-zinc-100 ml-1">{item.desc}</span>}
+                                  </div>
+                                ));
+                              }
+
+                              return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">{typeof pr === 'string' ? pr : JSON.stringify(pr)}</p>;
+                            })()}
+                        </div>
+                     </div>
                    </div>
-                )}
+                 </section>
+                 
+                 {/* 3. 추천 정책 솔루션 카드 */}
+                 <section>
+                   <h2 className="text-sm font-extrabold text-zinc-900 mb-6 flex items-center gap-2">
+                     <FileText size={18} className="text-primary" /> 추천 정책 솔루션
+                   </h2>
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     {(() => {
+                        let policies = data?.ai_insights?.recommended_policies;
+                        if (!policies) return null;
+                        if (typeof policies === 'string') { try { policies = JSON.parse(policies); } catch(e) { /* ignore */ } }
+                        if (policies && typeof policies === 'object' && !Array.isArray(policies)) {
+                          policies = [policies];
+                        }
+                        if (!Array.isArray(policies)) return null;
+
+                        const validPolicies = policies.map((policy: any, i: number) => {
+                          if (typeof policy === 'string') {
+                            if (policy === '[object Object]') return null;
+                            return { idx: i, title: policy, desc: '' };
+                          }
+                          if (typeof policy === 'object' && policy !== null) {
+                            return { idx: i, ...extractItemTexts(policy) };
+                          }
+                          return null;
+                        }).filter(Boolean);
+
+                        return validPolicies.map((policy: any) => (
+                          <div key={policy.idx} className="bg-white p-5 rounded-3xl border border-zinc-100 shadow-sm hover:border-primary/30 hover:bg-primary/[0.01] transition-all group cursor-pointer flex flex-col">
+                            <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-4 shrink-0">
+                              <FileText size={20} />
+                            </div>
+                            <span className="text-sm font-bold text-zinc-700 block mb-2">{policy.title}</span>
+                            {policy.desc ? <p className="text-[10px] text-zinc-400 leading-relaxed line-clamp-3">{policy.desc}</p> : <p className="text-[10px] text-zinc-400">정책 상세 정보 확인하기</p>}
+                          </div>
+                        ));
+                      })()}
+                    {isEmpty(data?.ai_insights?.recommended_policies) && (
+                       <div className="col-span-full py-12 text-center bg-zinc-50 rounded-3xl border border-dashed border-zinc-200">
+                          <p className="text-zinc-300 font-medium">추천된 정책이 없습니다.</p>
+                       </div>
+                    )}
+                  </div>
+                </section>
+              </>
+            ) : (
+              // --- AI 챗 데이터가 없는 경우 (대체 UI) ---
+              <div className="space-y-10">
+                {/* 1. 특이사항 및 사전 요청사항 */}
+                <section>
+                   <h2 className="text-[11px] font-black text-rose-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                     <AlertCircle size={14} />
+                     사전 접수 특이사항 (Special Notes)
+                   </h2>
+                   <div className="bg-white p-8 rounded-[2rem] border border-rose-100 shadow-sm relative overflow-hidden">
+                     <div className="absolute top-0 left-0 w-2 h-full bg-rose-400" />
+                     {specialNote ? (
+                       <p className="text-[14px] text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">{specialNote}</p>
+                     ) : (
+                       <p className="text-[13px] text-zinc-400 font-medium italic">신청 시 접수된 사전 특이사항이나 메모가 없습니다.</p>
+                     )}
+                   </div>
+                </section>
+
+                {/* 2. 프로필 기반 초기 상담 가이드 */}
+                <section>
+                   <h2 className="text-[11px] font-black text-primary uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                     <Compass size={14} className="animate-pulse" />
+                     초기 상담 방향성 가이드
+                   </h2>
+                   <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-8 rounded-[2rem] shadow-xl text-white space-y-6">
+                     <div>
+                       <p className="text-xl font-extrabold leading-relaxed text-indigo-50 flex flex-wrap items-center gap-2 mb-2">
+                         <span className="bg-white/20 px-3 py-1 rounded-full text-sm">{data?.name || data?.user_name || "내담자"}님</span>은 현재
+                         {data?.interest_areas?.length > 0 ? (
+                           <span> <span className="text-amber-300">[{data.interest_areas.join(", ")}]</span> 분야에 관심이 있는 </span>
+                         ) : null}
+                         <span className="text-white border-b-2 border-indigo-300">{data?.job_status || "직업 미상"}</span> 상태입니다.
+                       </p>
+                       <p className="text-[13px] text-indigo-100 mt-4 font-medium leading-relaxed">
+                         사전 AI 챗봇 상담을 진행하지 않아 맞춤형 AI 분석 보고서가 없습니다.<br/>
+                         대신 아래의 <strong>프로필 기반 권장 체크리스트</strong>를 활용하여 내담자의 현재 상황과 가장 큰 고민을 파악하는 데 집중해 주세요.
+                       </p>
+                     </div>
+                     
+                     <div className="bg-white/10 rounded-2xl p-6 border border-white/20 space-y-4">
+                       <p className="text-[11px] font-black tracking-widest text-indigo-200 uppercase flex items-center gap-1.5 border-b border-white/10 pb-3"><ListTodo size={14}/> Recommended Checklist</p>
+                       <ul className="space-y-4 pt-2">
+                         <li className="flex items-start gap-4 text-[14px] font-medium text-white/95">
+                           <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold">1</div>
+                           <span className="leading-relaxed">내담자가 센터를 방문하게 된 가장 결정적인 계기 및 현재 직면한 어려움 청취하기</span>
+                         </li>
+                         {data?.interest_areas?.length > 0 && (
+                           <li className="flex items-start gap-4 text-[14px] font-medium text-white/95">
+                             <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold">2</div>
+                             <span className="leading-relaxed">사전 선택한 관심 분야(<span className="text-amber-300 font-bold">{data.interest_areas.join(", ")}</span>)와 관련된 구체적인 목표나 희망 지원 방향 파악하기</span>
+                           </li>
+                         )}
+                         {(data?.job_status?.includes("구직") || data?.job_status?.includes("준비")) && (
+                           <li className="flex items-start gap-4 text-[14px] font-medium text-white/95">
+                             <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold">3</div>
+                             <span className="leading-relaxed">취업 및 구직 준비 과정에서의 구체적인 애로사항 및 심리적/경제적 압박감 요인 확인하기</span>
+                           </li>
+                         )}
+                         <li className="flex items-start gap-4 text-[14px] font-medium text-white/95">
+                           <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold">
+                             {(data?.interest_areas?.length > 0 ? 1 : 0) + ((data?.job_status?.includes("구직") || data?.job_status?.includes("준비")) ? 1 : 0) + 2}
+                           </div>
+                           <span className="leading-relaxed text-indigo-100">기본 프로필(연령, {data?.income_level ? `소득: ${data.income_level}` : "소득 미상"}) 기반의 정부/지자체 청년 지원정책 대상 여부 파악하기</span>
+                         </li>
+                       </ul>
+                     </div>
+                   </div>
+                </section>
               </div>
-            </section>
+            )}
           </div>
         </div>
 
