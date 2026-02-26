@@ -62,9 +62,9 @@ export default function ManagerCalendar({ calendarEvents = [], isLoading = false
     setCurrentDate(new Date());
   };
 
-  // 일정 타입 판별 (OOO 상담 (online|offline|phone) 형태인지 정확히 확인)
+  // 일정 타입 판별 (OOO 상담 (online|phone) 형태 또는 OOO 상담 (offline) 이후 텍스트 존재 여부 확인)
   const isConsultationEvent = (title: string) => {
-    return /^.+\s+상담\s*\((online|offline|phone)\)$/i.test(title.trim());
+    return /^.+\s+상담\s*(\((online|phone)\)$|\(offline\))/i.test(title.trim());
   };
 
   // 일정 색상
