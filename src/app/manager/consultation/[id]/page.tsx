@@ -896,73 +896,59 @@ export default function ConsultationPage() {
               </>
             ) : (
               // --- AI 챗 데이터가 없는 경우 (대체 UI) ---
-              <div className="space-y-10">
-                {/* 1. 특이사항 및 사전 요청사항 */}
-                <section>
-                   <h2 className="text-[11px] font-black text-rose-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                     <AlertCircle size={14} />
-                     사전 접수 특이사항 (Special Notes)
-                   </h2>
-                   <div className="bg-white p-8 rounded-[2rem] border border-rose-100 shadow-sm relative overflow-hidden">
-                     <div className="absolute top-0 left-0 w-2 h-full bg-rose-400" />
-                     {specialNote ? (
-                       <p className="text-[14px] text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">{specialNote}</p>
-                     ) : (
-                       <p className="text-[13px] text-zinc-400 font-medium italic">신청 시 접수된 사전 특이사항이나 메모가 없습니다.</p>
-                     )}
-                   </div>
-                </section>
+              <div className="space-y-6">
+                {/* 1. 특이사항 및 사전 요청사항 (간결화) */}
+                {specialNote && (
+                  <div className="bg-rose-50/50 border border-rose-100 p-4 rounded-2xl flex gap-3 items-start shadow-sm">
+                    <AlertCircle size={16} className="text-rose-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-[11px] font-black text-rose-600 uppercase mb-1 tracking-widest">사전 접수 특이사항 / 메모</p>
+                      <p className="text-[13px] text-zinc-800 font-bold whitespace-pre-wrap leading-relaxed">{specialNote}</p>
+                    </div>
+                  </div>
+                )}
 
-                {/* 2. 프로필 기반 초기 상담 가이드 */}
-                <section>
-                   <h2 className="text-[11px] font-black text-primary uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                     <Compass size={14} className="animate-pulse" />
-                     초기 상담 방향성 가이드
-                   </h2>
-                   <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-8 rounded-[2rem] shadow-xl text-white space-y-6">
-                     <div>
-                       <p className="text-xl font-extrabold leading-relaxed text-indigo-50 flex flex-wrap items-center gap-2 mb-2">
-                         <span className="bg-white/20 px-3 py-1 rounded-full text-sm">{data?.name || data?.user_name || "내담자"}님</span>은 현재
-                         {data?.interest_areas?.length > 0 ? (
-                           <span> <span className="text-amber-300">[{data.interest_areas.join(", ")}]</span> 분야에 관심이 있는 </span>
-                         ) : null}
-                         <span className="text-white border-b-2 border-indigo-300">{data?.job_status || "직업 미상"}</span> 상태입니다.
-                       </p>
-                       <p className="text-[13px] text-indigo-100 mt-4 font-medium leading-relaxed">
-                         사전 AI 챗봇 상담을 진행하지 않아 맞춤형 AI 분석 보고서가 없습니다.<br/>
-                         대신 아래의 <strong>프로필 기반 권장 체크리스트</strong>를 활용하여 내담자의 현재 상황과 가장 큰 고민을 파악하는 데 집중해 주세요.
-                       </p>
-                     </div>
-                     
-                     <div className="bg-white/10 rounded-2xl p-6 border border-white/20 space-y-4">
-                       <p className="text-[11px] font-black tracking-widest text-indigo-200 uppercase flex items-center gap-1.5 border-b border-white/10 pb-3"><ListTodo size={14}/> Recommended Checklist</p>
-                       <ul className="space-y-4 pt-2">
-                         <li className="flex items-start gap-4 text-[14px] font-medium text-white/95">
-                           <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold">1</div>
-                           <span className="leading-relaxed">내담자가 센터를 방문하게 된 가장 결정적인 계기 및 현재 직면한 어려움 청취하기</span>
-                         </li>
-                         {data?.interest_areas?.length > 0 && (
-                           <li className="flex items-start gap-4 text-[14px] font-medium text-white/95">
-                             <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold">2</div>
-                             <span className="leading-relaxed">사전 선택한 관심 분야(<span className="text-amber-300 font-bold">{data.interest_areas.join(", ")}</span>)와 관련된 구체적인 목표나 희망 지원 방향 파악하기</span>
-                           </li>
-                         )}
-                         {(data?.job_status?.includes("구직") || data?.job_status?.includes("준비")) && (
-                           <li className="flex items-start gap-4 text-[14px] font-medium text-white/95">
-                             <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold">3</div>
-                             <span className="leading-relaxed">취업 및 구직 준비 과정에서의 구체적인 애로사항 및 심리적/경제적 압박감 요인 확인하기</span>
-                           </li>
-                         )}
-                         <li className="flex items-start gap-4 text-[14px] font-medium text-white/95">
-                           <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold">
-                             {(data?.interest_areas?.length > 0 ? 1 : 0) + ((data?.job_status?.includes("구직") || data?.job_status?.includes("준비")) ? 1 : 0) + 2}
-                           </div>
-                           <span className="leading-relaxed text-indigo-100">기본 프로필(연령, {data?.income_level ? `소득: ${data.income_level}` : "소득 미상"}) 기반의 정부/지자체 청년 지원정책 대상 여부 파악하기</span>
-                         </li>
-                       </ul>
-                     </div>
-                   </div>
-                </section>
+                {/* 2. 프로필 기반 초기 상담 가이드 (밝은 UI 및 간결한 텍스트 반영) */}
+                <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-zinc-200/60 shadow-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-6 border-b border-zinc-100">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 shadow-inner">
+                        <Compass size={24} />
+                      </div>
+                      <div>
+                        <h2 className="text-base font-extrabold text-zinc-900">상담 초기 진행 방향</h2>
+                        <p className="text-[13px] text-zinc-500 font-medium mt-1">
+                          {data?.name || data?.user_name || "내담자"}님의 프로필 기반으로 생성된 가이드라인입니다.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-4 bg-zinc-50 hover:bg-zinc-100/80 transition-colors rounded-xl border border-zinc-100">
+                      <div className="w-6 h-6 rounded-full bg-white border border-zinc-200 text-zinc-400 shadow-sm flex items-center justify-center text-[11px] font-bold shrink-0">1</div>
+                      <p className="text-[13px] font-bold text-zinc-700">방문하게 된 결정적 계기 및 현재 직면한 주요 어려움 청취하기</p>
+                    </div>
+                    {data?.interest_areas?.length > 0 && (
+                      <div className="flex items-center gap-3 p-4 bg-zinc-50 hover:bg-zinc-100/80 transition-colors rounded-xl border border-zinc-100">
+                        <div className="w-6 h-6 rounded-full bg-white border border-zinc-200 text-zinc-400 shadow-sm flex items-center justify-center text-[11px] font-bold shrink-0">2</div>
+                        <p className="text-[13px] font-bold text-zinc-700">사전 선택한 관심 분야(<span className="text-indigo-500">{data.interest_areas.join(", ")}</span>) 연관 희망 지원 방향 파악하기</p>
+                      </div>
+                    )}
+                    {(data?.job_status?.includes("구직") || data?.job_status?.includes("준비")) && (
+                      <div className="flex items-center gap-3 p-4 bg-zinc-50 hover:bg-zinc-100/80 transition-colors rounded-xl border border-zinc-100">
+                        <div className="w-6 h-6 rounded-full bg-white border border-zinc-200 text-zinc-400 shadow-sm flex items-center justify-center text-[11px] font-bold shrink-0">3</div>
+                        <p className="text-[13px] font-bold text-zinc-700">취업 및 구직 준비 중 겪고 있는 심리적/경제적 압박 요인 확인하기</p>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-3 p-4 bg-zinc-50 hover:bg-zinc-100/80 transition-colors rounded-xl border border-zinc-100">
+                      <div className="w-6 h-6 rounded-full bg-white border border-zinc-200 text-zinc-400 shadow-sm flex items-center justify-center text-[11px] font-bold shrink-0">
+                        {(data?.interest_areas?.length > 0 ? 1 : 0) + ((data?.job_status?.includes("구직") || data?.job_status?.includes("준비")) ? 1 : 0) + 2}
+                      </div>
+                      <p className="text-[13px] font-bold text-zinc-700">기본 프로필을 바탕으로 한 정부/지자체 청년 지원 정책 스크리닝</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
