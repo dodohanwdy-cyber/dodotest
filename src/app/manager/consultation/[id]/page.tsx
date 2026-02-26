@@ -561,65 +561,70 @@ export default function ConsultationPage() {
           </div>
         </div>
 
-        {/* 오프라인 상담 및 마이크 체크 배너 */}
-        {isOffline && (
-          <div className="flex-1 flex flex-col items-center justify-center px-6">
-             <div className="w-full max-w-2xl bg-white border border-zinc-100 rounded-2xl p-4 shadow-sm flex items-center gap-6">
-                {/* 실시간 볼륨 미터 및 증폭 조절 */}
-                <div className="flex items-center gap-6 border-r border-zinc-100 pr-6 shrink-0">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="text-[9px] font-black text-zinc-400 uppercase leading-none">Input Level</div>
-                    <div className="w-4 h-14 bg-zinc-100 rounded-full relative overflow-hidden">
-                      <div 
-                        className="absolute bottom-0 left-0 right-0 bg-primary transition-all duration-75 ease-out rounded-full"
-                        style={{ height: `${audioLevel}%` }}
-                      />
-                    </div>
-                    <Mic size={12} className={audioLevel > 5 ? "text-primary animate-pulse" : "text-zinc-300"} />
+        {/* 마이크 체크 및 명언 배너 (온/오프라인 공통) */}
+        <div className="flex-1 flex flex-col items-center justify-center px-6">
+           <div className="w-full max-w-2xl bg-white border border-zinc-100 rounded-2xl p-4 shadow-sm flex items-center gap-6">
+              {/* 실시간 볼륨 미터 및 증폭 조절 */}
+              <div className="flex items-center gap-6 border-r border-zinc-100 pr-6 shrink-0">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-[9px] font-black text-zinc-400 uppercase leading-none">Input Level</div>
+                  <div className="w-4 h-14 bg-zinc-100 rounded-full relative overflow-hidden">
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 bg-primary transition-all duration-75 ease-out rounded-full"
+                      style={{ height: `${audioLevel}%` }}
+                    />
                   </div>
-                  
-                  {/* 증폭 조절 (Gain) 슬라이더 - 너비 최적화 */}
-                  <div className="flex flex-col gap-2 min-w-[100px]">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[9px] font-black text-zinc-400 uppercase tracking-tighter">Gain Boost</span>
-                      <span className="text-[9px] font-bold text-primary px-1 bg-primary/5 rounded">x{gainValue.toFixed(1)}</span>
-                    </div>
-                    <input 
-                       type="range"
-                       min="1"
-                       max="10"
-                       step="0.5"
-                       value={gainValue}
-                       onChange={(e) => setGainValue(parseFloat(e.target.value))}
-                       className="w-full h-1.5 bg-zinc-100 rounded-lg appearance-none cursor-pointer accent-primary"
-                     />
-                     <div className="flex justify-between text-[8px] font-bold text-zinc-300">
-                        <span>Min</span>
-                        <span>Max</span>
-                     </div>
-                  </div>
+                  <Mic size={12} className={audioLevel > 5 ? "text-primary animate-pulse" : "text-zinc-300"} />
                 </div>
-
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="px-2 py-0.5 bg-indigo-50 text-indigo-500 text-[10px] font-bold rounded-md">마이크 테스트</div>
-                    <span className="text-[11px] font-bold text-zinc-400">아래 문구를 읽어보세요</span>
+                
+                {/* 증폭 조절 (Gain) 슬라이더 - 너비 최적화 */}
+                <div className="flex flex-col gap-2 min-w-[100px]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-tighter">Gain Boost</span>
+                    <span className="text-[9px] font-bold text-primary px-1 bg-primary/5 rounded">x{gainValue.toFixed(1)}</span>
                   </div>
-                  <p className="text-sm font-bold text-zinc-800 leading-relaxed italic">
-                    "{dailyQuote.message}"
-                  </p>
-                  <p className="text-[10px] text-zinc-400 mt-1">— {dailyQuote.author}</p>
+                  <input 
+                     type="range"
+                     min="1"
+                     max="10"
+                     step="0.5"
+                     value={gainValue}
+                     onChange={(e) => setGainValue(parseFloat(e.target.value))}
+                     className="w-full h-1.5 bg-zinc-100 rounded-lg appearance-none cursor-pointer accent-primary"
+                   />
+                   <div className="flex justify-between text-[8px] font-bold text-zinc-300">
+                      <span>Min</span>
+                      <span>Max</span>
+                   </div>
                 </div>
+              </div>
 
-                <div className="pl-4">
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 rounded-xl border border-amber-100 animate-bounce-subtle">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="px-2 py-0.5 bg-indigo-50 text-indigo-500 text-[10px] font-bold rounded-md">마이크 테스트</div>
+                  <span className="text-[11px] font-bold text-zinc-400">아래 문구를 읽어보세요</span>
+                </div>
+                <p className="text-sm font-bold text-zinc-800 leading-relaxed italic">
+                  "{dailyQuote.message}"
+                </p>
+                <p className="text-[10px] text-zinc-400 mt-1">— {dailyQuote.author}</p>
+              </div>
+
+              <div className="pl-4">
+                {isOffline ? (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 rounded-xl border border-amber-100 animate-bounce-subtle shrink-0">
                      <AlertCircle className="text-amber-500" size={14} />
-                     <span className="text-[11px] font-bold text-amber-700">오프라인 모드</span>
+                     <span className="text-[11px] font-bold text-amber-700 whitespace-nowrap">오프라인 모드</span>
                   </div>
-                </div>
-             </div>
-          </div>
-        )}
+                ) : (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-sky-50 rounded-xl border border-sky-100 animate-bounce-subtle shrink-0">
+                     <Mic className="text-sky-500" size={14} />
+                     <span className="text-[11px] font-bold text-sky-700 whitespace-nowrap">온라인 (STT)</span>
+                  </div>
+                )}
+              </div>
+           </div>
+        </div>
 
         <div className="flex items-center gap-3">
           <button 
