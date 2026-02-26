@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, MapPin, Briefcase, Heart, Star, ChevronRight, Info, AlertCircle, X } from "lucide-react";
+import { User, MapPin, Briefcase, Heart, Star, ChevronRight, Info, AlertCircle, X, ChevronDown, CheckCircle2 } from "lucide-react";
 
 export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (data: any) => void }) {
   const [formData, setFormData] = useState({
@@ -166,31 +166,35 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
 
         {/* 소득 수준 */}
         <div className="space-y-4 group">
-          <label className="text-sm font-black text-slate-800 flex items-center gap-2 mb-1">
-            <span className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary">
-              <Heart size={18} />
-            </span>
-            소득 구간 (월평균)
+          <label className="text-sm font-black text-slate-800 flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary">
+                <Heart size={18} />
+              </span>
+              소득 구간 (월평균)
+            </div>
           </label>
           
           <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100 mb-2">
-            <div className="flex items-start gap-3">
-              <div className="p-1.5 bg-white rounded-lg shadow-sm">
-                <Info size={14} className="text-blue-500" />
+            <div className="flex flex-col gap-3">
+              <div className="flex items-start gap-3">
+                <div className="p-1.5 bg-white rounded-lg shadow-sm">
+                  <Info size={14} className="text-blue-500" />
+                </div>
+                <div className="space-y-1.5 flex-1">
+                  <p className="text-[11px] font-black text-slate-500 uppercase tracking-tighter">어떤 걸 골라야 할지 헷갈리시나요?</p>
+                  <p className="text-[10px] text-slate-400 font-bold leading-relaxed">
+                    청년 정책 지원 기준이 되는 소득 비율입니다. 정확한 소득이 헷갈리신다면 
+                    건강보험료 금액으로도 대략적인 확인이 가능합니다.
+                  </p>
+                </div>
               </div>
-              <div className="space-y-1.5 flex-1">
-                <p className="text-[11px] font-black text-slate-500 uppercase tracking-tighter">소득 구간이란 무엇인가요?</p>
-                <p className="text-[10px] text-slate-400 font-bold leading-relaxed">
-                  청년 정책 지원 기준이 되는 가구 소득 비율입니다. 정확한 월소득이 헷갈리신다면 
-                  건강보험료 본인부담금 액수로도 대략적인 확인이 가능합니다.
-                </p>
-                <button 
-                  onClick={() => setShowIncomeInfo(true)}
-                  className="mt-2 text-[10px] font-bold text-primary flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-50 hover:border-primary/30 transition-all shadow-sm"
-                >
-                  💡 2026년 기준 중위소득 / 건보료 기준 확인하기 <ChevronRight size={12} />
-                </button>
-              </div>
+              <button 
+                onClick={() => setShowIncomeInfo(true)}
+                className="w-full text-[13px] font-black text-primary bg-blue-50/50 py-3 rounded-xl border border-blue-100 shadow-sm hover:bg-primary hover:text-white hover:border-primary hover:shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                💡 [필독] 나의 정확한 소득 구간 알아보기
+              </button>
             </div>
           </div>
 
@@ -199,7 +203,7 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
             value={formData.income_level}
             onChange={(e) => setFormData({...formData, income_level: e.target.value})}
           >
-            <option value="없음">💰 소득 없음 (또는 비공개)</option>
+            <option value="없음">💰 소득 없음 (개인 소득 및 납부 건보료 없음)</option>
             <option value="50% 이하">📉 가구 소득 50% 이하</option>
             <option value="100% 이하">📊 가구 소득 100% 이하</option>
             <option value="150% 이하">📈 가구 소득 150% 이하</option>
@@ -300,14 +304,14 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
         </div>
       )}
 
-      {/* 소득 구간(중위소득/건보료) 정보 모달 */}
+      {/* 소득 구간(중위소득/건보료) 정보 모달 + 쉬운 용어 가이드 */}
       {showIncomeInfo && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowIncomeInfo(false)} />
-          <div className="bg-white w-full max-w-lg rounded-[2.5rem] p-8 relative z-10 shadow-2xl animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white w-full max-w-lg rounded-[2.5rem] p-6 md:p-8 relative z-10 shadow-2xl animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto custom-scrollbar">
             <button 
               onClick={() => setShowIncomeInfo(false)}
-              className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
+              className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors z-20"
             >
               <X size={20} />
             </button>
@@ -316,19 +320,71 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
               <Info size={24} />
             </div>
             
-            <h3 className="text-xl font-black text-slate-900 mb-2">2026년 기준 중위소득 100% 정보</h3>
-            <p className="text-xs text-slate-500 font-bold mb-8 leading-relaxed">
-              본인 가구의 <b>세전 월평균 소득</b> 또는 자신이 납부하는 <b>건강보험료 본인부담금 액수</b>로 
-              자신의 소득 구간을 더 편하게 확인할 수 있습니다.
+            <h3 className="text-xl font-black text-slate-900 mb-2 mt-1">나의 진단 소득 구간 알아보기</h3>
+            <p className="text-xs text-slate-500 font-bold mb-6 leading-relaxed">
+              정책 신청에 가장 기본이 되는 정보입니다. 아래 가이드와 기준표를 참고해 선택해 보세요.
             </p>
+
+            {/* 용어 설명 카드 영역 */}
+            <div className="bg-slate-50 rounded-2xl p-4 mb-6 border border-slate-100 space-y-3">
+              <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                <CheckCircle2 size={12} className="text-primary" /> 알기 쉬운 용어 사전
+              </h4>
+              <div className="grid gap-3">
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                  <span className="text-xs font-black text-slate-800 block mb-1">💸 실수령액 vs 세전 소득</span>
+                  <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                    통장에 실제로 찍히는 돈이 <b>'실수령액'</b>입니다. 하지만 정책 기준은 보통 여기서 <b>세금을 떼기 전의 원래 금액인 '세전 소득'</b>을 기준으로 합니다. (통장 입금액에 약 10~15%를 더한 금액)
+                  </p>
+                </div>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                  <span className="text-xs font-black text-slate-800 block mb-1">🏥 건강보험 납부액 (건보료)</span>
+                  <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                    매달 월급이나 소득에서 나가는 건강보험 요금입니다. 건보료는 내 소득에 비례해서 나오기 때문에, <b>내 소득을 정확히 모를 땐 납부하는 건보료 금액으로 소득 구간을 유추</b>할 수 있습니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 내 소득 확인 꿀팁 (토글) */}
+            <details className="bg-blue-50/40 rounded-2xl border border-blue-100 md:mb-6 mb-8 group overflow-hidden">
+              <summary className="p-4 cursor-pointer text-sm font-black text-primary flex items-center justify-between hover:bg-blue-50/80 transition-colors select-none">
+                <span className="flex items-center gap-2">💡 답답했던 내 소득, 여기서 1분 만에 확인하세요!</span>
+                <ChevronDown size={18} className="text-blue-400 group-open:rotate-180 transition-transform duration-300" />
+              </summary>
+              <div className="p-4 pt-0 border-t border-blue-100/50 mt-1 space-y-4">
+                <div className="pt-2">
+                  <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-bold mb-1">방법 1</span>
+                  <h5 className="text-xs font-black text-slate-800 mb-1">앱(App)으로 즉시 열람하기 (가장 쉽고 빠름)</h5>
+                  <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                    • <b>토스(Toss), 모바일 뱅킹 등</b>: 전체 메뉴에서 [내 소득/건강보험료 확인]을 누르면 간편인증만으로 확인됩니다.<br/>
+                    • <b>The건강보험 앱</b>: [민원요기요] &gt; [증명서 확인] 메뉴 이용.
+                  </p>
+                </div>
+                <div className="pt-1">
+                  <span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-bold mb-1">방법 2</span>
+                  <h5 className="text-xs font-black text-slate-800 mb-1">알바/프리랜서 계산법</h5>
+                  <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                    명세서 없이 한 달 동안 받은 입금액(실수령액)에 <b>약 3.4%를 곱해 더하면</b> 대략적인 세전 소득이 됩니다.
+                  </p>
+                </div>
+                <div className="pt-1">
+                  <span className="inline-block px-2 py-0.5 bg-slate-200 text-slate-700 rounded text-[10px] font-bold mb-1">참고</span>
+                  <h5 className="text-xs font-black text-slate-800 mb-1">저는 현재 무직/취준생이에요</h5>
+                  <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                    부모님 밑으로 건보료가 들어가는 피부양자이고, 본인 명의의 알바/근로 소득이 0원이라면 최상단의 <b>[소득 없음 (0원)]</b>을 선택하시면 됩니다.
+                  </p>
+                </div>
+              </div>
+            </details>
 
             <div className="space-y-6">
               {/* 월소득 기준표 */}
               <div>
                 <h4 className="text-[13px] font-black text-slate-800 mb-3 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary" /> 가구별 월소득 기준 (세전)
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" /> 가구별 월소득 기준표 (세전)
                 </h4>
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden">
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
                   <table className="w-full text-xs text-center border-collapse">
                     <thead>
                       <tr className="bg-slate-100 text-slate-500 font-bold border-b border-slate-200">
@@ -347,11 +403,11 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
               </div>
 
               {/* 건보료 기준표 */}
-              <div>
+              <div className="pb-4">
                 <h4 className="text-[13px] font-black text-slate-800 mb-3 flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> 건강보험료 본인부담금 기준 (월액)
                 </h4>
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden">
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
                   <table className="w-full text-[11px] text-center border-collapse">
                     <thead>
                       <tr className="bg-slate-100 text-slate-500 font-bold border-b border-slate-200">
@@ -379,12 +435,12 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
               </div>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-2 sticky bottom-0 pt-4 pb-2 bg-gradient-to-t from-white via-white to-transparent">
               <button 
                 onClick={() => setShowIncomeInfo(false)}
-                className="w-full bg-slate-900 text-white rounded-2xl py-4 font-bold text-sm shadow-xl active:scale-[0.98] transition-transform"
+                className="w-full bg-slate-900 text-white rounded-2xl py-4 font-bold text-sm shadow-xl hover:bg-slate-800 active:scale-[0.98] transition-all"
               >
-                확인했습니다
+                닫기
               </button>
             </div>
           </div>
