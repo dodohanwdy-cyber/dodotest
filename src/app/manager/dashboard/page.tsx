@@ -106,7 +106,8 @@ export default function ManagerDashboard() {
         const rawData = Array.isArray(mainRes) ? mainRes[0] : mainRes;
         
         const parsedEvents = (rawData.calendar_events ?? []).map((evt: any) => {
-          const isCounseling = typeof evt.title === "string" && evt.title.includes("상담");
+          const title = typeof evt.title === "string" ? evt.title.trim() : "";
+          const isCounseling = /^.+\s+상담$/.test(title) || title.endsWith("상담");
           return { ...evt, color: isCounseling ? "blue" : "gray" };
         });
 
@@ -420,7 +421,9 @@ export default function ManagerDashboard() {
                     if (!evt.start || !evt.title) return false;
                     const evtDate = new Date(evt.start);
                     evtDate.setHours(0, 0, 0, 0);
-                    return evtDate >= today && typeof evt.title === "string" && evt.title.includes("상담");
+                    const title = String(evt.title).trim();
+                    const isCounseling = /^.+\s+상담$/.test(title) || title.endsWith("상담");
+                    return evtDate >= today && isCounseling;
                   })
                   .sort((a: any, b: any) => new Date(a.start).getTime() - new Date(b.start).getTime());
 

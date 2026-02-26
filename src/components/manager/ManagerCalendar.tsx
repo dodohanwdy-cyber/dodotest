@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Settings2 } from "lucide-react";
 
 interface CalendarEvent {
+  id?: string;
   title: string;
   start: string; // ISO 8601 format
-  end: string;
+  end?: string;
+  color?: string;
 }
 
 interface ManagerCalendarProps {
@@ -60,13 +62,17 @@ export default function ManagerCalendar({ calendarEvents = [], isLoading = false
     setCurrentDate(new Date());
   };
 
-  // 일정 타입 판별 (상담 일정인지 확인)
+  // 일정 타입 판별 (OOO 상담 형태인지 정확히 확인)
   const isConsultationEvent = (title: string) => {
-    return title.includes('상담') || title.includes('(offline)') || title.includes('(online)') || title.includes('(phone)');
+    return /^.+\s+상담$/.test(title.trim()) || title.trim().endsWith("상담");
   };
 
   // 일정 색상
   const getEventColor = (event: CalendarEvent) => {
+    if (event.color === 'blue') return 'bg-blue-500 text-white';
+    if (event.color === 'gray') return 'bg-gray-400 text-white';
+    
+    // fallback
     if (isConsultationEvent(event.title)) {
       return 'bg-blue-500 text-white';
     }
