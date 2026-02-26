@@ -960,32 +960,33 @@ export default function ConsultationPage() {
         {/* 우측: 상담 기록장 & 실시간 STT */}
         <aside className="w-[450px] bg-white border-l border-zinc-100 flex flex-col shadow-2xl shadow-zinc-200/50 z-[5]">
           {/* 실시간 STT 전사 (헤더 및 컨텐츠 영역) */}
-          <div className={`border-b border-zinc-100 flex flex-col shrink-0 transition-all duration-300 ${showSTT ? 'h-[50%]' : 'h-auto bg-zinc-50/50'}`}>
-            <div className="p-5 border-b border-zinc-50 bg-white flex flex-col gap-4">
+          <div className={`border-b border-zinc-100 flex flex-col shrink-0 transition-all duration-300 ${showSTT ? 'h-[40%]' : 'h-auto bg-zinc-50/50'}`}>
+            <div className="p-4 border-b border-zinc-50 bg-white flex flex-col gap-3">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-[11px] font-black text-zinc-900 uppercase tracking-widest flex items-center gap-2 mb-2">
+                  <h2 className="text-[11px] font-black text-zinc-900 uppercase tracking-widest flex items-center gap-2 mb-1">
                     <Sparkles size={14} className="text-primary animate-pulse" />
                     실시간 상담 전사 기록 (STT)
                   </h2>
-                  <div className="flex items-center gap-3 ml-6 text-[10px] font-bold text-zinc-400">
-                    <span className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2.5 ml-6 text-[10px] font-bold text-zinc-400">
+                    <span className="flex items-center gap-1">
                       <span className={`w-1.5 h-1.5 rounded-full ${isRecording ? 'bg-rose-500 animate-pulse' : 'bg-zinc-300'}`} />
                       {isRecording ? '녹음 진행 중' : '대기 중'}
                     </span>
-                    <button onClick={resetTranscript} className="hover:text-rose-500 transition-colors flex items-center gap-1"><RotateCcw size={10}/> 기록 초기화</button>
+                    <span className="text-zinc-200">|</span>
+                    <button onClick={resetTranscript} className="hover:text-rose-500 transition-colors flex items-center gap-1"><RotateCcw size={10}/> 초기화</button>
                   </div>
                 </div>
                 
-                <div className="flex flex-col gap-3 items-end">
+                <div className="flex flex-col gap-2 items-end mt-1">
                    {/* STT 화면 표시 Toggle Row */}
                    <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold text-zinc-500">화면 표시</span>
                       <button 
                         onClick={() => setShowSTT(!showSTT)}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${showSTT ? 'bg-indigo-500' : 'bg-zinc-200'}`}
+                        className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none ${showSTT ? 'bg-indigo-500' : 'bg-zinc-200'}`}
                       >
-                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${showSTT ? 'translate-x-5' : 'translate-x-1'}`} />
+                        <span className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${showSTT ? 'translate-x-[14px]' : 'translate-x-1'}`} />
                       </button>
                    </div>
                    
@@ -997,9 +998,9 @@ export default function ConsultationPage() {
                           setUseSpeakerLabels(!useSpeakerLabels);
                           if (useSpeakerLabels) setAutoDiarization(false); 
                         }}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${useSpeakerLabels ? 'bg-primary' : 'bg-zinc-200'}`}
+                        className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none ${useSpeakerLabels ? 'bg-primary' : 'bg-zinc-200'}`}
                       >
-                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${useSpeakerLabels ? 'translate-x-5' : 'translate-x-1'}`} />
+                        <span className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${useSpeakerLabels ? 'translate-x-[14px]' : 'translate-x-1'}`} />
                       </button>
                    </div>
                 </div>
@@ -1007,7 +1008,7 @@ export default function ConsultationPage() {
 
               {/* Speaker Diarization Tools Row */}
               {showSTT && useSpeakerLabels && (
-                <div className="flex items-center gap-2 pt-3 border-t border-zinc-50 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="flex items-center gap-2 pt-2 border-t border-zinc-50 animate-in fade-in slide-in-from-top-2 duration-300">
                    {/* 실시간 음높이 모니터 (Pitch Vertical Gauge) */}
                    <div className="flex items-center justify-center gap-1.5 px-2 py-1 bg-zinc-50 rounded-lg border border-zinc-100 shrink-0" title={currentPitch > 0 ? `Pitch: ${currentPitch} Hz` : "음성 대기 중"}>
                      <Activity size={10} className={currentPitch > 0 ? "text-indigo-400 animate-pulse" : "text-zinc-300"} />
