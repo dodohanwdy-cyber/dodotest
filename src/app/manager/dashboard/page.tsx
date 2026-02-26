@@ -8,6 +8,9 @@ import {
   CheckCircle2, 
   AlertCircle,
   ExternalLink,
+  Bell,
+  X,
+  Send
 } from "lucide-react";
 import ManagerCalendar from "@/components/manager/ManagerCalendar";
 import ScheduleAdjustPopup from "@/components/manager/ScheduleAdjustPopup";
@@ -35,7 +38,7 @@ const getConfirmedDate = (apt: any): Date | null => {
     }
   }
   return null;
-};
+}
 
 // 확정 상담 목록 파싱 헬퍼
 const parseConfirmedList = (confirmedRes: any): any[] => {
@@ -61,6 +64,11 @@ export default function ManagerDashboard() {
   const [showDetailPopup, setShowDetailPopup] = useState(false);
   const [detailData, setDetailData] = useState<any>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+
+  // 알람 보내기 팝업 상태
+  const [showAlarmPopup, setShowAlarmPopup] = useState(false);
+  const [selectedAlarmUsers, setSelectedAlarmUsers] = useState<string[]>([]);
+  const [alarmStatus, setAlarmStatus] = useState<"idle" | "loading" | "success">("idle");
 
   const applyConfirmedData = (confirmedRes: any) => {
     const rawConfirmed = parseConfirmedList(confirmedRes);
@@ -147,6 +155,29 @@ export default function ManagerDashboard() {
     }
   };
 
+  const handleOpenAlarmPopup = () => {
+    // 확정된 캘린더 상의 사람들을 모두 기본 선택 상태로 지정
+    const allIds = confirmedAppointments.map(a => a.request_id);
+    setSelectedAlarmUsers(allIds);
+    setAlarmStatus("idle");
+    setShowAlarmPopup(true);
+  };
+
+  const toggleAlarmUser = (id: string) => {
+    setSelectedAlarmUsers(prev => prev.includes(id) ? prev.filter(uid => uid !== id) : [...prev, id]);
+  };
+
+  const handleSendAlarm = () => {
+    setAlarmStatus("loading");
+    // 실제 발송 로직 대신 타이머로 성공 처리
+    setTimeout(() => {
+      setAlarmStatus("success");
+      setTimeout(() => {
+        setShowAlarmPopup(false);
+      }, 2000);
+    }, 1200);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
       {/* 대시보드 헤더 */}
@@ -155,13 +186,22 @@ export default function ManagerDashboard() {
           <h1 className="text-3xl font-bold text-zinc-900 mb-2">매니저 대시보드</h1>
           <p className="text-zinc-500">상담 일정을 관리하고 신청 현황을 확인하세요</p>
         </div>
-        <button
-          onClick={() => setShowAdjustPopup(true)}
-          disabled={!data?.analyzed_list || data.analyzed_list.length === 0}
-          className="px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm flex items-center gap-2 hover:shadow-lg hover:scale-105 active:scale-95 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          일정 조율하기 <ExternalLink size={16} />
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleOpenAlarmPopup}
+            disabled={confirmedAppointments.length === 0}
+            className="px-6 py-3 bg-white text-primary border border-primary rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-blue-50/50 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            알람 보내기 <Bell size={16} />
+          </button>
+          <button
+            onClick={() => setShowAdjustPopup(true)}
+            disabled={!data?.analyzed_list || data.analyzed_list.length === 0}
+            className="px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm flex items-center gap-2 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            일정 조율하기 <ExternalLink size={16} />
+          </button>
+        </div>
       </div>
 
       {/* 캘린더 영역 */}
@@ -332,6 +372,74 @@ export default function ManagerDashboard() {
           <AlertCircle className="mx-auto text-zinc-300 mb-3" size={48} />
           <p className="text-zinc-400 font-medium">확정된 상담 일정이 없습니다.</p>
           <p className="text-zinc-300 text-sm mt-1">일정 조율을 통해 상담을 확정해 주세요.</p>
+        </div>
+      )}
+
+      {/* 알림 발송 모달 */}
+      {showAlarmPopup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setShowAlarmPopup(false)}></div>
+          <div className="bg-white rounded-[2rem] p-8 max-w-md w-full relative z-10 shadow-2xl animate-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setShowAlarmPopup(false)}
+              className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
+            >
+              <X size={20} />
+            </button>
+            
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mb-5 shadow-inner">
+              <Bell size={24} />
+            </div>
+
+            <h2 className="text-xl font-bold text-zinc-900 mb-2">알람 보내기</h2>
+            <p className="text-[13px] text-zinc-500 mb-6 font-bold">상담이 확정된 아래 분들께 문자 및 알람을 보내드릴게요.</p>
+
+            {/* 수신자 체크박스 리스트 */}
+            <div className="space-y-3 max-h-[300px] overflow-y-auto mb-6 pr-2 custom-scrollbar">
+              {confirmedAppointments.map(apt => (
+                <label key={apt.request_id} className="flex items-center gap-3 p-4 border border-zinc-100 rounded-xl cursor-pointer hover:bg-zinc-50 transition-colors">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedAlarmUsers.includes(apt.request_id)}
+                    onChange={() => toggleAlarmUser(apt.request_id)}
+                    className="w-5 h-5 rounded border-zinc-300 text-primary focus:ring-primary focus:ring-offset-0 disabled:opacity-50"
+                    disabled={alarmStatus !== "idle"}
+                  />
+                  <div className="flex-1 text-sm font-bold text-zinc-800">
+                    {apt.name} 상담
+                  </div>
+                  <div className="flex flex-col text-right">
+                     <span className="text-xs font-bold text-blue-600">{apt.age}세, {apt.gender === "male" ? "남성" : "여성"}</span>
+                     <span className="text-[10px] text-zinc-400">{apt.confirmed_datetime?.split(' ')[0]}</span>
+                  </div>
+                </label>
+              ))}
+              {confirmedAppointments.length === 0 && (
+                <p className="text-center text-zinc-400 text-sm py-4">확정된 상담이 없습니다.</p>
+              )}
+            </div>
+
+            <button
+              onClick={handleSendAlarm}
+              disabled={alarmStatus === "loading" || alarmStatus === "success" || selectedAlarmUsers.length === 0}
+              className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md ${
+                alarmStatus === "success" 
+                  ? "bg-green-100 text-green-700 shadow-none" 
+                  : "bg-primary text-white hover:bg-blue-600 hover:translate-y-[-1px] active:translate-y-[1px]"
+              } disabled:opacity-50 disabled:hover:translate-y-0 disabled:cursor-not-allowed`}
+            >
+              {alarmStatus === "loading" ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> 
+                  발송 준비 중...
+                </>
+              ) : alarmStatus === "success" ? (
+                <><CheckCircle2 size={18} /> 알람이 발송되었어요</>
+              ) : (
+                <><Send size={18} /> {selectedAlarmUsers.length}명에게 발송하기</>
+              )}
+            </button>
+          </div>
         </div>
       )}
 
