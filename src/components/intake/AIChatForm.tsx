@@ -13,9 +13,9 @@ interface Message {
 
 export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFinished }: { intakeData: any, onComplete: () => void, onUpdate?: (data: any) => void, isChatFinished?: boolean }) {
   const { user } = useAuth();
-  // 초기 인사말 설정 (따뜻하고 신뢰감 있는 톤)
+  // 초기 인사말 설정 (따뜻하고 신뢰감 있는 톤 + 3가지 질문 예고)
   const [messages, setMessages] = useState<Message[]>(intakeData.chat_history || [
-    { role: "ai", content: `안녕하세요, ${intakeData.name}님! 찾아주셔서 감사합니다. 😊\n\n선택해주신 고민에 대해 조금 더 편하게 이야기 나누고 싶어요. 현재 가장 마음이 쓰이는 부분이나, 해결하고 싶은 구체적인 상황이 있다면 편하게 말씀해 주세요. 제가 경청하고 도움 드릴 수 있는 방법을 함께 찾아볼게요.` }
+    { role: "ai", content: `안녕하세요, ${intakeData.name}님! 원활한 맞춤 상담을 위해 제가 3가지 정도 간단한 질문을 드릴 예정입니다. 😊\n\n현재 가장 마음이 쓰이는 부분이나, 해결하고 싶은 구체적인 상황을 먼저 편하게 말씀해 주시겠어요?` }
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -161,8 +161,8 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
       </div>
 
       {/* 입력 영역 */}
-      <div className="p-4 bg-white border-t border-zinc-100 flex items-center gap-3">
-          <div className="flex gap-3 items-end">
+      <div className="p-4 bg-white border-t border-zinc-100">
+          <div className="flex gap-3 items-end w-full">
             <input
               type="text"
               value={input}
@@ -170,12 +170,12 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
               onKeyDown={(e) => e.key === "Enter" && !isChatFinished && handleSend()}
               placeholder={isChatFinished ? "AI 상담이 완료되었습니다" : "편하게 말씀해 주세요..."}
               disabled={isChatFinished}
-              className="flex-1 px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-primary transition-all text-sm placeholder:text-slate-300 shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed"
+              className="flex-1 px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-primary transition-all text-sm placeholder:text-slate-300 shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed w-full"
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || isTyping || isChatFinished}
-              className="px-6 py-4 bg-gradient-to-r from-blue-500 to-primary text-white rounded-2xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-bold text-sm shadow-md"
+              className="px-6 py-4 bg-gradient-to-r from-blue-500 to-primary text-white rounded-2xl hover:shadow-lg transition-all disabled:opacity-80 disabled:cursor-not-allowed flex items-center gap-2 font-bold text-sm shadow-md whitespace-nowrap"
             >
               {isTyping ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
               <span>{isTyping ? "생각 중..." : "전송"}</span>

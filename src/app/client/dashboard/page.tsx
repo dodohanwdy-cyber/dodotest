@@ -29,20 +29,29 @@ export default function ClientDashboard() {
       return;
     }
 
-    // 캐시 확인 (5분 이내 데이터는 재사용)
     const CACHE_DURATION = 5 * 60 * 1000; // 5분
     const now = Date.now();
     
-    if (!forceRefresh && lastFetched && (now - lastFetched < CACHE_DURATION)) {
-      console.log('캐시된 데이터 사용 중...');
-      setLoading(false);
-      return;
+    if (forceRefresh) {
+      console.log('강제 새로고침: 캐시 무시');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('dashboard_cache');
+      }
+    } else {
+      // 일반 로드 시 캐시 확인 (메모리 캐시)
+      if (lastFetched && (now - lastFetched < CACHE_DURATION)) {
+        console.log('캐시된 데이터 사용 중...');
+        setLoading(false);
+        return;
+      }
     }
     
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`/api/applications?email=${encodeURIComponent(user.email)}`);
+      // forceRefresh일 때는 API 라우트에서도 캐시를 무시하도록 타임스탬프 추가
+      const url = `/api/applications?email=${encodeURIComponent(user.email)}${forceRefresh ? `&_t=${now}` : ''}`;
+      const res = await fetch(url);
       const data = await res.json();
       
       if (res.ok) {
@@ -92,6 +101,7 @@ export default function ClientDashboard() {
     }
 
     fetchApplications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (

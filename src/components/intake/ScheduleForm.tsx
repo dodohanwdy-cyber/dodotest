@@ -600,7 +600,7 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
             </>
           ) : (
             <>
-              예약 확정 및 상담 시작 <ChevronRight size={20} />
+              예약 신청하고 AI와 대화 나누기 <ChevronRight size={20} />
             </>
           )}
         </button>
