@@ -21,7 +21,9 @@ import {
   Tag,
   ArrowUpRight,
   Copy,
-  Check
+  Check,
+  X,
+  Send
 } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
@@ -249,11 +251,17 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
   }, []);
   
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
-  const [isSent, setIsSent] = React.useState(false);
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [sendResultStatus, setSendResultStatus] = useState<"idle" | "loading" | "success">("idle");
 
-  const handleSendReport = () => {
-    setIsSent(true);
-    setTimeout(() => setIsSent(false), 3000);
+  const handleSendResultAction = async () => {
+    setSendResultStatus("loading");
+    await new Promise((res) => setTimeout(res, 1500));
+    setSendResultStatus("success");
+    setTimeout(() => {
+      setShowResultModal(false);
+      setSendResultStatus("idle");
+    }, 2000);
   };
 
   const handleCopy = (text: string, id: string) => {
@@ -307,7 +315,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
               </p>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 print:hidden">
             <button 
               onClick={() => window.print()} 
               className="px-5 py-2.5 bg-zinc-100 text-zinc-600 font-bold rounded-xl hover:bg-zinc-200 transition-all text-sm flex items-center gap-2"
@@ -315,11 +323,10 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
               PDF 저장
             </button>
             <button 
-              onClick={handleSendReport}
-              disabled={isSent}
-              className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center gap-2 disabled:opacity-70"
+              onClick={() => setShowResultModal(true)}
+              className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center gap-2"
             >
-              {isSent ? <><CheckCircle2 size={16} /> 전송 완료!</> : <>리포트 전송하기 <ArrowRight size={16} /></>}
+              상담 결과 보내기 <Send size={16} />
             </button>
           </div>
         </div>
@@ -535,6 +542,93 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
 
         </div>
       </main>
+
+      {/* 상담 결과 보내기 모달 */}
+      {showResultModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setShowResultModal(false)}></div>
+          <div className="bg-white rounded-[2rem] p-8 max-w-2xl w-full relative z-10 shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]">
+            <button 
+              onClick={() => setShowResultModal(false)}
+              className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors z-20"
+            >
+              <X size={20} />
+            </button>
+            
+            <h2 className="text-xl font-black text-zinc-900 mb-6 shrink-0 flex items-center gap-2">
+              <Send className="text-primary" size={24} /> 상담 결과 보내기
+            </h2>
+            
+            {/* 원페이퍼 미리보기 창 */}
+            <div className="flex-1 overflow-y-auto min-h-[300px] mb-6 border border-zinc-200 rounded-2xl p-6 bg-zinc-50 relative custom-scrollbar">
+               <div className="bg-white p-8 rounded-xl shadow-sm border border-zinc-100 space-y-8">
+                 <div className="text-center border-b border-zinc-100 pb-6">
+                    <h3 className="text-xl font-black text-zinc-900">상담 분석 결과 보고서 요약</h3>
+                    <p className="text-xs text-zinc-400 mt-2 tracking-wide font-bold">발급번호: {baseData?.request_id || "N/A"}</p>
+                 </div>
+                 
+                 <div className="grid grid-cols-2 gap-6">
+                   <div>
+                      <h4 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-2">내담자 정보</h4>
+                      <p className="text-sm font-bold text-zinc-800">{baseData?.name || "내담자"} <span className="text-zinc-500 font-medium">({baseData?.age}세, {baseData?.gender === "male" ? "남성" : "여성"})</span></p>
+                   </div>
+                   <div>
+                      <h4 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-2">위기 진단 지수</h4>
+                      <p className="text-sm font-bold text-amber-600">위험도 {reportData.summary.risk_score} / 10</p>
+                   </div>
+                 </div>
+
+                 <div>
+                    <h4 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-3 bg-zinc-50 py-1.5 px-3 rounded-md inline-block">주요 이슈</h4>
+                    <p className="text-sm text-zinc-800 font-bold mb-3">{reportData.summary.main_issue}</p>
+                    <p className="text-sm text-zinc-600 leading-relaxed bg-zinc-50/50 p-4 rounded-xl border border-zinc-100">{reportData.analysis.dialog_summary}</p>
+                 </div>
+
+                 <div>
+                    <h4 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-3 bg-blue-50 py-1.5 px-3 text-blue-600 rounded-md inline-block">추천 정책 & 실행 계획</h4>
+                    <ul className="text-sm text-zinc-700 space-y-2 mt-2">
+                      {reportData.action_plan.policy_match.map((p: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <CheckCircle2 size={16} className="text-blue-500 mt-0.5 shrink-0" />
+                          <span className="font-bold">{p}</span>
+                        </li>
+                      ))}
+                    </ul>
+                 </div>
+
+                 <div className="pt-4 border-t border-zinc-100">
+                    <h4 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-3">전달 메시지</h4>
+                    <div className="p-5 bg-zinc-50 rounded-xl text-sm text-zinc-700 font-bold italic leading-relaxed relative">
+                      <div className="absolute top-0 left-6 -translate-y-1/2 w-3 h-3 bg-zinc-50 rotate-45 border-l border-t border-zinc-100" />
+                      "{reportData.feedback.user_message}"
+                    </div>
+                 </div>
+               </div>
+            </div>
+
+            <div className="shrink-0 space-y-4">
+              <p className="text-center text-[15px] font-black text-blue-600 bg-blue-50 py-4 rounded-xl border border-blue-100 flex items-center justify-center gap-2">
+                <MessageCircle size={18} /> 상담자에게 위와 같은 내용을 발송합니다.
+              </p>
+
+              <button
+                onClick={handleSendResultAction}
+                disabled={sendResultStatus !== "idle"}
+                className="w-full h-14 rounded-2xl bg-primary text-white font-bold flex items-center justify-center gap-2 hover:bg-blue-600 transition-colors disabled:opacity-50 text-lg shadow-lg shadow-blue-200"
+              >
+                {sendResultStatus === "loading" ? (
+                  <span className="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
+                ) : sendResultStatus === "success" ? (
+                  <><CheckCircle2 size={20} /> 전송이 완료되었습니다!</>
+                ) : (
+                  <>보내기 <Send size={20} /></>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
