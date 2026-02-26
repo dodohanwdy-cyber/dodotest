@@ -21,7 +21,9 @@ import {
   Compass,
   FileText,
   Loader2,
-  Save
+  Save,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
@@ -33,6 +35,7 @@ export default function ConsultationPage() {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notes, setNotes] = useState("");
+  const [showSTT, setShowSTT] = useState(true); // 실시간 STT 화면 표시 여부
   const [isSaving, setIsSaving] = useState(false);
   const { user } = useAuth();
   
@@ -880,7 +883,8 @@ export default function ConsultationPage() {
         {/* 우측: 상담 기록장 & 실시간 STT */}
         <aside className="w-[450px] bg-white border-l border-zinc-100 flex flex-col shadow-2xl shadow-zinc-200/50 z-[5]">
           {/* 실시간 STT 전사 영역 */}
-          <div className="h-[45%] border-b border-zinc-100 flex flex-col">
+          {showSTT && (
+            <div className="h-[45%] border-b border-zinc-100 flex flex-col shrink-0">
             <div className="p-5 border-b border-zinc-50 bg-white flex items-center justify-between">
               <h2 className="text-[11px] font-black text-zinc-900 uppercase tracking-widest flex items-center gap-2">
                 <Sparkles size={14} className="text-primary animate-pulse" />
@@ -988,7 +992,8 @@ export default function ConsultationPage() {
                  </div>
               </div>
             </div>
-          </div>
+            </div>
+          )}
 
           {/* 수동 메모 영역 */}
           <div className="flex-1 flex flex-col">
@@ -996,6 +1001,17 @@ export default function ConsultationPage() {
               <h2 className="text-[11px] font-black text-zinc-900 uppercase tracking-widest flex items-center gap-2">
                 <MessageSquare size={12} className="text-zinc-400" /> 상담사 관찰 정보 및 요약 메모
               </h2>
+              <button
+                onClick={() => setShowSTT(!showSTT)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 bg-white text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50 transition-colors shadow-sm ml-auto"
+                title="실시간 전사 기록장 켜기/끄기"
+              >
+                {showSTT ? (
+                  <><EyeOff size={14} /> <span className="text-[10px] font-bold">STT 숨기기</span></>
+                ) : (
+                  <><Eye size={14} className="text-primary" /> <span className="text-[10px] font-bold text-primary">STT 보기</span></>
+                )}
+              </button>
             </div>
             <textarea
               value={notes}
