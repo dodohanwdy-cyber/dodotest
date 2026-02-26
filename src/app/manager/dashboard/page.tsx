@@ -161,10 +161,10 @@ export default function ManagerDashboard() {
     today.setHours(0, 0, 0, 0);
 
     const validEvents = (data?.calendar_events || []).filter((evt: any) => {
-      if (!evt.start) return false;
+      if (!evt.start || !evt.title) return false;
       const evtDate = new Date(evt.start);
       evtDate.setHours(0, 0, 0, 0);
-      return evtDate >= today;
+      return evtDate >= today && typeof evt.title === "string" && evt.title.includes("상담");
     });
 
     const allIds = validEvents.map((a: any) => a.id);
@@ -411,23 +411,19 @@ export default function ManagerDashboard() {
                 today.setHours(0, 0, 0, 0);
                 const validEvents = (data?.calendar_events || [])
                   .filter((evt: any) => {
-                    if (!evt.start) return false;
+                    if (!evt.start || !evt.title) return false;
                     const evtDate = new Date(evt.start);
                     evtDate.setHours(0, 0, 0, 0);
-                    return evtDate >= today;
+                    return evtDate >= today && typeof evt.title === "string" && evt.title.includes("상담");
                   })
                   .sort((a: any, b: any) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
                 if (validEvents.length === 0) {
-                  return <p className="text-center text-zinc-400 text-sm py-4">예정된 캘린더 일정이 없습니다.</p>;
+                  return <p className="text-center text-zinc-400 text-sm py-4">예정된 상담 일정이 없습니다.</p>;
                 }
 
                 return validEvents.map((evt: any) => {
-                  // evt.title 형식: "홍길동 상담 (회색)" 등
                   const isPending = evt.color === "gray";
-                  const statusBadge = isPending 
-                    ? <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full ml-2">미확정</span>
-                    : <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full ml-2">확정</span>;
 
                   // 날짜 시간 포맷팅 (예: "2026-02-28 14:00")
                   const dateStr = new Date(evt.start).toLocaleString("ko-KR", {
@@ -443,8 +439,9 @@ export default function ManagerDashboard() {
                         className="w-5 h-5 rounded border-zinc-300 text-primary focus:ring-primary focus:ring-offset-0 disabled:opacity-50"
                         disabled={alarmStatus !== "idle"}
                       />
-                      <div className="flex-1 text-sm font-bold text-zinc-800 flex items-center">
-                        {evt.title} {statusBadge}
+                      <div className={`flex-1 text-sm font-bold flex items-center gap-2 ${isPending ? "text-slate-500" : "text-blue-600"}`}>
+                        <div className={`w-2 h-2 rounded-full ${isPending ? "bg-slate-400" : "bg-blue-500"}`} />
+                        {evt.title}
                       </div>
                       <div className="flex flex-col text-right">
                          <span className="text-[11px] font-bold text-zinc-500">{dateStr}</span>
