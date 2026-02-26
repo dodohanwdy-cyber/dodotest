@@ -104,11 +104,17 @@ export default function ManagerDashboard() {
 
       if (mainRes) {
         const rawData = Array.isArray(mainRes) ? mainRes[0] : mainRes;
+        
+        const parsedEvents = (rawData.calendar_events ?? []).map((evt: any) => {
+          const isCounseling = typeof evt.title === "string" && evt.title.includes("상담");
+          return { ...evt, color: isCounseling ? "blue" : "gray" };
+        });
+
         setData({
           pending_count: rawData.summary?.total_pending ?? 0,
           auto_assigned_count: rawData.summary?.auto_assigned_count ?? 0,
           completed_today: 0,
-          calendar_events: rawData.calendar_events ?? [],
+          calendar_events: parsedEvents,
           analyzed_list: rawData.analyzed_list ?? [],
           requests: [],
         });
