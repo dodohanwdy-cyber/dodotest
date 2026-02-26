@@ -107,7 +107,7 @@ export default function ManagerDashboard() {
         
         const parsedEvents = (rawData.calendar_events ?? []).map((evt: any) => {
           const title = typeof evt.title === "string" ? evt.title.trim() : "";
-          const isCounseling = /^.+\s+상담$/.test(title) || title.endsWith("상담");
+          const isCounseling = /^.+\s+상담\s*\((online|offline|phone)\)$/i.test(title);
           return { ...evt, color: isCounseling ? "blue" : "gray" };
         });
 
@@ -422,7 +422,7 @@ export default function ManagerDashboard() {
                     const evtDate = new Date(evt.start);
                     evtDate.setHours(0, 0, 0, 0);
                     const title = String(evt.title).trim();
-                    const isCounseling = /^.+\s+상담$/.test(title) || title.endsWith("상담");
+                    const isCounseling = /^.+\s+상담\s*\((online|offline|phone)\)$/i.test(title);
                     return evtDate >= today && isCounseling;
                   })
                   .sort((a: any, b: any) => new Date(a.start).getTime() - new Date(b.start).getTime());
