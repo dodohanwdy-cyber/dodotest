@@ -105,10 +105,11 @@ export default function ManagerDashboard() {
       if (mainRes) {
         const rawData = Array.isArray(mainRes) ? mainRes[0] : mainRes;
         
-        const parsedEvents = (rawData.calendar_events ?? []).map((evt: any) => {
+        const parsedEvents = (rawData.calendar_events ?? []).map((evt: any, idx: number) => {
           const title = typeof evt.title === "string" ? evt.title.trim() : "";
           const isCounseling = /^.+\s+상담\s*(\((online|phone)\)$|\(offline\))/i.test(title);
-          return { ...evt, color: isCounseling ? "blue" : "gray" };
+          const id = evt.id || `evt-${idx}-${evt.start || Date.now()}`;
+          return { ...evt, id, color: isCounseling ? "blue" : "gray" };
         });
 
         setData({
@@ -171,7 +172,9 @@ export default function ManagerDashboard() {
       if (!evt.start || !evt.title) return false;
       const evtDate = new Date(evt.start);
       evtDate.setHours(0, 0, 0, 0);
-      return evtDate >= today && typeof evt.title === "string" && evt.title.includes("상담");
+      const title = String(evt.title).trim();
+      const isCounseling = /^.+\s+상담\s*(\((online|phone)\)$|\(offline\))/i.test(title);
+      return evtDate >= today && isCounseling;
     });
 
     const allIds = validEvents.map((a: any) => a.id);
