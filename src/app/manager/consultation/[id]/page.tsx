@@ -910,13 +910,16 @@ export default function ConsultationPage() {
 
                 {useSpeakerLabels && (
                   <div className="flex items-center animate-in slide-in-from-right-2 duration-300 gap-2">
-                    {/* 실시간 음높이 모니터 (Hz) - 너비 고정으로 주변 레이아웃 밀림 방지 */}
-                    {currentPitch > 0 && (
-                      <div className="flex items-center justify-center gap-1.5 w-[70px] py-0.5 bg-zinc-50 rounded-lg border border-zinc-100">
-                        <Activity size={10} className="text-zinc-400 shrink-0" />
-                        <span className="text-[9px] font-bold text-zinc-500 tabular-nums">{currentPitch} Hz</span>
+                    {/* 실시간 음높이 모니터 (Pitch Vertical Gauge) - 항상 렌더링하여 UI 밀림 완벽 방지 */}
+                    <div className="flex items-center justify-center gap-1.5 px-2 py-1 bg-zinc-50 rounded-lg border border-zinc-100 shrink-0" title={currentPitch > 0 ? `Pitch: ${currentPitch} Hz` : "음성 대기 중"}>
+                      <Activity size={10} className={currentPitch > 0 ? "text-indigo-400 animate-pulse" : "text-zinc-300"} />
+                      <div className="w-1.5 h-3.5 bg-zinc-200 rounded-full relative overflow-hidden">
+                        <div 
+                          className="absolute bottom-0 left-0 right-0 bg-indigo-500 transition-all duration-75 ease-out rounded-full"
+                          style={{ height: currentPitch > 0 ? `${Math.min((currentPitch / 300) * 100, 100)}%` : '0%' }}
+                        />
                       </div>
-                    )}
+                    </div>
 
                     {/* 자동 화자 감지 스위치 */}
                     <button 
