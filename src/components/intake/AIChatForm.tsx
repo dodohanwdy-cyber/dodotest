@@ -35,7 +35,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
     const userMsg = input.trim();
     setInput("");
     
-    // [TypeScript 오류 수정] 타입을 Message[]로 명시적으로 지정합니다.
+    // [TS 에러 방지] 타입을 확실하게 지정
     const newUserMsg: Message = { role: "user", content: userMsg };
     setMessages(prev => [...prev, newUserMsg]);
     setIsTyping(true);
@@ -51,31 +51,37 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         }),
       });
 
-      if (!response.ok) throw new Error("Network error");
+      if (!response.ok) throw new Error("Server response error");
 
       const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
       let aiContent = "";
 
-      // AI 답변을 위한 빈 메시지 추가
+      // AI 답변을 위한 공간 생성
       setMessages(prev => [...prev, { role: "ai", content: "" }]);
 
-      while (true) {
-        const { done, value } = await reader!.read();
-        if (done) break;
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        const chunk = new TextDecoder().decode(value);
-        aiContent += chunk;
+          // [핵심] 한글 조각이 잘리지 않도록 스트림 디코딩
+          const chunk = decoder.decode(value, { stream: true });
+          aiContent += chunk;
 
-        setMessages(prev => {
-          const updated = [...prev];
-          updated[updated.length - 1].content = aiContent;
-          return updated;
-        });
+          setMessages(prev => {
+            const updated = [...prev];
+            if (updated.length > 0) {
+              updated[updated.length - 1].content = aiContent;
+            }
+            return updated;
+          });
+        }
       }
 
     } catch (err) {
       console.error("Chat error:", err);
-      setMessages(prev => [...prev, { role: "ai", content: "연결이 원활하지 않습니다. 버튼을 눌러 상담을 완료해주시거나 잠시 후 다시 시도해주세요." }]);
+      setMessages(prev => [...prev, { role: "ai", content: "통신이 불안정합니다. 잠시 후 다시 시도해 주세요." }]);
     } finally {
       setIsTyping(false);
     }
@@ -100,9 +106,9 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         user_id: storedUser?.id || "", email: storedUser?.email || "",
         role: storedUser?.role || "", password_hash: storedUser?.password_hash || "", time: kstTime,
       });
-      if (res && (res.status === "success" || res.code)) { onComplete(); }
-      else { alert("상담 완료 처리에 실패했습니다."); }
-    } catch (err) { alert("오류가 발생했습니다."); } finally { setIsSaving(false); }
+      if (res && (res.status === "success" || res.code)) onComplete();
+      else alert("상담 완료 처리에 실패했습니다.");
+    } catch (err) { alert("통신 중 오류가 발생했습니다."); } finally { setIsSaving(false); }
   };
 
   return (
@@ -112,7 +118,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
           msg.content && (
             <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[90%] p-4 rounded-2xl text-sm leading-relaxed ${
-                msg.role === "user" ? "bg-primary text-white rounded-br-none" : "bg-white text-zinc-800 border border-zinc-100 rounded-bl-none shadow-sm"
+                msg.role === "user" ? "bg-primary text-white rounded-br-none shadow-md" : "bg-white text-zinc-800 border border-zinc-100 rounded-bl-none shadow-sm"
               }`}>
                 {msg.role === "ai" && <div className="text-[10px] uppercase font-bold text-indigo-400 mb-1 flex items-center gap-1"><Sparkles size={10}/> AI Counselor</div>}
                 <div className="whitespace-pre-wrap">{msg.content}</div>
@@ -147,7 +153,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
       </div>
 
       <div className="p-4 bg-white border-t border-zinc-100 flex justify-between items-center px-6">
-        <p className="text-[11px] text-zinc-400 font-medium"><AlertCircle size={12} className="inline mr-1"/> 대화 후 상담 신청을 완료해 주세요.</p>
+        <p className="text-[11px] text-zinc-400 font-medium flex items-center gap-1"><AlertCircle size={12}/> 대화가 충분하다면 상담 신청을 완료해 주세요.</p>
         <button onClick={handleFinalSubmit} disabled={isSaving} className="bg-zinc-900 text-white px-6 py-2.5 rounded-xl text-xs font-bold">
           {isSaving ? <Loader2 className="animate-spin" size={14} /> : "상담 신청 완료"}
         </button>
