@@ -14,7 +14,6 @@ interface Message {
 export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFinished }: { intakeData: any, onComplete: () => void, onUpdate?: (data: any) => void, isChatFinished?: boolean }) {
   const { user } = useAuth();
   
-  // 1. 첫인사: 따뜻하고 신뢰감 있는 톤으로 설정
   const [messages, setMessages] = useState<Message[]>(intakeData.chat_history || [
     { role: "ai", content: `안녕하세요, ${intakeData.name}님! 마음 편히 이야기하실 수 있도록 제가 곁에서 도와드릴게요. 😊\n\n본격적인 상담에 앞서 제가 3가지 정도 짧은 질문을 드릴 예정입니다. 혹시 지금 가장 마음이 쓰이거나 해결하고 싶은 상황은 어떤 것인가요?` }
   ]);
@@ -23,9 +22,8 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
   const [isSaving, setIsSaving] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // AI 답변 횟수 체크 (첫인사 포함, AI 답변이 4번째가 되면 상담 가이드가 나간 상태임)
-  const aiResponseCount = messages.filter(m => m.role === "ai").length;
-  const isFinalGuideGiven = aiResponseCount >= 4;
+  // 유저가 보낸 메시지 개수 파악
+  const userMsgCount = messages.filter(m => m.role === "user").length;
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -46,21 +44,18 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
     const userMsg = input.trim();
     setInput("");
     setMessages(prev => [...prev, { role: "user", content: userMsg }]);
+    setIsTyping(true);
 
-    // [중요] 4단계 안내가 이미 나갔다면 백엔드로 보내지 않고 즉시 응답
-    if (isFinalGuideGiven) {
-      setIsTyping(true);
+    // [핵심 수정] 유저가 4번째 답변을 보낸 경우 (이미 3번의 질문에 답한 상태)
+    // 서버를 거치지 않고 즉시 로컬에서 마무리 답변 생성
+    if (userMsgCount >= 3) {
       setTimeout(() => {
-        setMessages(prev => [...prev, { 
-          role: "ai", 
-          content: "작성해주신 내용을 바탕으로 상담 준비를 거의 마쳤습니다! 아래 '상담 신청 완료하기' 버튼을 눌러주시면 바로 예약을 도와드릴게요. 😊" 
-        }]);
+        const finalResponse = `네, ${intakeData.name}님의 상황과 원하시는 방향을 충분히 이해했습니다. 지금까지 혼자 고민하며 노력해오신 점들이 상담에서 큰 도움이 될 거예요. 말씀해주신 내용을 바탕으로 전문 상담사가 가장 적합한 정책을 찾아드릴 예정입니다. 😊\n\n이제 아래의 **'상담 신청 완료하기'** 버튼을 눌러주시면 최종 확정됩니다!`;
+        setMessages(prev => [...prev, { role: "ai", content: finalResponse }]);
         setIsTyping(false);
-      }, 600); // 0.6초 뒤에 즉시 답변 (자연스러움을 위해)
+      }, 800);
       return;
     }
-
-    setIsTyping(true);
 
     try {
       const response = await fetch("/api/chat", {
@@ -81,10 +76,9 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
       if (response.ok && data.output) {
         setMessages(prev => [...prev, { role: "ai", content: data.output }]);
       } else {
-        throw new Error(data.error || "Failed to get response");
+        throw new Error(data.error || "Failed");
       }
     } catch (err) {
-      console.error("Chat error:", err);
       setMessages(prev => [...prev, { role: "ai", content: "죄송합니다, 잠시 연결이 원활하지 않네요. 😥 잠시 후 다시 말씀해 주시겠어요?" }]);
     } finally {
       setIsTyping(false);
@@ -98,7 +92,6 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
   const handleFinalSubmit = async () => {
     setIsSaving(true);
     const kstTime = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).substring(0, 19);
-    
     let storedUser = user;
     if (!storedUser || !storedUser.password_hash) {
       if (typeof window !== 'undefined') {
@@ -106,13 +99,11 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         if (sessionUser) storedUser = { ...storedUser, ...sessionUser };
       }
     }
-
     try {
       const formattedHistory = messages.map(msg => ({
         role: msg.role === "ai" ? "assistant" : "user",
         content: msg.content
       }));
-
       const res = await postToWebhook(WEBHOOK_URLS.AI_CHAT_ANALYZE, {
         ...intakeData,
         conversation_scrips: formattedHistory,
@@ -123,15 +114,14 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         password_hash: storedUser?.password_hash || "",
         time: kstTime,
       });
-
       const resData = Array.isArray(res) ? res[0] : res;
       if (resData && (resData.status === "success" || resData.code)) {
         onComplete();
       } else {
-        alert(resData?.message || "상담 완료 처리에 실패했습니다.");
+        alert("상담 완료 처리에 실패했습니다.");
       }
     } catch (err) {
-      alert("서버 통신 중 오류가 발생했습니다.");
+      alert("서버 통신 오류가 발생했습니다.");
     } finally {
       setIsSaving(false);
     }
@@ -143,7 +133,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[90%] p-4 rounded-2xl text-sm leading-relaxed ${
-              msg.role === "user" ? "bg-primary text-white rounded-br-none" : "bg-white text-zinc-800 border border-zinc-100 rounded-bl-none"
+              msg.role === "user" ? "bg-primary text-white rounded-br-none" : "bg-white text-zinc-800 border border-zinc-100 rounded-bl-none shadow-sm"
             }`}>
               {msg.role === "ai" && <div className="text-[10px] uppercase font-bold text-indigo-400 mb-1 flex items-center gap-1"><Sparkles size={10}/> AI Counselor</div>}
               {msg.content}
@@ -166,7 +156,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder={isFinalGuideGiven ? "상담 준비가 완료되었습니다." : "편하게 말씀해 주세요..."}
+            placeholder={userMsgCount >= 4 ? "상담 준비가 완료되었습니다." : "편하게 말씀해 주세요..."}
             className="flex-1 px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-primary text-sm shadow-sm"
           />
           <button
@@ -182,7 +172,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
 
       <div className="p-4 bg-white border-t border-zinc-100 flex justify-between items-center px-6">
         <p className="text-[11px] text-zinc-400 font-medium flex items-center gap-1">
-          <AlertCircle size={12}/> 대화가 충분하다면 신청을 완료해 주세요.
+          <AlertCircle size={12}/> 대화가 충분하다면 상담 신청을 완료해 주세요.
         </p>
         <button 
           onClick={handleFinalSubmit}
