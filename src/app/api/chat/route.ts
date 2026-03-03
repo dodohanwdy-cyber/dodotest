@@ -1,6 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
+// Vercel에서 최대 60초까지 기다리도록 설정 (하지만 무료플랜은 10초 내외임)
+export const maxDuration = 60;
+
 const apiKey = process.env.GOOGLE_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
@@ -10,27 +13,22 @@ export async function POST(req: Request) {
     const { message, history, userProfile } = body;
 
     const systemInstruction = `
-      당신은 청년 정책 전문 AI 상담사입니다. 내담자가 자신의 고민을 편하게 털어놓을 수 있도록 **따뜻하고 친절하며 공감적인 말투**를 유지하세요.
-
-      [상담 원칙]
-      1. 질문 제한: 전체 대화에서 당신은 **단 3개의 질문**만 합니다.
-      2. 답변 스타일: 내담자의 말에 깊이 공감하는 문장을 앞에 두고, 이어서 질문을 던지세요.
-      3. 간결성: 답변은 공백 포함 150자 내외로 유지하세요.
-
-      [대화 흐름]
-      - 1단계(첫 답변): "가장 시급하게 해결하고 싶은 어려움" 질문
-      - 2단계: "지금까지 그 상황을 어떻게 버텨오셨는지, 혹은 스스로 시도해본 현실적인 방법" 질문
-      - 3단계: "이번 상담을 통해 내일 당장 어떤 작은 부분이라도 달라지기를 원하는지" 질문
-      - 4단계(최종): 3번의 질문이 끝나면 공감의 인사를 전한 뒤, "전문 상담사가 최적의 정책을 찾아드리기 위해 준비 중이니, 아래 '상담 신청 완료하기' 버튼을 눌러달라"고 정중히 안내하며 마무리. (이후 추가 질문 금지)
-
-      내담자 정보: ${userProfile.name}(${userProfile.age}세), ${userProfile.job_status}
+      당신은 청년 정책 전문 AI 상담사입니다. 내담자의 말에 따뜻하게 공감하고 짧게 답변하세요.
+      
+      [원칙]
+      1. 질문은 전체 대화에서 **단 3개**만 합니다.
+      2. 답변은 120자 내외로 아주 짧게 하세요.
+      3. 대화 단계: 공감 후 상황 파악(질문1) -> 대처 파악(질문2) -> 목표 설정(질문3).
+      
+      내담자: ${userProfile.name}(${userProfile.age}세)
     `;
 
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash", 
+      model: "gemini-1.5-flash", // 속도가 가장 빠른 1.5-flash 권장 (2.5보다 안정적)
       systemInstruction: systemInstruction 
     });
 
+    // 히스토리 간소화로 속도 향상
     const sanitizedHistory = (history || [])
       .filter((msg: any) => msg.content && msg.content.trim() !== "")
       .map((msg: any) => ({
@@ -43,17 +41,15 @@ export async function POST(req: Request) {
 
     const chat = model.startChat({
       history: sanitizedHistory,
-      generationConfig: { maxOutputTokens: 1000, temperature: 0.7 },
+      generationConfig: { maxOutputTokens: 500, temperature: 0.5 },
     });
 
     const result = await chat.sendMessage(message);
     const response = await result.response;
-    const text = response.text();
-
-    return NextResponse.json({ output: text });
+    return NextResponse.json({ output: response.text() });
 
   } catch (error: any) {
-    console.error("🚨 AI Error:", error);
-    return NextResponse.json({ error: "상담 준비 중입니다. 잠시만 기다려 주세요." }, { status: 500 });
+    console.error("AI Error:", error);
+    return NextResponse.json({ error: "상담 준비 중..." }, { status: 500 });
   }
 }
