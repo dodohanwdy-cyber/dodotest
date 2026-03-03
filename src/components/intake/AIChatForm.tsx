@@ -13,7 +13,7 @@ interface Message {
 
 export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFinished }: { intakeData: any, onComplete: () => void, onUpdate?: (data: any) => void, isChatFinished?: boolean }) {
   const { user } = useAuth();
-  // 초기 인사말 설정 (따뜻하고 신뢰감 있는 톤 + 3가지 질문 예고)
+  // 초기 인사말 설정
   const [messages, setMessages] = useState<Message[]>(intakeData.chat_history || [
     { role: "ai", content: `안녕하세요, ${intakeData.name}님! 원활한 맞춤 상담을 위해 제가 3가지 정도 간단한 질문을 드릴 예정입니다. 😊\n\n현재 가장 마음이 쓰이는 부분이나, 해결하고 싶은 구체적인 상황을 먼저 편하게 말씀해 주시겠어요?` }
   ]);
@@ -44,7 +44,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
     setIsTyping(true);
 
     try {
-      // Google Gemini API 호출 (Next.js API Route)
+      // Google Gemini API 호출
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -52,8 +52,12 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         },
         body: JSON.stringify({
           message: userMsg,
-          history: messages.map(m => ({ role: m.role, content: m.content })), // 이전 대화 기록 전달
-          userProfile: intakeData, // 사용자 컨텍스트 전달
+          // Gemini 규격에 맞게 'ai'를 'model'로 변경하여 전송 (수정된 부분)
+          history: messages.map(m => ({ 
+            role: m.role === "ai" ? "model" : "user", 
+            content: m.content 
+          })), 
+          userProfile: intakeData,
         }),
       });
 
@@ -72,7 +76,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
     }
   };
 
-  // 메시지 변경 시 부모 상태 업데이트 (저장용)
+  // 메시지 변경 시 부모 상태 업데이트
   useEffect(() => {
     if (onUpdate) {
       onUpdate({ chat_history: messages });
@@ -84,7 +88,6 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
     setIsSaving(true);
     const kstTime = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).substring(0, 19);
     
-    // user 객체가 있더라도 password_hash가 비어있다면 sessionStorage를 다시 확인
     let storedUser = user;
     if (!storedUser || !storedUser.password_hash) {
       if (typeof window !== 'undefined') {
@@ -96,16 +99,14 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
     }
 
     try {
-      // 대화 내역을 [ { "role": "user", "content": "내용" }, { "role": "assistant", "content": "내용" } ] 형식으로 변환
       const formattedHistory = messages.map(msg => ({
         role: msg.role === "ai" ? "assistant" : "user",
         content: msg.content
       }));
 
-      // 대화 전체 내용을 분석 웹후크로 전달
       const res = await postToWebhook(WEBHOOK_URLS.AI_CHAT_ANALYZE, {
         ...intakeData,
-        conversation_scrips: formattedHistory, // 필드명 변경 및 포맷팅 적용
+        conversation_scrips: formattedHistory,
         completed_at: kstTime,
         user_id: storedUser?.id || "",
         email: storedUser?.email || "",
@@ -115,8 +116,6 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
       });
 
       const resData = Array.isArray(res) ? res[0] : res;
-
-      // 성공 판단 조건 확장: status === "success" 또는 특정 성공 코드
       const isSuccess = resData && (resData.status === "success" || resData.code);
 
       if (isSuccess) {
@@ -134,7 +133,6 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
 
   return (
     <div className="flex flex-col h-[500px] border border-zinc-100 rounded-3xl bg-zinc-50 overflow-hidden shadow-inner">
-      {/* 채팅 메시지 영역 */}
       <div 
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto p-6 space-y-4"
@@ -160,7 +158,6 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         )}
       </div>
 
-      {/* 입력 영역 */}
       <div className="p-4 bg-white border-t border-zinc-100">
           <div className="flex gap-3 items-end w-full">
             <input
@@ -183,7 +180,6 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
           </div>
       </div>
 
-      {/* 최종 완료 버튼 */}
       <div className="p-4 bg-white border-t border-zinc-100 flex justify-between items-center px-6">
         <p className="text-[11px] text-zinc-400 font-medium flex items-center gap-1">
           <AlertCircle size={12}/> 대화가 충분하다면 상담 신청을 완료해 주세요. (채팅 없이도 진행 가능)
