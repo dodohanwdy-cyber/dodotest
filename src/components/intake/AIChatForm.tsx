@@ -34,8 +34,10 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
 
     const userMsg = input.trim();
     setInput("");
-    const newMessages = [...messages, { role: "user", content: userMsg }];
-    setMessages(newMessages);
+    
+    // [TypeScript 오류 수정] 타입을 Message[]로 명시적으로 지정합니다.
+    const newUserMsg: Message = { role: "user", content: userMsg };
+    setMessages(prev => [...prev, newUserMsg]);
     setIsTyping(true);
 
     try {
@@ -51,12 +53,10 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
 
       if (!response.ok) throw new Error("Network error");
 
-      // [스트리밍 수신 로직]
       const reader = response.body?.getReader();
-      const decoder = new TextEncoder().encode("").constructor === Uint8Array ? new TextDecoder() : null;
       let aiContent = "";
 
-      // AI 메시지 자리를 미리 하나 만듭니다.
+      // AI 답변을 위한 빈 메시지 추가
       setMessages(prev => [...prev, { role: "ai", content: "" }]);
 
       while (true) {
@@ -66,7 +66,6 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         const chunk = new TextDecoder().decode(value);
         aiContent += chunk;
 
-        // 실시간으로 마지막 AI 메시지만 업데이트합니다.
         setMessages(prev => {
           const updated = [...prev];
           updated[updated.length - 1].content = aiContent;
