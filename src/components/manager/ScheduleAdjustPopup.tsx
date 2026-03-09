@@ -222,11 +222,21 @@ export default function ScheduleAdjustPopup({
     }
   };
 
-  // 배정 해제 (휴지통이 아닌, 일반 배정 취소 - 돌아가기)
+  // 배정 해제 (X 버튼) - 확정된 일정은 바로 취소 대기로 넘어가게 처리
   const handleRemoveAssignment = (requestId: string) => {
-    const newAssignments = { ...assignments };
-    delete newAssignments[requestId];
-    setAssignments(newAssignments);
+    const request = analyzedList.find(req => req.request_id === requestId);
+    if (request?.status === 'confirmed') {
+      setCanceledList(prev => {
+        if (!prev.includes(requestId)) return [...prev, requestId];
+        return prev;
+      });
+      // 확정된 일정을 취소 대기로 보냈으므로, 별도의 assignments에서는 삭제하지 않아도 됨 
+      // (어차피 렌더링 필터에서 canceledList에 있으면 걸러짐)
+    } else {
+      const newAssignments = { ...assignments };
+      delete newAssignments[requestId];
+      setAssignments(newAssignments);
+    }
     setDraggedRequest(null);
   };
 
@@ -276,6 +286,14 @@ export default function ScheduleAdjustPopup({
 
   // 확정 처리
   const handleConfirm = async () => {
+    // 취소 건이 있을 경우 사용자 확인 경고창 (신청자가 취소되는 점 알림)
+    if (canceledList.length > 0) {
+      const confirmed = window.confirm(
+        `[경고] 총 ${canceledList.length}건의 일정을 취소하려고 합니다.\n해당 상담 신청건이 삭제되므로 내담자와 사전에 합의가 되었는지 확인해주세요.\n\n정말 확정하시겠습니까?`
+      );
+      if (!confirmed) return;
+    }
+
     try {
       // 토스트 알림: 처리 시작
       const toastId = showToast('일정을 확정하는 중입니다...', 'loading');
@@ -691,6 +709,9 @@ export default function ScheduleAdjustPopup({
                           onClick={() => {
                             // 취소 대기에서 복구
                             setCanceledList(prev => prev.filter(id => id !== request.request_id));
+                            // 만약 확정(confirmed)이었던 사람이라면? 이미 assignments 없이도 기본 렌더링이 되므로 canceledList에서만 빼주면 제자리로 돌아감.
+                            // 만약 배정(assignments)했던 사람이 취소 대기로 갔던거라면? -> 우측 메뉴(unassigned)로 돌아가도록 하거나, 복구 로직을 짤 수 있지만, 
+                            // 현재 기획상 확정 일정이 아닌 이상 좌측 미배정 목록에서 다시 드래그 하는 것이 자연스러우므로 상태 변경만 수행.
                           }}
                           className="w-6 h-6 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded flex items-center justify-center transition-colors"
                           title="취소 대기 복구"
@@ -711,19 +732,19 @@ export default function ScheduleAdjustPopup({
           <div className="flex items-center gap-5">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-zinc-100 rounded-full"></div>
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Empty</span>
+              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">선택 가능</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-blue-600 rounded-full shadow-sm shadow-blue-300"></div>
-              <span className="text-[11px] font-bold text-blue-500 uppercase tracking-wider">Assigned</span>
+              <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">배정 대기</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-indigo-800 rounded-full shadow-sm shadow-indigo-300"></div>
-              <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">Confirmed</span>
+              <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">확정됨</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-zinc-300 rounded-full opacity-50"></div>
-              <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Busy</span>
+              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">상담 불가</span>
             </div>
           </div>
           <div className="flex gap-2">
