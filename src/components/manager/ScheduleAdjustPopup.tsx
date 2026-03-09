@@ -533,14 +533,24 @@ export default function ScheduleAdjustPopup({
                               
                               {/* 배정된 신청 (우리가 배정한 것) */}
                               {assignedRequest && !existingEvent && !isLunch && !isWeekendDay && (
-                                <div className={`absolute inset-[2px] p-2 rounded-lg flex flex-col justify-center shadow-sm border border-white/20 ${
+                                <div 
+                                  draggable
+                                  onDragStart={(e) => {
+                                    e.stopPropagation();
+                                    handleDragStart(assignedRequest.request_id);
+                                  }}
+                                  className={`absolute inset-[2px] p-2 rounded-lg flex flex-col justify-center shadow-sm border border-white/20 cursor-grab active:cursor-grabbing ${
+                                  assignedRequest.status === 'confirmed' ? 'bg-indigo-800 text-white shadow-md ring-1 ring-white/30' :
                                   assignedRequest.weight_score >= 80 ? 'bg-blue-600 text-white shadow-md' :
                                   assignedRequest.weight_score >= 50 ? 'bg-indigo-500 text-white shadow-md' :
                                   'bg-sky-500 text-white shadow-md'
                                 }`}>
                                   <div className="flex items-center justify-between">
-                                    <p className="text-[11px] font-bold leading-tight truncate mr-1">
-                                      {assignedRequest.name}
+                                    <p className="text-[11px] font-bold leading-tight truncate mr-1 flex items-center gap-1">
+                                      {assignedRequest.status === 'confirmed' && (
+                                        <span className="text-[9px] bg-white/20 px-1 py-0.5 rounded leading-none shrink-0">확정</span>
+                                      )}
+                                      <span className="truncate">{assignedRequest.name}</span>
                                     </p>
                                     <button
                                       onClick={(e) => {
@@ -706,6 +716,10 @@ export default function ScheduleAdjustPopup({
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-blue-600 rounded-full shadow-sm shadow-blue-300"></div>
               <span className="text-[11px] font-bold text-blue-500 uppercase tracking-wider">Assigned</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 bg-indigo-800 rounded-full shadow-sm shadow-indigo-300"></div>
+              <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">Confirmed</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-zinc-300 rounded-full opacity-50"></div>

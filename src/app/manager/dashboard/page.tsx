@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { 
   Calendar, 
@@ -198,6 +198,47 @@ export default function ManagerDashboard() {
     }, 1200);
   };
 
+  const combinedList = useMemo(() => {
+    const baseList = data?.analyzed_list ?? [];
+    
+    // confirmedAppointments를 AnalyzedRequest 형식으로 변환하여 추가
+    const confirmedMapped = confirmedAppointments.map((apt: any) => {
+      return {
+        request_id: apt.request_id,
+        name: apt.name,
+        weight_score: 100, // 확정 데이터는 가중치 무관하게 무조건 렌더링
+        preferred_method: apt.confirmed_method || apt.preferred_method,
+        preferred_location: apt.confirmed_location || apt.preferred_location,
+        options: [], // 이미 확정되었으므로 options는 빈 배열
+        recommendation: {
+          status: "manual_required" as const,
+          suggested_time: "",
+          suggested_priority: 0
+        },
+        status: apt.status || "confirmed",
+        confirmed_datetime: apt.confirmed_datetime
+      };
+    });
+
+    const baseIds = new Set(baseList.map((item: any) => item.request_id));
+    const filteredConfirmed = confirmedMapped.filter((apt: any) => !baseIds.has(apt.request_id));
+
+    // 혹시라도 baseList에 들어있는데 status 업데이트가 안 된 경우를 위해 덮어쓰기
+    const mappedBase = baseList.map((item: any) => {
+      const confirmedMatch = confirmedAppointments.find((c: any) => c.request_id === item.request_id);
+      if (confirmedMatch) {
+        return {
+          ...item,
+          status: confirmedMatch.status || "confirmed",
+          confirmed_datetime: confirmedMatch.confirmed_datetime
+        };
+      }
+      return item;
+    });
+
+    return [...mappedBase, ...filteredConfirmed];
+  }, [data?.analyzed_list, confirmedAppointments]);
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
       {/* 대시보드 헤더 */}
@@ -216,7 +257,7 @@ export default function ManagerDashboard() {
           </button>
           <button
             onClick={() => setShowAdjustPopup(true)}
-            disabled={!data?.analyzed_list || data.analyzed_list.length === 0}
+            disabled={(!data?.analyzed_list || data.analyzed_list.length === 0) && confirmedAppointments.length === 0}
             className="px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm flex items-center gap-2 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             일정 조율하기 <ExternalLink size={16} />
@@ -492,7 +533,7 @@ export default function ManagerDashboard() {
       <ScheduleAdjustPopup
         isOpen={showAdjustPopup}
         onClose={() => setShowAdjustPopup(false)}
-        analyzedList={data?.analyzed_list ?? []}
+        analyzedList={combinedList}
         calendarEvents={data?.calendar_events ?? []}
         onConfirm={handleConfirmAssignments}
       />
