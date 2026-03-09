@@ -401,21 +401,21 @@ export default function ScheduleAdjustPopup({
                 </div>
 
                 {/* 날짜 헤더 */}
-                <div className="grid grid-cols-8 gap-2 mb-3">
+                <div className="grid grid-cols-8 gap-2 mb-2">
                   <div className="text-[11px] font-bold text-zinc-300 text-center uppercase tracking-widest flex items-center justify-center">Time</div>
                   {dates.map((date, idx) => {
                     const isWeekendDay = isWeekend(date);
                     const isToday = new Date().toISOString().split('T')[0] === date.toISOString().split('T')[0];
                     return (
-                      <div key={idx} className={`text-center py-2 rounded-2xl ${isToday ? 'bg-amber-50/50 ring-1 ring-amber-100/50' : ''}`}>
-                        <div className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${
+                      <div key={idx} className={`text-center py-1 rounded-2xl ${isToday ? 'bg-amber-50/50 ring-1 ring-amber-100/50' : ''}`}>
+                        <div className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${
                           date.getDay() === 0 ? 'text-rose-400' : 
                           date.getDay() === 6 ? 'text-blue-400' : 
                           isToday ? 'text-amber-500' : 'text-zinc-400'
                         }`}>
                           {['일', '월', '화', '수', '목', '금', '토'][date.getDay()]}
                         </div>
-                        <div className={`text-lg font-bold tracking-tight ${
+                        <div className={`text-base font-bold tracking-tight ${
                           isToday ? 'text-amber-600' : 'text-zinc-800'
                         }`}>
                           {date.getDate()}
