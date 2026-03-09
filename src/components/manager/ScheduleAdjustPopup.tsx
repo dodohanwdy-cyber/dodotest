@@ -369,7 +369,7 @@ export default function ScheduleAdjustPopup({
       
       // 토스트 알림: 처리 완료
       hideToast(toastId);
-      showToast('변경사항이 성공적으로 반영되었습니다!', 'success');
+      showToast('신청한 일정이 확정되었습니다!', 'success');
       
       // 부모 컴포넌트에 한 번만 응답 전달 (ManagerDashboard에서 파싱 및 재조회)
       onConfirm(finalResult, canceledList);
