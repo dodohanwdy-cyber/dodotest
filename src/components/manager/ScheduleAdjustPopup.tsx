@@ -319,8 +319,8 @@ export default function ScheduleAdjustPopup({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-[32px] max-w-[95vw] w-full max-h-[95vh] overflow-hidden flex flex-col shadow-2xl border border-zinc-100">
+    <div className="fixed inset-0 bg-[#fafafa] z-50 flex flex-col overflow-hidden animate-in slide-in-from-bottom-2 duration-300">
+      <div className="bg-white w-full h-full overflow-hidden flex flex-col shadow-2xl">
         {/* 헤더 - 여백 최적화 */}
         <div className="px-6 py-4 border-b border-zinc-100 bg-white">
           <div className="flex items-center justify-between">
