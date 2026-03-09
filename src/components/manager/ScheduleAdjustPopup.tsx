@@ -50,6 +50,7 @@ export default function ScheduleAdjustPopup({
   const [resetToAssignedIds, setResetToAssignedIds] = useState<string[]>([]); // 초기화 후 배정대기로 복귀한 request_id 목록
   const [currentWeek, setCurrentWeek] = useState<number>(0); // 0, 1, 2 (3주)
   const [draggedRequest, setDraggedRequest] = useState<string | null>(null);
+  const [hoveredCell, setHoveredCell] = useState<string | null>(null);
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'loading' | 'success' | 'error' }[]>([]);
   const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
 
@@ -274,13 +275,14 @@ export default function ScheduleAdjustPopup({
     }));
     
     setDraggedRequest(null);
+    setHoveredCell(null);
   };
 
 
 
   // 토스트 알림 함수
   const showToast = (message: string, type: 'loading' | 'success' | 'error') => {
-    const id = Date.now().toString();
+    const id = Math.random().toString(36).substr(2, 9); // 중복 방지를 위한 랜덤 ID
     setToasts(prev => [...prev, { id, message, type }]);
     
     // success와 error는 3초 후 자동 제거
@@ -371,11 +373,11 @@ export default function ScheduleAdjustPopup({
       hideToast(toastId);
       showToast('신청한 일정이 확정되었습니다!', 'success');
       
-      // 토스트 메시지를 보여주기 위해 1.5초 딜레이 후 부모 갱신 및 팝업 닫기 호출
+      // 토스트 메시지를 보여주기 위해 2초 딜레이 후 부모 갱신 및 팝업 닫기 호출
       setTimeout(() => {
         onConfirm(finalResult, canceledList);
         onClose();
-      }, 1500);
+      }, 2000);
     } catch (error) {
       console.error('[handleConfirm] 에러:', error);
       showToast('일정 확정 중 오류가 발생했습니다.', 'error');
@@ -572,20 +574,34 @@ export default function ScheduleAdjustPopup({
                           const isWeekendDay = isWeekend(date);
                           const isBusy = hasExistingEvent(date, timeSlot) || isLunch || isWeekendDay;
                           
+                          const cellId = `${date.toISOString().split('T')[0]}-${timeSlot}`;
+                          
                           return (
                             <div
                               key={idx}
                               onDragOver={(e) => {
                                 if (!isBusy) e.preventDefault();
                               }}
-                              onDrop={() => handleDrop(date, timeSlot)}
+                              onDragEnter={() => {
+                                if (!isBusy && draggedRequest) setHoveredCell(cellId);
+                              }}
+                              onDragLeave={() => {
+                                if (hoveredCell === cellId) setHoveredCell(null);
+                              }}
+                              onDrop={() => {
+                                handleDrop(date, timeSlot);
+                                setHoveredCell(null);
+                              }}
                               className={`h-full rounded-xl border transition-all duration-200 relative group overflow-hidden ${
                                 isBusy
                                   ? 'bg-zinc-50 border-zinc-100 cursor-not-allowed'
+                                  : hoveredCell === cellId
+                                  ? 'bg-blue-50/80 border-blue-400 border-dashed animate-pulse ring-2 ring-blue-300/50'
                                   : draggedRequest
-                                  ? 'bg-blue-50/50 border-blue-200 border-dashed animate-pulse'
+                                  ? 'bg-blue-50/20 border-blue-200 border-dashed'
                                   : 'bg-white border-zinc-100 hover:border-blue-200 hover:shadow-sm'
                               }`}
+                              style={hoveredCell === cellId ? { animationIterationCount: 2 } : {}}
                             >
                               {/* 점심시간 표시 */}
                               {isLunch && !isWeekendDay && (
@@ -838,7 +854,7 @@ export default function ScheduleAdjustPopup({
       </div>
 
       {/* 토스트 알림 - 토스 스타일 플로팅 카드 */}
-      <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-[10000] flex flex-col gap-3 pointer-events-none">
+      <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-[100000] flex flex-col gap-3 pointer-events-none">
         {toasts.map((toast) => (
           <div
             key={toast.id}
