@@ -371,11 +371,9 @@ export default function ScheduleAdjustPopup({
       hideToast(toastId);
       showToast('신청한 일정이 확정되었습니다!', 'success');
       
-      // 부모 컴포넌트에 한 번만 응답 전달 (ManagerDashboard에서 파싱 및 재조회)
-      onConfirm(finalResult, canceledList);
-      
-      // 토스트 메시지를 보여주기 위해 1.5초 대기 후 팝업 닫기
+      // 토스트 메시지를 보여주기 위해 1.5초 딜레이 후 부모 갱신 및 팝업 닫기 호출
       setTimeout(() => {
+        onConfirm(finalResult, canceledList);
         onClose();
       }, 1500);
     } catch (error) {
@@ -420,10 +418,9 @@ export default function ScheduleAdjustPopup({
       setCanceledList([]);
       setResetToAssignedIds([]);
       
-      // 재조회 연동 등을 위해 onConfirm 호출 및 팝업 닫기
-      onConfirm(result, []);
-
+      // 토스트 메시지를 충분히(2.5초) 보여준 후 부모 상태 갱신 및 팝업 닫기
       setTimeout(() => {
+        onConfirm(result, []);
         onClose();
       }, 2500);
     } catch (error) {
