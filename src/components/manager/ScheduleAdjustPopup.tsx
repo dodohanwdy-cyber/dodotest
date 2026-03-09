@@ -372,6 +372,52 @@ export default function ScheduleAdjustPopup({
     }
   };
 
+  // 전체 일정 초기화
+  const handleResetSchedule = async () => {
+    const confirmedIds = analyzedList
+      .filter(req => req.status === 'confirmed')
+      .map(req => req.request_id);
+
+    const payload = {
+      action: "RESET_SCHEDULE_ASSIGNMENTS",
+      confirmed_requests: confirmedIds,
+      timestamp: new Date().toISOString()
+    };
+
+    const confirmed = window.confirm(
+      "정말 모든 일정(기확정 포함)을 초기화하시겠습니까?\nDB에 즉각 반영되며 기존 확정 일정들이 모두 취소 처리됩니다."
+    );
+    if (!confirmed) return;
+
+    try {
+      const toastId = showToast('일정 초기화를 진행 중입니다...', 'loading');
+      console.log('[handleResetSchedule] 전송 데이터:', payload);
+
+      const resetResponse = await fetch("https://primary-production-1f39e.up.railway.app/webhook/reset-schedule", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!resetResponse.ok) {
+        throw new Error('초기화 요청에 실패했습니다.');
+      }
+      const result = await resetResponse.json();
+
+      hideToast(toastId);
+      showToast('모든 일정이 성공적으로 초기화되었습니다.', 'success');
+      
+      setAssignments({});
+      setCanceledList([]);
+      
+      // 재조회 연동 등을 위해 onConfirm 호출
+      onConfirm(result, []);
+    } catch (error) {
+      console.error("[ScheduleAdjustPopup] 초기화 중 오류:", error);
+      showToast('초기화 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+    }
+  };
+
   // 가중치 점수에 따른 색상
   const getScoreColor = (score: number) => {
     if (score >= 20) return "bg-red-500";
@@ -753,12 +799,7 @@ export default function ScheduleAdjustPopup({
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => {
-                if (window.confirm("배정된 모든 일정을 초기화하시겠습니까? (서버에 즉시 반영되지 않으며 임시 초기화됩니다)")) {
-                  setAssignments({});
-                  setCanceledList([]);
-                }
-              }}
+              onClick={handleResetSchedule}
               className="px-5 py-2.5 bg-zinc-50 hover:bg-zinc-100 text-zinc-500 rounded-xl text-sm font-bold transition-all duration-200"
             >
               전체 초기화
