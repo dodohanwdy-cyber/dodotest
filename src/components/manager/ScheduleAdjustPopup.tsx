@@ -112,6 +112,18 @@ export default function ScheduleAdjustPopup({
     }
   }, [isOpen, analyzedList, calendarEvents]);
 
+  // 팝업이 열려있을 때 배경(body) 스크롤 방지
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   // 점심시간 체크 (12:00)
   const isLunchTime = (timeSlot: string) => {
     return timeSlot === "12:00";
@@ -319,8 +331,8 @@ export default function ScheduleAdjustPopup({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-[#fafafa] z-50 flex flex-col overflow-hidden animate-in slide-in-from-bottom-2 duration-300">
-      <div className="bg-white w-full h-full overflow-hidden flex flex-col shadow-2xl">
+    <div className="fixed inset-0 bg-black/50 z-[9999] py-6 px-12 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white w-full max-w-[1600px] h-full max-h-[96vh] rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
         {/* 헤더 - 여백 최적화 */}
         <div className="px-6 py-4 border-b border-zinc-100 bg-white">
           <div className="flex items-center justify-between">
