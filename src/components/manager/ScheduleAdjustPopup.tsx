@@ -337,8 +337,8 @@ export default function ScheduleAdjustPopup({
   if (!isOpen || !mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/50 z-[99999] py-2 px-8 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-[1600px] h-[98vh] max-h-[98vh] rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
+    <div className="fixed inset-0 bg-black/60 z-[99999] py-4 px-8 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white w-full max-w-[1600px] h-full max-h-[96vh] rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
         {/* 헤더 - 여백 최적화 */}
         <div className="px-6 py-4 border-b border-zinc-100 bg-white">
           <div className="flex items-center justify-between">
@@ -348,8 +348,8 @@ export default function ScheduleAdjustPopup({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold text-zinc-900 tracking-tight">일정 최적 조율</h2>
-                  <span className="px-2.5 py-0.5 bg-blue-50 text-blue-500 text-[10px] font-bold rounded-full border border-blue-100/50 uppercase tracking-wider">Smart Mode</span>
+                  <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">일정 최적 조율</h2>
+                  <span className="px-2.5 py-0.5 bg-blue-50 text-blue-500 text-[11px] font-bold rounded-full border border-blue-100/50 uppercase tracking-wider">Smart Mode</span>
                 </div>
                 <p className="text-zinc-500 text-sm mt-1 font-medium">
                   가장 매칭률이 높은 시간을 AI가 추천해 드립니다 
@@ -402,20 +402,20 @@ export default function ScheduleAdjustPopup({
 
                 {/* 날짜 헤더 */}
                 <div className="grid grid-cols-8 gap-2 mb-3">
-                  <div className="text-[10px] font-bold text-zinc-300 text-center uppercase tracking-widest flex items-center justify-center">Time</div>
+                  <div className="text-[11px] font-bold text-zinc-300 text-center uppercase tracking-widest flex items-center justify-center">Time</div>
                   {dates.map((date, idx) => {
                     const isWeekendDay = isWeekend(date);
                     const isToday = new Date().toISOString().split('T')[0] === date.toISOString().split('T')[0];
                     return (
-                      <div key={idx} className={`text-center py-1.5 rounded-2xl ${isToday ? 'bg-amber-50/50 ring-1 ring-amber-100/50' : ''}`}>
-                        <div className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${
+                      <div key={idx} className={`text-center py-2 rounded-2xl ${isToday ? 'bg-amber-50/50 ring-1 ring-amber-100/50' : ''}`}>
+                        <div className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${
                           date.getDay() === 0 ? 'text-rose-400' : 
                           date.getDay() === 6 ? 'text-blue-400' : 
                           isToday ? 'text-amber-500' : 'text-zinc-400'
                         }`}>
                           {['일', '월', '화', '수', '목', '금', '토'][date.getDay()]}
                         </div>
-                        <div className={`text-base font-bold tracking-tight ${
+                        <div className={`text-lg font-bold tracking-tight ${
                           isToday ? 'text-amber-600' : 'text-zinc-800'
                         }`}>
                           {date.getDate()}
@@ -426,14 +426,14 @@ export default function ScheduleAdjustPopup({
                 </div>
 
                 {/* 시간대 그리드 */}
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   {timeSlots.map((timeSlot) => {
                     const isLunch = isLunchTime(timeSlot);
                     
                     return (
-                      <div key={timeSlot} className="grid grid-cols-8 gap-1.5">
+                      <div key={timeSlot} className="grid grid-cols-8 gap-2">
                         {/* 시간 라벨 */}
-                        <div className={`flex items-center justify-center text-[10px] font-bold rounded-xl py-1 border ${
+                        <div className={`flex items-center justify-center text-[11px] font-bold rounded-xl py-2 border ${
                           isLunch ? 'bg-zinc-100 border-zinc-100 text-zinc-400' : 'bg-white border-zinc-100 text-zinc-400'
                         }`}>
                           {timeSlot}
@@ -453,7 +453,7 @@ export default function ScheduleAdjustPopup({
                                 if (!isBusy) e.preventDefault();
                               }}
                               onDrop={() => handleDrop(date, timeSlot)}
-                              className={`min-h-[42px] rounded-xl border transition-all duration-200 relative group overflow-hidden ${
+                              className={`min-h-[52px] rounded-xl border transition-all duration-200 relative group overflow-hidden ${
                                 isBusy
                                   ? 'bg-zinc-50 border-zinc-100 cursor-not-allowed'
                                   : draggedRequest
@@ -486,13 +486,13 @@ export default function ScheduleAdjustPopup({
                               
                               {/* 배정된 신청 (우리가 배정한 것) */}
                               {assignedRequest && !existingEvent && !isLunch && !isWeekendDay && (
-                                <div className={`absolute inset-[2px] p-1.5 rounded-lg flex flex-col justify-center shadow-sm border border-white/20 ${
+                                <div className={`absolute inset-[2px] p-2 rounded-lg flex flex-col justify-center shadow-sm border border-white/20 ${
                                   assignedRequest.weight_score >= 80 ? 'bg-blue-600 text-white shadow-md' :
                                   assignedRequest.weight_score >= 50 ? 'bg-indigo-500 text-white shadow-md' :
                                   'bg-sky-500 text-white shadow-md'
                                 }`}>
                                   <div className="flex items-center justify-between">
-                                    <p className="text-[9px] font-bold leading-none truncate mr-1">
+                                    <p className="text-[11px] font-bold leading-tight truncate mr-1">
                                       {assignedRequest.name}
                                     </p>
                                     <button
