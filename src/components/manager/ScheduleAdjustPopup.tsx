@@ -320,17 +320,17 @@ export default function ScheduleAdjustPopup({
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-[40px] max-w-[95vw] w-full max-h-[92vh] overflow-hidden flex flex-col shadow-2xl border border-zinc-100">
-        {/* 헤더 - 더욱 깨끗한 느낌 */}
-        <div className="px-8 py-7 border-b border-zinc-100 bg-white">
+      <div className="bg-white rounded-[32px] max-w-[95vw] w-full max-h-[95vh] overflow-hidden flex flex-col shadow-2xl border border-zinc-100">
+        {/* 헤더 - 여백 최적화 */}
+        <div className="px-6 py-4 border-b border-zinc-100 bg-white">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-5">
-              <div className="w-13 h-13 bg-blue-50/50 rounded-2xl flex items-center justify-center">
-                <Calendar className="text-blue-500" size={28} />
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-blue-50/50 rounded-xl flex items-center justify-center">
+                <Calendar className="text-blue-500" size={24} />
               </div>
               <div>
-                <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">일정 최적 조율</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold text-zinc-900 tracking-tight">일정 최적 조율</h2>
                   <span className="px-2.5 py-0.5 bg-blue-50 text-blue-500 text-[10px] font-bold rounded-full border border-blue-100/50 uppercase tracking-wider">Smart Mode</span>
                 </div>
                 <p className="text-zinc-500 text-sm mt-1 font-medium">
@@ -351,11 +351,11 @@ export default function ScheduleAdjustPopup({
         </div>
 
         {/* 본문 */}
-        <div className="flex-1 overflow-auto p-8 bg-[#fafafa]">
-          <div className="grid grid-cols-12 gap-8">
+        <div className="flex-1 overflow-auto p-5 bg-[#fafafa]">
+          <div className="grid grid-cols-12 gap-6">
             {/* 왼쪽: 캘린더 그리드 */}
             <div className="col-span-9">
-              <div className="bg-white rounded-[32px] p-6 border border-zinc-200/60 shadow-sm">
+              <div className="bg-white rounded-[24px] p-4 border border-zinc-200/60 shadow-sm">
                 {/* 주 선택 헤더 */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -383,22 +383,22 @@ export default function ScheduleAdjustPopup({
                 </div>
 
                 {/* 날짜 헤더 */}
-                <div className="grid grid-cols-8 gap-3 mb-6">
+                <div className="grid grid-cols-8 gap-2 mb-3">
                   <div className="text-[10px] font-bold text-zinc-300 text-center uppercase tracking-widest flex items-center justify-center">Time</div>
                   {dates.map((date, idx) => {
                     const isWeekendDay = isWeekend(date);
                     const isToday = new Date().toISOString().split('T')[0] === date.toISOString().split('T')[0];
                     return (
                       <div key={idx} className={`text-center py-2 rounded-2xl ${isToday ? 'bg-blue-50/50' : ''}`}>
-                        <div className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${
+                        <div className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${
                           date.getDay() === 0 ? 'text-rose-400' : 
                           date.getDay() === 6 ? 'text-blue-400' : 
-                          isToday ? 'text-blue-500' : 'text-zinc-300'
+                          isToday ? 'text-blue-500' : 'text-zinc-400'
                         }`}>
                           {['일', '월', '화', '수', '목', '금', '토'][date.getDay()]}
                         </div>
-                        <div className={`text-lg font-bold tracking-tight ${
-                          isToday ? 'text-blue-500' : 'text-zinc-900'
+                        <div className={`text-base font-bold tracking-tight ${
+                          isToday ? 'text-blue-500' : 'text-zinc-800'
                         }`}>
                           {date.getDate()}
                         </div>
@@ -408,14 +408,14 @@ export default function ScheduleAdjustPopup({
                 </div>
 
                 {/* 시간대 그리드 */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {timeSlots.map((timeSlot) => {
                     const isLunch = isLunchTime(timeSlot);
                     
                     return (
-                      <div key={timeSlot} className="grid grid-cols-8 gap-3">
+                      <div key={timeSlot} className="grid grid-cols-8 gap-2">
                         {/* 시간 라벨 */}
-                        <div className={`flex items-center justify-center text-[10px] font-bold rounded-2xl py-3 border ${
+                        <div className={`flex items-center justify-center text-[10px] font-bold rounded-xl py-2 border ${
                           isLunch ? 'bg-zinc-100 border-zinc-100 text-zinc-400' : 'bg-white border-zinc-100 text-zinc-400'
                         }`}>
                           {timeSlot}
@@ -435,7 +435,7 @@ export default function ScheduleAdjustPopup({
                                 if (!isBusy) e.preventDefault();
                               }}
                               onDrop={() => handleDrop(date, timeSlot)}
-                              className={`min-h-[70px] rounded-2xl border transition-all duration-200 relative group overflow-hidden ${
+                              className={`min-h-[48px] rounded-xl border transition-all duration-200 relative group overflow-hidden ${
                                 isBusy
                                   ? 'bg-zinc-50 border-zinc-100 cursor-not-allowed'
                                   : draggedRequest
@@ -468,13 +468,13 @@ export default function ScheduleAdjustPopup({
                               
                               {/* 배정된 신청 (우리가 배정한 것) */}
                               {assignedRequest && !existingEvent && !isLunch && !isWeekendDay && (
-                                <div className={`absolute inset-1 p-2 rounded-xl flex flex-col justify-between shadow-sm border border-white/20 ${
+                                <div className={`absolute inset-[2px] p-1.5 rounded-lg flex flex-col justify-center shadow-sm border border-white/20 ${
                                   assignedRequest.weight_score >= 80 ? 'bg-blue-600 text-white shadow-md' :
                                   assignedRequest.weight_score >= 50 ? 'bg-indigo-500 text-white shadow-md' :
                                   'bg-sky-500 text-white shadow-md'
                                 }`}>
-                                  <div className="flex items-start justify-between">
-                                    <p className="text-[10px] font-bold leading-tight truncate mr-2">
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-[9px] font-bold leading-none truncate mr-1">
                                       {assignedRequest.name}
                                     </p>
                                     <button
@@ -486,12 +486,6 @@ export default function ScheduleAdjustPopup({
                                     >
                                       <X size={10} />
                                     </button>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <div className="w-1 h-1 bg-white rounded-full"></div>
-                                    <p className="text-[8px] font-bold opacity-90 uppercase tracking-tighter">
-                                      {assignedRequest.weight_score} pts
-                                    </p>
                                   </div>
                                 </div>
                               )}
@@ -506,13 +500,13 @@ export default function ScheduleAdjustPopup({
             </div>
 
             {/* 오른쪽: 미배정 신청 목록 - 세련된 사이드바 */}
-            <div className="col-span-3 space-y-4">
-              <div className="bg-white rounded-[28px] p-6 border border-zinc-200/60 shadow-sm sticky top-0 h-fit">
-                <div className="flex items-center justify-between mb-4">
+            <div className="col-span-3 space-y-3">
+              <div className="bg-white rounded-[24px] p-5 border border-zinc-200/60 shadow-sm sticky top-0 h-fit">
+                <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-widest px-1">미배정 신청</h3>
                   <span className="bg-zinc-100 text-zinc-500 px-2 py-0.5 rounded-lg text-[10px] font-bold">{unassignedRequests.length}</span>
                 </div>
-                <p className="text-zinc-500 text-xs font-medium mb-6 px-1 leading-relaxed">
+                <p className="text-zinc-500 text-xs font-medium mb-4 px-1 leading-relaxed">
                   신청 항목을 드래그하여 <br/>원하는 시간대에 배치하세요
                 </p>
                 
@@ -525,9 +519,9 @@ export default function ScheduleAdjustPopup({
                         key={request.request_id}
                         draggable
                         onDragStart={() => handleDragStart(request.request_id)}
-                        className="bg-zinc-50 border border-zinc-100/50 rounded-2xl p-4 cursor-grab active:cursor-grabbing hover:bg-white hover:border-blue-200 hover:shadow-md transition-all duration-200 group"
+                        className="bg-zinc-50 border border-zinc-100/50 rounded-xl p-3 cursor-grab active:cursor-grabbing hover:bg-white hover:border-blue-200 hover:shadow-md transition-all duration-200 group"
                       >
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2.5">
                             <div className={`w-2.5 h-2.5 rounded-full shadow-sm ${
                               request.weight_score >= 80 ? 'bg-rose-400' :
@@ -597,9 +591,9 @@ export default function ScheduleAdjustPopup({
           </div>
         </div>
 
-        {/* 푸터 - 세련된 버튼 레이아웃 */}
-        <div className="px-8 py-6 bg-white border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex items-center justify-between">
-          <div className="flex items-center gap-6">
+        {/* 푸터 - 여백 최적화 */}
+        <div className="px-6 py-4 bg-white border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex items-center justify-between">
+          <div className="flex items-center gap-5">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-zinc-100 rounded-full"></div>
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Empty</span>
@@ -613,17 +607,17 @@ export default function ScheduleAdjustPopup({
               <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Busy</span>
             </div>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-8 py-3.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-2xl font-bold transition-all duration-200 active:scale-95"
+              className="px-6 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl text-sm font-bold transition-all duration-200 active:scale-95"
             >
               취소
             </button>
             <button
               onClick={handleConfirm}
               disabled={Object.keys(assignments).length === 0}
-              className="px-10 py-3.5 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:hover:bg-zinc-200 text-white rounded-2xl font-bold border-none transition-all duration-200 active:scale-95 shadow-lg shadow-zinc-200"
+              className="px-8 py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:hover:bg-zinc-200 text-white rounded-xl text-sm font-bold border-none transition-all duration-200 active:scale-95 shadow-lg shadow-zinc-200"
             >
               일정 확정하기 ({Object.keys(assignments).length}건)
             </button>
