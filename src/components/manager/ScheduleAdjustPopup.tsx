@@ -388,7 +388,7 @@ export default function ScheduleAdjustPopup({
     <div className="fixed inset-0 bg-black/60 z-[99999] py-4 px-8 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-[1600px] h-full max-h-[96vh] rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
         {/* 헤더 - 여백 최적화 */}
-        <div className="px-6 py-2.5 border-b border-zinc-100 bg-white">
+        <div className="px-6 py-2.5 border-b border-zinc-100 bg-white shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-9 h-9 bg-blue-50/50 rounded-xl flex items-center justify-center">
@@ -423,7 +423,7 @@ export default function ScheduleAdjustPopup({
             <div className="col-span-9 h-full flex flex-col">
               <div className="bg-white rounded-[24px] p-3 border border-zinc-200/60 shadow-sm flex-1 flex flex-col min-h-0">
                 {/* 주 선택 헤더 */}
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-2 shrink-0">
                   <div className="flex items-center gap-3">
                     <button
                       onClick={handlePrevWeek}
@@ -449,7 +449,7 @@ export default function ScheduleAdjustPopup({
                 </div>
 
                 {/* 날짜 헤더 */}
-                <div className="grid grid-cols-8 gap-2 mb-2">
+                <div className="grid grid-cols-8 gap-2 mb-2 shrink-0">
                   <div className="text-[11px] font-bold text-zinc-300 text-center uppercase tracking-widest flex items-center justify-center">Time</div>
                   {dates.map((date, idx) => {
                     const isWeekendDay = isWeekend(date);
@@ -477,9 +477,8 @@ export default function ScheduleAdjustPopup({
                 <div className="flex-1 flex flex-col gap-1 min-h-0">
                   {timeSlots.map((timeSlot) => {
                     const isLunch = isLunchTime(timeSlot);
-                    
                     return (
-                      <div key={timeSlot} className="flex-1 grid grid-cols-8 gap-1.5 min-h-0">
+                      <div key={timeSlot} className="flex-1 grid grid-cols-8 gap-1.5 min-h-[clamp(32px,3.5vh,52px)]">
                         {/* 시간 라벨 */}
                         <div className={`flex items-center justify-center text-[clamp(10px,0.8vw,11px)] font-bold rounded-xl border h-full ${
                           isLunch ? 'bg-zinc-100 border-zinc-100 text-zinc-400' : 'bg-white border-zinc-100 text-zinc-400'
@@ -566,7 +565,7 @@ export default function ScheduleAdjustPopup({
             </div>
 
             {/* 오른쪽: 미배정 신청 목록 - 세련된 사이드바 */}
-            <div className="col-span-3 h-full flex flex-col">
+            <div className="col-span-3 h-full flex flex-col gap-3 overflow-hidden">
               <div className="bg-white rounded-[24px] p-5 border border-zinc-200/60 shadow-sm flex-1 flex flex-col min-h-0">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-widest px-1">미배정 신청</h3>
@@ -658,7 +657,7 @@ export default function ScheduleAdjustPopup({
               <div 
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleCancelDrop}
-                className={`bg-rose-50/30 rounded-[24px] p-5 border shadow-sm transition-all duration-200 flex flex-col ${
+                className={`shrink-0 bg-rose-50/30 rounded-[24px] p-5 border shadow-sm transition-all duration-200 flex flex-col ${
                   draggedRequest ? 'border-rose-300 border-dashed bg-rose-50/80 animate-pulse' : 'border-rose-100'
                 }`}
                 style={{ minHeight: '160px', maxHeight: '30vh' }}
@@ -698,7 +697,7 @@ export default function ScheduleAdjustPopup({
         </div>
 
         {/* 푸터 - 여백 최적화 */}
-        <div className="px-6 py-4 bg-white border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex items-center justify-between">
+        <div className="px-6 py-4 bg-white border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-5">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-zinc-100 rounded-full"></div>
