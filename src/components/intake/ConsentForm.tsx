@@ -85,7 +85,7 @@ export default function ConsentForm({ onNext, onPrev }: ConsentFormProps) {
               <li>
                 <strong>개인정보의 보유 및 이용기간 :</strong> 청년 연령 경과 시까지 (단, 의무복무 제대군인은 복무기간을 고려하여 최대 3살의 범위에서 참여 대상자 연령 상한을 연장하여 적용)
                 <div className="bg-white p-3 rounded-lg mt-2 border border-slate-200 text-xs">
-                  <p className="font-bold mb-1 text-slate-700">서울을 거점으로 하는 청년(만19세 ~ 39세) 회원</p>
+                  <p className="font-bold mb-1 text-slate-700">청년(만19세 ~ 39세) 회원</p>
                   <p className="mb-2">*일반: 만 19세 ~ 39세 (86년 ~ 07년생)</p>
                   <p className="font-bold mb-1 text-slate-700">의무복무 제대군인</p>
                   <ul className="list-disc pl-4 space-y-1">
@@ -117,8 +117,8 @@ export default function ConsentForm({ onNext, onPrev }: ConsentFormProps) {
           </div>
           <div className="p-4 bg-slate-50 h-40 overflow-y-auto text-sm text-slate-600 space-y-3 custom-scrollbar">
             <ul className="space-y-3 list-disc list-inside">
-              <li><strong>개인정보를 제공받는 자 :</strong> 서울시, 서울광역청년센터, 상담을 신청한 자치구의 청년센터</li>
-              <li><strong>개인정보를 제공받는 자의 이용 목적 :</strong> 서울시, 서울광역청년센터, 상담을 신청한 자치구의 서울청년센터가 동일하고 연결된 서비스를 제공 하기 위함, 서울청년센터 사업성과를 확인하기 위함</li>
+              <li><strong>개인정보를 제공받는 자 :</strong> 청년센터, 도도한콜라보(주)</li>
+              <li><strong>개인정보를 제공받는 자의 이용 목적 :</strong> 청년센터, 도도한콜라보(주)가 향상된 상담서비스를 제공하기 위함, 청년정책 제안을 위한 데이터 수집을 위함</li>
               <li><strong>제공하는 개인정보의 항목 :</strong> 성함, 아이디, 휴대폰번호, 성별, 나이, 주소, 상담신청내용, 상담결과 (기초설문 일체)</li>
               <li><strong>개인정보를 제공받는 자의 개인정보 보유 및 이용 기간 :</strong> 상담 참여일로부터 2년 (단, 다른 법령에 의해 보존할 필요가 있는 경우에는 제외함)</li>
               <li className="text-amber-700"><strong>동의거부 권리 및 동의거부에 따른 불이익 :</strong> 귀하는 개인정보 제공 및 동의를 거부할 권리가 있으며, 위 항목 동의 거부 시 프로그램 참여가 제한될 수 있습니다.</li>
