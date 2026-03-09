@@ -4,12 +4,13 @@ import React, { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import * as Accordion from "@radix-ui/react-accordion";
 import { useAuth } from "@/context/AuthContext";
-import { ChevronDown, Info, Calendar, MessageCircle, CheckCircle, AlertCircle } from "lucide-react";
+import { ChevronDown, Info, Calendar, MessageCircle, CheckCircle, AlertCircle, ShieldCheck as ShieldCheckIcon } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
 import BasicInfoForm from "@/components/intake/BasicInfoForm";
 import ScheduleForm from "@/components/intake/ScheduleForm";
 import AIChatForm from "@/components/intake/AIChatForm";
+import ConsentForm from "@/components/intake/ConsentForm";
 import ReviewForm from "@/components/intake/ReviewForm";
 
 function IntakeContent() {
@@ -116,8 +117,8 @@ function IntakeContent() {
         setCompletedSteps(['section-1', 'section-2', 'section-3']);
         setIsChatFinished(true);
         
-        // Step 4 (리뷰)로 바로 이동
-        setValue('section-4');
+        // Step 5 (리뷰)로 바로 이동 (모든 이전 단계 패스됨)
+        setValue('section-5');
       } else {
         console.error('Failed to load application detail:', data.error);
       }
@@ -244,6 +245,8 @@ function IntakeContent() {
     } else if (step === "section-3") {
       setIsChatFinished(true);
       setValue("section-4");
+    } else if (step === "section-4") {
+      setValue("section-5");
     }
   };
 
@@ -352,13 +355,13 @@ function IntakeContent() {
              <div className="h-4 w-full bg-white rounded-full border border-slate-100 p-1.5 overflow-hidden shadow-inner relative">
                 <div 
                   className="h-full bg-gradient-to-r from-blue-400 via-primary to-blue-600 rounded-full transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-sm relative overflow-hidden"
-                  style={{ width: `${completedSteps.length === 0 ? 3 : completedSteps.length === 1 ? 25 : completedSteps.length === 2 ? 50 : completedSteps.length === 3 ? 75 : 100}%` }}
+                  style={{ width: `${completedSteps.length === 0 ? 3 : completedSteps.length === 1 ? 25 : completedSteps.length === 2 ? 50 : completedSteps.length === 3 ? 75 : completedSteps.length >= 4 ? 100 : 100}%` }}
                 >
                    <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:24px_24px] animate-[progress-stripe_1s_linear_infinite]" />
                 </div>
              </div>
              <div className="flex justify-between mt-3 px-1">
-                {["기본정보", "상담예약", "AI진단", "신청확인"].map((step, idx) => (
+                {["기본정보", "상담예약", "AI진단", "약관동의", "신청확인"].map((step, idx) => (
                   <div key={idx} className={`text-[11px] font-black tracking-tighter transition-colors duration-500 ${completedSteps.length >= idx + 1 ? "text-primary" : "text-slate-300"}`}>
                     {step}
                   </div>
@@ -457,7 +460,7 @@ function IntakeContent() {
                         AI 상담 내용이 안전하게 저장되었습니다
                       </p>
                       <p className="text-sm text-amber-700 font-bold leading-relaxed">
-                        상담 결과가 분석되어 전문가에게 전달되었습니다. 세부 요청 사항은 'Step 4'에서 최종 확인 및 수정이 가능합니다.
+                        상담 결과가 분석되어 전문가에게 전달되었습니다. 세부 요청 사항은 'Step 5'에서 최종 확인 및 수정이 가능합니다.
                       </p>
                     </div>
                   </div>
@@ -477,10 +480,37 @@ function IntakeContent() {
               <Accordion.Trigger className="flex-1 flex items-center justify-between p-10 text-left group">
                 <div className="flex items-center gap-8">
                   <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all duration-700 ${completedSteps.includes("section-4") ? "bg-green-50 text-green-600 scale-110 shadow-inner" : "bg-blue-50 text-primary group-hover:bg-primary group-hover:text-white"}`}>
-                    {completedSteps.includes("section-4") ? <CheckCircle size={32} /> : <CheckCircle size={32} />}
+                    {completedSteps.includes("section-4") ? <CheckCircle size={32} /> : <ShieldCheckIcon size={32} />}
                   </div>
                   <div className="space-y-1">
-                    <h3 className="font-black text-slate-900 text-2xl tracking-tight">Step 04. 최종 리포트 확인</h3>
+                    <h3 className="font-black text-slate-900 text-2xl tracking-tight">Step 04. 서비스 이용 동의</h3>
+                    <p className="text-[13px] text-slate-400 font-bold">안전한 맞춤 상담을 위해 약관에 동의해 주세요.</p>
+                  </div>
+                </div>
+                <div className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center group-hover:bg-slate-50 transition-colors">
+                   <ChevronDown className="text-slate-400 group-data-[state=open]:rotate-180 transition-transform duration-500" size={20} />
+                </div>
+              </Accordion.Trigger>
+            </Accordion.Header>
+            <Accordion.Content className="px-12 pb-12 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
+               <div className="pt-8">
+                <ConsentForm 
+                  onPrev={() => setValue("section-3")}
+                  onNext={() => handleStepComplete("section-4", {})} 
+                />
+              </div>
+            </Accordion.Content>
+          </Accordion.Item>
+
+          <Accordion.Item value="section-5" className={`bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 data-[state=open]:ring-4 data-[state=open]:ring-primary/5 data-[state=open]:-translate-y-1 ${!completedSteps.includes("section-4") ? "opacity-40 grayscale pointer-events-none" : ""}`}>
+            <Accordion.Header className="flex">
+              <Accordion.Trigger className="flex-1 flex items-center justify-between p-10 text-left group">
+                <div className="flex items-center gap-8">
+                  <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all duration-700 ${completedSteps.includes("section-5") ? "bg-green-50 text-green-600 scale-110 shadow-inner" : "bg-blue-50 text-primary group-hover:bg-primary group-hover:text-white"}`}>
+                    {completedSteps.includes("section-5") ? <CheckCircle size={32} /> : <CheckCircle size={32} />}
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-black text-slate-900 text-2xl tracking-tight">Step 05. 최종 리포트 확인</h3>
                     <p className="text-[13px] text-slate-400 font-bold">작성된 모든 내용을 검토하고 상담 신청을 확정합니다.</p>
                   </div>
                 </div>
