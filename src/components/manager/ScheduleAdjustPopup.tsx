@@ -195,8 +195,9 @@ export default function ScheduleAdjustPopup({
     const dateStr = date.toISOString().split('T')[0];
     const targetDateTime = `${dateStr} ${timeSlot}`;
     
+    // 할당된 시간과 일치하면서, 취소 대기열에 들어있지 않은(취소되지 않은) 항목만 표시
     const requestId = Object.entries(assignments).find(
-      ([_id, assignedTime]) => assignedTime === targetDateTime
+      ([id, assignedTime]) => assignedTime === targetDateTime && !canceledList.includes(id)
     )?.[0];
     
     return requestId ? analyzedList.find(req => req.request_id === requestId) : null;
@@ -214,10 +215,8 @@ export default function ScheduleAdjustPopup({
         if (!prev.includes(draggedRequest)) return [...prev, draggedRequest];
         return prev;
       });
-      // 혹시 배정 목록에 있었다면 제거
-      const newAssignments = { ...assignments };
-      delete newAssignments[draggedRequest];
-      setAssignments(newAssignments);
+      // [수정] 나중에 복구(< 버튼) 시 제자리로 돌아가기 위해 assignments에서는 굳이 지우지 않고 보존합니다.
+      // (getAssignedRequest에서 canceledList 체크를 통해 캘린더 화면에서는 자연스레 숨겨짐)
       setDraggedRequest(null);
     }
   };
@@ -298,8 +297,13 @@ export default function ScheduleAdjustPopup({
       // 토스트 알림: 처리 시작
       const toastId = showToast('일정을 확정하는 중입니다...', 'loading');
       
-      // assignments를 배열로 변환하고 추가 정보 포함
-      const assignmentsData = Object.entries(assignments).map(([request_id, assigned_time]) => {
+      // assignments 중 현재 취소 대기열에 있는 건들은 제외하고 발송해야 함
+      const validAssignments = Object.entries(assignments).filter(
+        ([reqId, _]) => !canceledList.includes(reqId)
+      );
+
+      // 배열로 변환하고 추가 정보 포함
+      const assignmentsData = validAssignments.map(([request_id, assigned_time]) => {
         const request = analyzedList.find(r => r.request_id === request_id);
         
         return {
