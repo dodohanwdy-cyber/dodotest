@@ -401,16 +401,16 @@ export default function ScheduleAdjustPopup({
                     const isWeekendDay = isWeekend(date);
                     const isToday = new Date().toISOString().split('T')[0] === date.toISOString().split('T')[0];
                     return (
-                      <div key={idx} className={`text-center py-2 rounded-2xl ${isToday ? 'bg-blue-50/50' : ''}`}>
+                      <div key={idx} className={`text-center py-1.5 rounded-2xl ${isToday ? 'bg-amber-50/50 ring-1 ring-amber-100/50' : ''}`}>
                         <div className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${
                           date.getDay() === 0 ? 'text-rose-400' : 
                           date.getDay() === 6 ? 'text-blue-400' : 
-                          isToday ? 'text-blue-500' : 'text-zinc-400'
+                          isToday ? 'text-amber-500' : 'text-zinc-400'
                         }`}>
                           {['일', '월', '화', '수', '목', '금', '토'][date.getDay()]}
                         </div>
                         <div className={`text-base font-bold tracking-tight ${
-                          isToday ? 'text-blue-500' : 'text-zinc-800'
+                          isToday ? 'text-amber-600' : 'text-zinc-800'
                         }`}>
                           {date.getDate()}
                         </div>
@@ -420,14 +420,14 @@ export default function ScheduleAdjustPopup({
                 </div>
 
                 {/* 시간대 그리드 */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   {timeSlots.map((timeSlot) => {
                     const isLunch = isLunchTime(timeSlot);
                     
                     return (
-                      <div key={timeSlot} className="grid grid-cols-8 gap-2">
+                      <div key={timeSlot} className="grid grid-cols-8 gap-1.5">
                         {/* 시간 라벨 */}
-                        <div className={`flex items-center justify-center text-[10px] font-bold rounded-xl py-2 border ${
+                        <div className={`flex items-center justify-center text-[10px] font-bold rounded-xl py-1 border ${
                           isLunch ? 'bg-zinc-100 border-zinc-100 text-zinc-400' : 'bg-white border-zinc-100 text-zinc-400'
                         }`}>
                           {timeSlot}
@@ -447,7 +447,7 @@ export default function ScheduleAdjustPopup({
                                 if (!isBusy) e.preventDefault();
                               }}
                               onDrop={() => handleDrop(date, timeSlot)}
-                              className={`min-h-[48px] rounded-xl border transition-all duration-200 relative group overflow-hidden ${
+                              className={`min-h-[42px] rounded-xl border transition-all duration-200 relative group overflow-hidden ${
                                 isBusy
                                   ? 'bg-zinc-50 border-zinc-100 cursor-not-allowed'
                                   : draggedRequest
@@ -604,7 +604,7 @@ export default function ScheduleAdjustPopup({
         </div>
 
         {/* 푸터 - 여백 최적화 */}
-        <div className="px-6 py-4 bg-white border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex items-center justify-between">
+        <div className="px-6 py-3 bg-white border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex items-center justify-between">
           <div className="flex items-center gap-5">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-zinc-100 rounded-full"></div>
