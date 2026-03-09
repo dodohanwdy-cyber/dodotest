@@ -414,21 +414,18 @@ export default function ScheduleAdjustPopup({
       const result = await resetResponse.json();
 
       hideToast(toastId);
-      showToast('모든 일정이 성공적으로 초기화되었습니다.', 'success');
+      showToast('모든 일정이 성공적으로 초기화되었습니다.\n일정 재배정은 현재 창이 닫힌 후 다시 \'일정 조율하기\' 버튼을 눌러주세요.', 'success');
       
-      // 결과에서 초기화된 id 목록이 있을 경우 배정 대기로 돌림
-      if (result && result.reset_requests && Array.isArray(result.reset_requests)) {
-        setResetToAssignedIds(prev => [...prev, ...result.reset_requests]);
-        // assignments는 이미 useEffect를 통해 배정 대기로 세팅됨
-      } else {
-        // 백엔드에서 reset_requests를 안줬을 경우 fallback으로 요청된 애들 전체를 포함시킴
-        setResetToAssignedIds(prev => [...prev, ...confirmedIds]);
-      }
-      
-      // 혹시라도 취소 대기열에 있던 항목 중 초기화된 항목이 있다면 해제
+      setAssignments({});
       setCanceledList([]);
+      setResetToAssignedIds([]);
       
-      // 팝업을 닫지 않고 onConfirm 호출 지양
+      // 재조회 연동 등을 위해 onConfirm 호출 및 팝업 닫기
+      onConfirm(result, []);
+
+      setTimeout(() => {
+        onClose();
+      }, 2500);
     } catch (error) {
       console.error("[ScheduleAdjustPopup] 초기화 중 오류:", error);
       showToast('초기화 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
@@ -865,7 +862,16 @@ export default function ScheduleAdjustPopup({
             {toast.type === 'error' && (
               <AlertCircle size={18} />
             )}
-            <span className="font-bold text-sm tracking-tight">{toast.message}</span>
+            <div className="flex flex-col">
+              {toast.message.split('\n').map((line, idx) => (
+                <span 
+                  key={idx} 
+                  className={idx === 0 ? "font-bold text-sm tracking-tight" : "font-medium text-[12px] opacity-80 mt-1"}
+                >
+                  {line}
+                </span>
+              ))}
+            </div>
           </div>
         ))}
       </div>
