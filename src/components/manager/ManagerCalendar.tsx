@@ -232,6 +232,10 @@ export default function ManagerCalendar({ calendarEvents = [], isLoading = false
           <div className="w-3 h-3 rounded bg-indigo-800 shadow-sm border border-white/20"></div>
           <span className="text-zinc-600 font-bold">확정된 상담 일정</span>
         </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded bg-gray-400"></div>
+          <span className="text-zinc-600 font-medium">기타 일정</span>
+        </div>
       </div>
     </div>
   );
