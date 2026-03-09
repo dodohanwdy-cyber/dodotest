@@ -41,12 +41,22 @@ export default function ManagerCalendar({ calendarEvents = [], isLoading = false
     setCalendarDays(days);
   }, [currentDate]);
 
+  // 로컬 시간 기준 YYYY-MM-DD 문자열 반환 함수 (타임존 문제 방지)
+  const getLocalDateString = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
   // 특정 날짜의 일정 가져오기
   const getEventsForDate = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
+    const dateStr = getLocalDateString(date);
     return calendarEvents.filter(event => {
-      const eventDate = new Date(event.start).toISOString().split('T')[0];
-      return eventDate === dateStr;
+      // event.start 예: "2026-03-04 10:00" 또는 ISO 스트링 통합 처리
+      const normalizedStart = event.start.includes('T') ? event.start : event.start.replace(' ', 'T');
+      const eventDateStr = getLocalDateString(new Date(normalizedStart));
+      return eventDateStr === dateStr;
     });
   };
 
