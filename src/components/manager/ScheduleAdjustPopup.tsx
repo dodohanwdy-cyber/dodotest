@@ -20,6 +20,8 @@ interface AnalyzedRequest {
     suggested_time: string;
     suggested_priority: number;
   };
+  status?: string; // "pending", "confirmed", "in_progress", "completed", "cancelled" 등
+  confirmed_datetime?: string; // "YYYY-MM-DD HH:MM:SS" 형식
 }
 
 interface CalendarEvent {
@@ -33,7 +35,7 @@ interface ScheduleAdjustPopupProps {
   onClose: () => void;
   analyzedList: AnalyzedRequest[];
   calendarEvents: CalendarEvent[];
-  onConfirm: (assignments: { request_id: string; assigned_time: string }[]) => void;
+  onConfirm: (assignments: { request_id: string; assigned_time: string }[], canceledIds: string[]) => void;
 }
 
 export default function ScheduleAdjustPopup({ 
@@ -44,6 +46,7 @@ export default function ScheduleAdjustPopup({
   onConfirm 
 }: ScheduleAdjustPopupProps) {
   const [assignments, setAssignments] = useState<{ [key: string]: string }>({});
+  const [canceledList, setCanceledList] = useState<string[]>([]); // 취소 대기 중인 request_id 목록
   const [currentWeek, setCurrentWeek] = useState<number>(0); // 0, 1, 2 (3주)
   const [draggedRequest, setDraggedRequest] = useState<string | null>(null);
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'loading' | 'success' | 'error' }[]>([]);
@@ -79,11 +82,31 @@ export default function ScheduleAdjustPopup({
   useEffect(() => {
     if (isOpen && analyzedList.length > 0) {
       const initial: { [key: string]: string } = {};
+      const initialCanceled: string[] = [];
+
       analyzedList.forEach(req => {
-        if (req.recommendation.status === "auto_assigned") {
+        // 이미 취소된 상태의 요청은 canceledList에 추가
+        if (req.status === "cancelled") {
+          initialCanceled.push(req.request_id);
+          return;
+        }
+
+        // 기존 배정 내역이 있거나, 취소 목록에 있으면 패스 (초기화 시에는 canceledList는 아직 비어있음)
+        // if (assignments[req.request_id] || canceledList.includes(req.request_id)) return; // 이 부분은 초기화 로직이므로 제외
+
+        const isConfirmed = req.status === "confirmed";
+        let targetTime: string | undefined;
+
+        // 확정된 데이터이거나 추천 배정인 경우
+        if (isConfirmed && req.confirmed_datetime) {
+          targetTime = req.confirmed_datetime.substring(0, 16); // "YYYY-MM-DD HH:MM"
+        } else if (req.recommendation?.status === "auto_assigned") {
+          targetTime = req.recommendation.suggested_time;
+        }
+
+        if (targetTime) {
           // 시간 형식 정규화: "2026-02-25 9:00" -> "2026-02-25 09:00"
-          const suggestedTime = req.recommendation.suggested_time;
-          const [datePart, timePart] = suggestedTime.split(' ');
+          const [datePart, timePart] = targetTime.split(' ');
           const [hour, minute] = timePart.split(':');
           const normalizedTime = `${datePart} ${hour.padStart(2, '0')}:${minute}`;
           
@@ -104,12 +127,15 @@ export default function ScheduleAdjustPopup({
             initial[req.request_id] = normalizedTime;
           } else {
             console.log(`[ScheduleAdjustPopup] 충돌 감지 - ${req.name}: ${normalizedTime}`);
+            // 충돌 발생 시, 해당 요청은 미배정 상태로 둠
           }
         }
       });
       console.log('[ScheduleAdjustPopup] 자동 배정 초기화:', initial);
+      console.log('[ScheduleAdjustPopup] 초기 취소 목록:', initialCanceled);
       console.log('[ScheduleAdjustPopup] Analyzed List:', analyzedList);
       setAssignments(initial);
+      setCanceledList(initialCanceled);
     }
   }, [isOpen, analyzedList, calendarEvents]);
 
@@ -170,24 +196,41 @@ export default function ScheduleAdjustPopup({
     const targetDateTime = `${dateStr} ${timeSlot}`;
     
     const requestId = Object.entries(assignments).find(
-      ([_, assignedTime]) => {
-        const match = assignedTime === targetDateTime;
-        if (match) {
-          console.log('[getAssignedRequest] 매칭 발견:', { targetDateTime, assignedTime, requestId: _ });
-        }
-        return match;
-      }
+      ([_id, assignedTime]) => assignedTime === targetDateTime
     )?.[0];
     
     return requestId ? analyzedList.find(req => req.request_id === requestId) : null;
   };
 
-  // 드래그 시작
+  // 드래그 시작 (미배정 목록 또는 캘린더의 확정 이벤트에서)
   const handleDragStart = (requestId: string) => {
     setDraggedRequest(requestId);
   };
 
-  // 드롭 처리
+  // 일정 취소 처리 드롭 (휴지통 영역으로 드롭)
+  const handleCancelDrop = () => {
+    if (draggedRequest) {
+      setCanceledList(prev => {
+        if (!prev.includes(draggedRequest)) return [...prev, draggedRequest];
+        return prev;
+      });
+      // 혹시 배정 목록에 있었다면 제거
+      const newAssignments = { ...assignments };
+      delete newAssignments[draggedRequest];
+      setAssignments(newAssignments);
+      setDraggedRequest(null);
+    }
+  };
+
+  // 배정 해제 (휴지통이 아닌, 일반 배정 취소 - 돌아가기)
+  const handleRemoveAssignment = (requestId: string) => {
+    const newAssignments = { ...assignments };
+    delete newAssignments[requestId];
+    setAssignments(newAssignments);
+    setDraggedRequest(null);
+  };
+
+  // 캘린더 영역에 드롭
   const handleDrop = (date: Date, timeSlot: string) => {
     if (!draggedRequest) return;
     
@@ -200,6 +243,9 @@ export default function ScheduleAdjustPopup({
       setDraggedRequest(null);
       return;
     }
+
+    // 취소 목록에 있었다면 제거
+    setCanceledList(prev => prev.filter(id => id !== draggedRequest));
     
     setAssignments(prev => ({
       ...prev,
@@ -209,16 +255,7 @@ export default function ScheduleAdjustPopup({
     setDraggedRequest(null);
   };
 
-  // 배정 취소
-  const handleRemoveAssignment = (requestId: string) => {
-    console.log('[handleRemoveAssignment] 배정 취소:', requestId);
-    setAssignments(prev => {
-      const newAssignments = { ...prev };
-      delete newAssignments[requestId];
-      console.log('[handleRemoveAssignment] 업데이트된 assignments:', newAssignments);
-      return newAssignments;
-    });
-  };
+
 
   // 토스트 알림 함수
   const showToast = (message: string, type: 'loading' | 'success' | 'error') => {
@@ -259,43 +296,49 @@ export default function ScheduleAdjustPopup({
       
       console.log('[handleConfirm] 전송 데이터:', assignmentsData);
       
-      // ADJUST_SCHEDULE 웹훅 호출
-      const response = await fetch('https://primary-production-1f39e.up.railway.app/webhook/schedule-confirm', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          manager_email: 'manager_dodo@dodo.com', // TODO: 실제 매니저 이메일로 변경
-          assignments: assignmentsData,
-          timestamp: new Date().toISOString()
-        })
-      });
+      let finalResult = null;
+      let hasError = false;
       
-      if (!response.ok) {
-        throw new Error('일정 확정에 실패했습니다');
+      // 1. 배정 웹훅 호출
+      if (assignmentsData.length > 0) {
+        const assignResponse = await fetch('https://primary-production-1f39e.up.railway.app/webhook/schedule-confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            manager_email: 'manager_dodo@dodo.com',
+            assignments: assignmentsData,
+            timestamp: new Date().toISOString()
+          })
+        });
+        if (!assignResponse.ok) hasError = true;
+        else finalResult = await assignResponse.json();
+      }
+
+      // 2. 취소 웹훅 호출
+      if (canceledList.length > 0 && !hasError) {
+        const cancelResponse = await fetch('https://primary-production-1f39e.up.railway.app/webhook/cancel-assignment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            manager_email: 'manager_dodo@dodo.com',
+            canceled_requests: canceledList,
+            timestamp: new Date().toISOString()
+          })
+        });
+        if (!cancelResponse.ok) hasError = true;
+        else finalResult = finalResult || await cancelResponse.json(); // 배정이 없는 경우 취소 응답을 최종으로 사용
       }
       
-      const result = await response.json();
-      console.log('[handleConfirm] 웹훅 응답:', result);
-      console.log('[handleConfirm] 응답 타입:', typeof result);
-      console.log('[handleConfirm] 응답이 배열인가?', Array.isArray(result));
-      
-      // 응답 데이터 구조 확인
-      if (result) {
-        console.log('[handleConfirm] 응답 키:', Object.keys(result));
-        if (Array.isArray(result) && result.length > 0) {
-          console.log('[handleConfirm] 첫 번째 요소:', result[0]);
-          console.log('[handleConfirm] 첫 번째 요소 키:', Object.keys(result[0]));
-        }
+      if (hasError) {
+        throw new Error('요청 처리 중 문제가 발생했습니다.');
       }
       
       // 토스트 알림: 처리 완료
       hideToast(toastId);
-      showToast('일정이 확정되었습니다!', 'success');
+      showToast('변경사항이 성공적으로 반영되었습니다!', 'success');
       
-      // 부모 컴포넌트에 전체 응답 전달 (ManagerDashboard에서 파싱)
-      onConfirm(result);
+      // 부모 컴포넌트에 한 번만 응답 전달 (ManagerDashboard에서 파싱 및 재조회)
+      onConfirm(finalResult);
       
       // 토스트 메시지를 보여주기 위해 1.5초 대기 후 팝업 닫기
       setTimeout(() => {
@@ -315,9 +358,14 @@ export default function ScheduleAdjustPopup({
     return "bg-green-500";
   };
 
-  // 미배정 신청 목록
+  // 미배정 신청 목록 (배정되지 않았고 취소되지도 않은 항목)
   const unassignedRequests = analyzedList.filter(
-    req => !assignments[req.request_id]
+    req => !assignments[req.request_id] && !canceledList.includes(req.request_id) && req.status !== "confirmed"
+  );
+  
+  // 확정 취소 대기 목록 (기존 배열에서 confirmed인데 취소 목록에 있는 경우, 또는 그냥 취소된 경우)
+  const canceledRequests = analyzedList.filter(
+    req => canceledList.includes(req.request_id)
   );
 
   // 주 이동
@@ -605,6 +653,46 @@ export default function ScheduleAdjustPopup({
                   )}
                 </div>
               </div>
+
+              {/* 일정 취소 (휴지통) 영역 */}
+              <div 
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleCancelDrop}
+                className={`bg-rose-50/30 rounded-[24px] p-5 border shadow-sm transition-all duration-200 flex flex-col ${
+                  draggedRequest ? 'border-rose-300 border-dashed bg-rose-50/80 animate-pulse' : 'border-rose-100'
+                }`}
+                style={{ minHeight: '160px', maxHeight: '30vh' }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold text-rose-500 uppercase tracking-widest px-1">일정 취소 대기</h3>
+                  <span className="bg-rose-100 text-rose-600 px-2 py-0.5 rounded-lg text-[10px] font-bold">{canceledRequests.length}</span>
+                </div>
+                
+                {canceledRequests.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-rose-300 pointer-events-none">
+                    <X size={28} className="mb-2 opacity-50" />
+                    <p className="text-xs font-medium text-center">취소할 일정을<br/>이곳으로 드래그하세요</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 overflow-y-auto custom-scrollbar pr-1 flex-1">
+                    {canceledRequests.map((request) => (
+                      <div key={request.request_id} className="bg-white border border-rose-100 rounded-xl p-2.5 flex items-center justify-between group">
+                        <span className="font-bold text-xs text-zinc-700 line-through decoration-rose-300">{request.name}</span>
+                        <button 
+                          onClick={() => {
+                            // 취소 대기에서 복구
+                            setCanceledList(prev => prev.filter(id => id !== request.request_id));
+                          }}
+                          className="w-6 h-6 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded flex items-center justify-center transition-colors"
+                          title="취소 대기 복구"
+                        >
+                          <ChevronLeft size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -625,19 +713,35 @@ export default function ScheduleAdjustPopup({
               <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Busy</span>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                if (window.confirm("배정된 모든 일정을 초기화하시겠습니까? (서버에 즉시 반영되지 않으며 임시 초기화됩니다)")) {
+                  setAssignments({});
+                  setCanceledList([]);
+                }
+              }}
+              className="px-5 py-2.5 bg-zinc-50 hover:bg-zinc-100 text-zinc-500 rounded-xl text-sm font-bold transition-all duration-200"
+            >
+              전체 초기화
+            </button>
             <button
               onClick={onClose}
-              className="px-6 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl text-sm font-bold transition-all duration-200 active:scale-95"
+              className="px-5 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl text-sm font-bold transition-all duration-200 active:scale-95 ml-2"
             >
-              취소
+              닫기
             </button>
             <button
               onClick={handleConfirm}
-              disabled={Object.keys(assignments).length === 0}
-              className="px-8 py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:hover:bg-zinc-200 text-white rounded-xl text-sm font-bold border-none transition-all duration-200 active:scale-95 shadow-lg shadow-zinc-200"
+              disabled={Object.keys(assignments).length === 0 && canceledList.length === 0}
+              className="px-8 py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:hover:bg-zinc-200 text-white rounded-xl text-sm font-bold border-none transition-all duration-200 active:scale-95 shadow-lg shadow-zinc-200 ml-2"
             >
-              일정 확정하기 ({Object.keys(assignments).length}건)
+              변경사항 확정하기 
+              {(Object.keys(assignments).length > 0 || canceledList.length > 0) && (
+                <span className="ml-1 opacity-80 font-normal">
+                  (배정 {Object.keys(assignments).length}건 / 취소 {canceledList.length}건)
+                </span>
+              )}
             </button>
           </div>
         </div>
