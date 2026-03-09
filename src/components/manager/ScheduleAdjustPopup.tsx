@@ -340,11 +340,11 @@ export default function ScheduleAdjustPopup({
     <div className="fixed inset-0 bg-black/60 z-[99999] py-4 px-8 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-[1600px] h-full max-h-[96vh] rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
         {/* 헤더 - 여백 최적화 */}
-        <div className="px-6 py-4 border-b border-zinc-100 bg-white">
+        <div className="px-6 py-2.5 border-b border-zinc-100 bg-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-blue-50/50 rounded-xl flex items-center justify-center">
-                <Calendar className="text-blue-500" size={24} />
+              <div className="w-9 h-9 bg-blue-50/50 rounded-xl flex items-center justify-center">
+                <Calendar className="text-blue-500" size={20} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -361,21 +361,21 @@ export default function ScheduleAdjustPopup({
             </div>
             <button
               onClick={onClose}
-              className="w-11 h-11 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-2xl flex items-center justify-center transition-all duration-200 active:scale-90"
+              className="w-9 h-9 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90"
             >
-              <X size={24} />
+              <X size={20} />
             </button>
           </div>
         </div>
 
         {/* 본문 */}
-        <div className="flex-1 overflow-auto p-5 bg-[#fafafa]">
-          <div className="grid grid-cols-12 gap-6">
+        <div className="flex-1 overflow-auto p-4 bg-[#fafafa]">
+          <div className="grid grid-cols-12 gap-5">
             {/* 왼쪽: 캘린더 그리드 */}
             <div className="col-span-9">
-              <div className="bg-white rounded-[24px] p-4 border border-zinc-200/60 shadow-sm">
+              <div className="bg-white rounded-[24px] p-3 border border-zinc-200/60 shadow-sm">
                 {/* 주 선택 헤더 */}
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
                     <button
                       onClick={handlePrevWeek}
