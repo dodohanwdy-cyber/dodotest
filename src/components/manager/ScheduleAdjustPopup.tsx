@@ -426,14 +426,14 @@ export default function ScheduleAdjustPopup({
                 </div>
 
                 {/* 시간대 그리드 */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   {timeSlots.map((timeSlot) => {
                     const isLunch = isLunchTime(timeSlot);
                     
                     return (
-                      <div key={timeSlot} className="grid grid-cols-8 gap-2">
+                      <div key={timeSlot} className="grid grid-cols-8 gap-1.5">
                         {/* 시간 라벨 */}
-                        <div className={`flex items-center justify-center text-[11px] font-bold rounded-xl py-2 border ${
+                        <div className={`flex items-center justify-center text-[10px] font-bold rounded-xl border min-h-[clamp(34px,4.2vh,52px)] ${
                           isLunch ? 'bg-zinc-100 border-zinc-100 text-zinc-400' : 'bg-white border-zinc-100 text-zinc-400'
                         }`}>
                           {timeSlot}
@@ -453,7 +453,7 @@ export default function ScheduleAdjustPopup({
                                 if (!isBusy) e.preventDefault();
                               }}
                               onDrop={() => handleDrop(date, timeSlot)}
-                              className={`min-h-[52px] rounded-xl border transition-all duration-200 relative group overflow-hidden ${
+                              className={`min-h-[clamp(34px,4.2vh,52px)] rounded-xl border transition-all duration-200 relative group overflow-hidden ${
                                 isBusy
                                   ? 'bg-zinc-50 border-zinc-100 cursor-not-allowed'
                                   : draggedRequest
