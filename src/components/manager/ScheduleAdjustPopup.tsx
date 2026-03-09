@@ -50,6 +50,7 @@ export default function ScheduleAdjustPopup({
   const [currentWeek, setCurrentWeek] = useState<number>(0); // 0, 1, 2 (3주)
   const [draggedRequest, setDraggedRequest] = useState<string | null>(null);
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'loading' | 'success' | 'error' }[]>([]);
+  const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
 
   // 시간대 생성 (9:00 ~ 17:00, 1시간 단위)
   const timeSlots = Array.from({ length: 9 }, (_, i) => {
@@ -373,7 +374,9 @@ export default function ScheduleAdjustPopup({
   };
 
   // 전체 일정 초기화
-  const handleResetSchedule = async () => {
+  const executeResetSchedule = async () => {
+    setShowResetConfirm(false);
+    
     const confirmedIds = analyzedList
       .filter(req => req.status === 'confirmed')
       .map(req => req.request_id);
@@ -383,11 +386,6 @@ export default function ScheduleAdjustPopup({
       confirmed_requests: confirmedIds,
       timestamp: new Date().toISOString()
     };
-
-    const confirmed = window.confirm(
-      "정말 모든 일정(기확정 포함)을 초기화하시겠습니까?\nDB에 즉각 반영되며 기존 확정 일정들이 모두 취소 처리됩니다."
-    );
-    if (!confirmed) return;
 
     try {
       const toastId = showToast('일정 초기화를 진행 중입니다...', 'loading');
@@ -799,8 +797,8 @@ export default function ScheduleAdjustPopup({
           </div>
           <div className="flex gap-2">
             <button
-              onClick={handleResetSchedule}
-              className="px-5 py-2.5 bg-zinc-50 hover:bg-zinc-100 text-zinc-500 rounded-xl text-sm font-bold transition-all duration-200"
+              onClick={() => setShowResetConfirm(true)}
+              className="px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-xl text-sm font-bold transition-all duration-200 shadow-sm"
             >
               전체 초기화
             </button>
@@ -852,6 +850,37 @@ export default function ScheduleAdjustPopup({
           </div>
         ))}
       </div>
+
+      {/* 전체 초기화 커스텀 모달 (토스트 형태) */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-[24px] p-6 md:p-8 max-w-[340px] w-full mx-4 shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col items-center text-center border border-zinc-100">
+            <div className="w-14 h-14 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mb-5 shadow-sm border border-rose-100/50">
+              <AlertCircle size={28} />
+            </div>
+            <h3 className="text-lg font-bold text-zinc-900 mb-2 whitespace-pre-line tracking-tight leading-snug">
+              정말 모든 신청 일정을{'\n'}초기화하시겠습니까?
+            </h3>
+            <p className="text-[13px] text-zinc-500 mb-8 leading-relaxed font-medium">
+              DB에 즉시 반영되며,<br/>기존 확정 일정들이 배정 전 단계로 돌아갑니다.
+            </p>
+            <div className="flex gap-2 w-full">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="flex-1 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-bold rounded-xl transition-colors text-[13px]"
+              >
+                닫기
+              </button>
+              <button
+                onClick={executeResetSchedule}
+                className="flex-1 py-3 bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold rounded-xl transition-colors border border-rose-200 border-b-rose-300 text-[13px]"
+              >
+                초기화하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>,
     document.body
   );
