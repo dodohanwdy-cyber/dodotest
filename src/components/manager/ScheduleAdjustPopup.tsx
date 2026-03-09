@@ -369,11 +369,11 @@ export default function ScheduleAdjustPopup({
         </div>
 
         {/* 본문 */}
-        <div className="flex-1 overflow-auto p-4 bg-[#fafafa]">
-          <div className="grid grid-cols-12 gap-5">
+        <div className="flex-1 overflow-hidden p-4 bg-[#fafafa]">
+          <div className="grid grid-cols-12 gap-5 h-full">
             {/* 왼쪽: 캘린더 그리드 */}
-            <div className="col-span-9">
-              <div className="bg-white rounded-[24px] p-3 border border-zinc-200/60 shadow-sm">
+            <div className="col-span-9 h-full flex flex-col">
+              <div className="bg-white rounded-[24px] p-3 border border-zinc-200/60 shadow-sm flex-1 flex flex-col min-h-0">
                 {/* 주 선택 헤더 */}
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
@@ -407,15 +407,15 @@ export default function ScheduleAdjustPopup({
                     const isWeekendDay = isWeekend(date);
                     const isToday = new Date().toISOString().split('T')[0] === date.toISOString().split('T')[0];
                     return (
-                      <div key={idx} className={`text-center py-1 rounded-2xl ${isToday ? 'bg-amber-50/50 ring-1 ring-amber-100/50' : ''}`}>
-                        <div className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${
+                      <div key={idx} className={`text-center py-1 rounded-2xl flex flex-col justify-center ${isToday ? 'bg-amber-50/50 ring-1 ring-amber-100/50' : ''}`}>
+                        <div className={`text-[clamp(9px,0.8vw,10px)] font-bold uppercase tracking-widest mb-0.5 ${
                           date.getDay() === 0 ? 'text-rose-400' : 
                           date.getDay() === 6 ? 'text-blue-400' : 
                           isToday ? 'text-amber-500' : 'text-zinc-400'
                         }`}>
                           {['일', '월', '화', '수', '목', '금', '토'][date.getDay()]}
                         </div>
-                        <div className={`text-base font-bold tracking-tight ${
+                        <div className={`text-[clamp(14px,1.2vw,16px)] font-bold tracking-tight ${
                           isToday ? 'text-amber-600' : 'text-zinc-800'
                         }`}>
                           {date.getDate()}
@@ -426,14 +426,14 @@ export default function ScheduleAdjustPopup({
                 </div>
 
                 {/* 시간대 그리드 */}
-                <div className="space-y-1">
+                <div className="flex-1 flex flex-col gap-1 min-h-0">
                   {timeSlots.map((timeSlot) => {
                     const isLunch = isLunchTime(timeSlot);
                     
                     return (
-                      <div key={timeSlot} className="grid grid-cols-8 gap-1.5">
+                      <div key={timeSlot} className="flex-1 grid grid-cols-8 gap-1.5 min-h-0">
                         {/* 시간 라벨 */}
-                        <div className={`flex items-center justify-center text-[10px] font-bold rounded-xl border min-h-[clamp(34px,4.2vh,52px)] ${
+                        <div className={`flex items-center justify-center text-[clamp(10px,0.8vw,11px)] font-bold rounded-xl border h-full ${
                           isLunch ? 'bg-zinc-100 border-zinc-100 text-zinc-400' : 'bg-white border-zinc-100 text-zinc-400'
                         }`}>
                           {timeSlot}
@@ -453,7 +453,7 @@ export default function ScheduleAdjustPopup({
                                 if (!isBusy) e.preventDefault();
                               }}
                               onDrop={() => handleDrop(date, timeSlot)}
-                              className={`min-h-[clamp(34px,4.2vh,52px)] rounded-xl border transition-all duration-200 relative group overflow-hidden ${
+                              className={`h-full rounded-xl border transition-all duration-200 relative group overflow-hidden ${
                                 isBusy
                                   ? 'bg-zinc-50 border-zinc-100 cursor-not-allowed'
                                   : draggedRequest
@@ -518,8 +518,8 @@ export default function ScheduleAdjustPopup({
             </div>
 
             {/* 오른쪽: 미배정 신청 목록 - 세련된 사이드바 */}
-            <div className="col-span-3 space-y-3">
-              <div className="bg-white rounded-[24px] p-5 border border-zinc-200/60 shadow-sm sticky top-0 h-fit">
+            <div className="col-span-3 h-full flex flex-col">
+              <div className="bg-white rounded-[24px] p-5 border border-zinc-200/60 shadow-sm flex-1 flex flex-col min-h-0">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-widest px-1">미배정 신청</h3>
                   <span className="bg-zinc-100 text-zinc-500 px-2 py-0.5 rounded-lg text-[10px] font-bold">{unassignedRequests.length}</span>
@@ -528,7 +528,7 @@ export default function ScheduleAdjustPopup({
                   신청 항목을 드래그하여 <br/>원하는 시간대에 배치하세요
                 </p>
                 
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar pr-1">
+                <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-1 min-h-0">
                   {unassignedRequests.map((request) => {
                     const sortedOptions = [...request.options].sort((a, b) => a.p - b.p);
                     
