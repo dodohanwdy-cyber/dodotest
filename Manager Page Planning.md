@@ -63,10 +63,22 @@
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/send-confirmed-list-data`
   - Method: POST
   - 용도: 상담사 대시보드 요약 정보 (확정 목록)
-- **ADJUST_SCHEDULE** - 드래그 앤 드롭 일정 변경
+- **ADJUST_SCHEDULE** - 드래그 앤 드롭 일정 변경 (신규 배정)
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/schedule-confirm`
   - Method: POST
-  - 용도: 상담 일정 조정
+  - 용도: 상담 일정 등록 완료
+- **FETCH_CONFIRMED_SCHEDULE** - 기 확정 일정 불러오기 (취소/변경용)
+  - URL: `https://primary-production-1f39e.up.railway.app/webhook/fetch-confirmed-schedule` (예정)
+  - Method: POST
+  - 용도: 팝업 등에 기존에 배정된 리스트 노출
+- **CANCEL_ASSIGNMENT** - 특정 확정 일정 배정 취소 (미배정 복구)
+  - URL: `https://primary-production-1f39e.up.railway.app/webhook/cancel-assignment` (예정)
+  - Method: POST
+  - 용도: 배정된 일정을 다시 미배정 목록으로 되돌림
+- **RESET_SCHEDULE_ASSIGNMENTS** - 배정 내역 일괄 초기화
+  - URL: `https://primary-production-1f39e.up.railway.app/webhook/reset-schedule` (예정)
+  - Method: POST
+  - 용도: 주간/특정 기간 배정 전체 취소
 - **START_CONSULTATION** - 상담 시작 시 전체 데이터 로드
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/send-all-data`
   - Method: POST
@@ -97,13 +109,14 @@
   - 🔔 알림 센터 (신규 신청, 일정 변경, 긴급 요청)
 - **연동 웹훅**: `GET_MANAGER_DASHBOARD`, `GET_DASHBOARD_PREVIEW`
 
-### 2. 상담 일정 관리 (`/manager/schedule`)
+### 2. 상담 일정 관리 (`/manager/schedule` 및 `ScheduleAdjustPopup`)
 - **필요한 데이터**: 전체 상담 일정(확정/대기), 상담사 근무 시간, 휴일 정보
 - **주요 기능**:
   - 📅 인터랙티브 캘린더 (시간 블록 시각화, 상태별 색상 코딩, 충돌 감지)
-  - ⏰ 일정 조정 (변경, 취소, 긴급 추가, 자동 내담자 알림)
-  - 🔄 자동 스케줄링 (빈 시간대 최적 할당)
-- **연동 웹훅**: `ADJUST_SCHEDULE`, `GET_CALENDAR`
+  - ⏰ 일정 조정 (미배정 목록 드래그앤드롭 배정)
+  - 🔙 확정 일정 취소 및 되돌리기 (기존 배정된 일정을 다시 우측 '미배정 목록'과 같은 별도 칸으로 이동/원복 기능 탑재)
+  - 🔄 자동 스케줄링 및 전체 초기화 (빈 시간대 최적 할당, 전체 리셋 후 재조정)
+- **연동 웹훅**: `ADJUST_SCHEDULE`, `GET_CALENDAR`, `FETCH_CONFIRMED_SCHEDULE`, `CANCEL_ASSIGNMENT`, `RESET_SCHEDULE_ASSIGNMENTS`
 
 ### 3. 상담 진행 페이지 (`/manager/consultation/[id]`)
 - **필요한 데이터**: 내담자 기본 정보, 인테이크 응답, AI 채팅 분석 결과, 이전 기록

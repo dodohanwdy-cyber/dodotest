@@ -469,9 +469,9 @@ export default function ScheduleAdjustPopup({
                               {/* 배정된 신청 (우리가 배정한 것) */}
                               {assignedRequest && !existingEvent && !isLunch && !isWeekendDay && (
                                 <div className={`absolute inset-1 p-2 rounded-xl flex flex-col justify-between shadow-sm border border-white/20 ${
-                                  assignedRequest.weight_score >= 80 ? 'bg-blue-500 text-white' :
-                                  assignedRequest.weight_score >= 50 ? 'bg-indigo-400 text-white' :
-                                  'bg-sky-400 text-white'
+                                  assignedRequest.weight_score >= 80 ? 'bg-blue-600 text-white shadow-md' :
+                                  assignedRequest.weight_score >= 50 ? 'bg-indigo-500 text-white shadow-md' :
+                                  'bg-sky-500 text-white shadow-md'
                                 }`}>
                                   <div className="flex items-start justify-between">
                                     <p className="text-[10px] font-bold leading-tight truncate mr-2">
@@ -605,8 +605,8 @@ export default function ScheduleAdjustPopup({
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Empty</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-blue-500 rounded-full shadow-sm shadow-blue-200"></div>
-              <span className="text-[11px] font-bold text-blue-400 uppercase tracking-wider">Assigned</span>
+              <div className="w-2.5 h-2.5 bg-blue-600 rounded-full shadow-sm shadow-blue-300"></div>
+              <span className="text-[11px] font-bold text-blue-500 uppercase tracking-wider">Assigned</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-zinc-300 rounded-full opacity-50"></div>
