@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { X, Calendar, User, Award, Clock, CheckCircle, AlertCircle, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
 interface AnalyzedRequest {
@@ -328,11 +329,16 @@ export default function ScheduleAdjustPopup({
     if (currentWeek < 2) setCurrentWeek(currentWeek + 1);
   };
 
-  if (!isOpen) return null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  return (
-    <div className="fixed inset-0 bg-black/50 z-[9999] py-6 px-12 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-[1600px] h-full max-h-[96vh] rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 z-[99999] py-2 px-8 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white w-full max-w-[1600px] h-[98vh] max-h-[98vh] rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
         {/* 헤더 - 여백 최적화 */}
         <div className="px-6 py-4 border-b border-zinc-100 bg-white">
           <div className="flex items-center justify-between">
@@ -604,7 +610,7 @@ export default function ScheduleAdjustPopup({
         </div>
 
         {/* 푸터 - 여백 최적화 */}
-        <div className="px-6 py-3 bg-white border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex items-center justify-between">
+        <div className="px-6 py-4 bg-white border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex items-center justify-between">
           <div className="flex items-center gap-5">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-zinc-100 rounded-full"></div>
@@ -663,6 +669,7 @@ export default function ScheduleAdjustPopup({
           </div>
         ))}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
