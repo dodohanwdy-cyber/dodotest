@@ -47,6 +47,7 @@ export default function ScheduleAdjustPopup({
 }: ScheduleAdjustPopupProps) {
   const [assignments, setAssignments] = useState<{ [key: string]: string }>({});
   const [canceledList, setCanceledList] = useState<string[]>([]); // 취소 대기 중인 request_id 목록
+  const [resetToAssignedIds, setResetToAssignedIds] = useState<string[]>([]); // 초기화 후 배정대기로 복귀한 request_id 목록
   const [currentWeek, setCurrentWeek] = useState<number>(0); // 0, 1, 2 (3주)
   const [draggedRequest, setDraggedRequest] = useState<string | null>(null);
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'loading' | 'success' | 'error' }[]>([]);
@@ -135,10 +136,19 @@ export default function ScheduleAdjustPopup({
       console.log('[ScheduleAdjustPopup] 자동 배정 초기화:', initial);
       console.log('[ScheduleAdjustPopup] 초기 취소 목록:', initialCanceled);
       console.log('[ScheduleAdjustPopup] Analyzed List:', analyzedList);
+      
+      // 초기화된 id들은 기존 initial 에서 엎어치기로 유지
+      resetToAssignedIds.forEach(id => {
+        const req = analyzedList.find(r => r.request_id === id);
+        if (req && req.confirmed_datetime) {
+          initial[id] = req.confirmed_datetime.substring(0, 16);
+        }
+      });
+      
       setAssignments(initial);
       setCanceledList(initialCanceled);
     }
-  }, [isOpen, analyzedList, calendarEvents]);
+  }, [isOpen, analyzedList, calendarEvents, resetToAssignedIds]);
 
   // 팝업이 열려있을 때 배경(body) 스크롤 방지
   useEffect(() => {
@@ -225,7 +235,8 @@ export default function ScheduleAdjustPopup({
   // 배정 해제 (X 버튼) - 확정된 일정은 바로 취소 대기로 넘어가게 처리
   const handleRemoveAssignment = (requestId: string) => {
     const request = analyzedList.find(req => req.request_id === requestId);
-    if (request?.status === 'confirmed') {
+    // 확정된 상태이면서 방금 막 초기화되어 '배정 대기'로 강등된 상태가 아니라면 취소 대기열로 보냄
+    if (request?.status === 'confirmed' && !resetToAssignedIds.includes(requestId)) {
       setCanceledList(prev => {
         if (!prev.includes(requestId)) return [...prev, requestId];
         return prev;
@@ -405,11 +416,19 @@ export default function ScheduleAdjustPopup({
       hideToast(toastId);
       showToast('모든 일정이 성공적으로 초기화되었습니다.', 'success');
       
-      setAssignments({});
+      // 결과에서 초기화된 id 목록이 있을 경우 배정 대기로 돌림
+      if (result && result.reset_requests && Array.isArray(result.reset_requests)) {
+        setResetToAssignedIds(prev => [...prev, ...result.reset_requests]);
+        // assignments는 이미 useEffect를 통해 배정 대기로 세팅됨
+      } else {
+        // 백엔드에서 reset_requests를 안줬을 경우 fallback으로 요청된 애들 전체를 포함시킴
+        setResetToAssignedIds(prev => [...prev, ...confirmedIds]);
+      }
+      
+      // 혹시라도 취소 대기열에 있던 항목 중 초기화된 항목이 있다면 해제
       setCanceledList([]);
       
-      // 재조회 연동 등을 위해 onConfirm 호출
-      onConfirm(result, []);
+      // 팝업을 닫지 않고 onConfirm 호출 지양
     } catch (error) {
       console.error("[ScheduleAdjustPopup] 초기화 중 오류:", error);
       showToast('초기화 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
@@ -606,14 +625,14 @@ export default function ScheduleAdjustPopup({
                                     handleDragStart(assignedRequest.request_id);
                                   }}
                                   className={`absolute inset-[2px] p-2 rounded-lg flex flex-col justify-center shadow-sm border border-white/20 cursor-grab active:cursor-grabbing ${
-                                  assignedRequest.status === 'confirmed' ? 'bg-indigo-800 text-white shadow-md ring-1 ring-white/30' :
+                                  (assignedRequest.status === 'confirmed' && !resetToAssignedIds.includes(assignedRequest.request_id)) ? 'bg-indigo-800 text-white shadow-md ring-1 ring-white/30' :
                                   assignedRequest.weight_score >= 80 ? 'bg-blue-600 text-white shadow-md' :
                                   assignedRequest.weight_score >= 50 ? 'bg-indigo-500 text-white shadow-md' :
                                   'bg-sky-500 text-white shadow-md'
                                 }`}>
                                   <div className="flex items-center justify-between">
                                     <p className="text-[11px] font-bold leading-tight truncate mr-1 flex items-center gap-1">
-                                      {assignedRequest.status === 'confirmed' && (
+                                      {(assignedRequest.status === 'confirmed' && !resetToAssignedIds.includes(assignedRequest.request_id)) && (
                                         <span className="text-[9px] bg-white/20 px-1 py-0.5 rounded leading-none shrink-0">확정</span>
                                       )}
                                       <span className="truncate">{assignedRequest.name}</span>
@@ -854,17 +873,17 @@ export default function ScheduleAdjustPopup({
       {/* 전체 초기화 커스텀 모달 (토스트 형태) */}
       {showResetConfirm && (
         <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-[24px] p-6 md:p-8 max-w-[340px] w-full mx-4 shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col items-center text-center border border-zinc-100">
+          <div className="bg-white rounded-[24px] p-6 md:p-8 max-w-[420px] w-full mx-4 shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col items-center text-center border border-zinc-100">
             <div className="w-14 h-14 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mb-5 shadow-sm border border-rose-100/50">
               <AlertCircle size={28} />
             </div>
-            <h3 className="text-lg font-bold text-zinc-900 mb-2 whitespace-pre-line tracking-tight leading-snug">
-              정말 모든 신청 일정을{'\n'}초기화하시겠습니까?
+            <h3 className="text-xl font-bold text-zinc-900 mb-2 whitespace-pre-line tracking-tight leading-snug">
+              정말 모든 신청 일정을 초기화하시겠습니까?
             </h3>
             <p className="text-[13px] text-zinc-500 mb-8 leading-relaxed font-medium">
               DB에 즉시 반영되며,<br/>기존 확정 일정들이 배정 전 단계로 돌아갑니다.
             </p>
-            <div className="flex gap-2 w-full">
+            <div className="flex gap-3 w-full">
               <button
                 onClick={() => setShowResetConfirm(false)}
                 className="flex-1 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-bold rounded-xl transition-colors text-[13px]"
