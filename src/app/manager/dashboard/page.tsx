@@ -239,6 +239,18 @@ export default function ManagerDashboard() {
     return [...mappedBase, ...filteredConfirmed];
   }, [data?.analyzed_list, confirmedAppointments]);
 
+  // 대시보드 캘린더 전용: 기확정 일정만 매핑하여 전달
+  const confirmedCalendarEvents = useMemo(() => {
+    return confirmedAppointments.map((apt: any) => ({
+      id: apt.request_id,
+      title: `[확정] ${apt.name} 상담`,
+      start: apt.confirmed_datetime,
+      // 임의로 1시간 뒤를 end 시간으로 지정 (필요 시)
+      end: new Date(new Date(apt.confirmed_datetime).getTime() + 60 * 60 * 1000).toISOString(),
+      color: 'indigo'
+    }));
+  }, [confirmedAppointments]);
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
       {/* 대시보드 헤더 */}
@@ -268,7 +280,7 @@ export default function ManagerDashboard() {
       {/* 캘린더 영역 */}
       <div className="mb-8">
         <ManagerCalendar
-          calendarEvents={data?.calendar_events ?? []}
+          calendarEvents={confirmedCalendarEvents}
           onEventClick={() => {}}
         />
       </div>

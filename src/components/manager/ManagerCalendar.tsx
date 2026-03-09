@@ -69,6 +69,7 @@ export default function ManagerCalendar({ calendarEvents = [], isLoading = false
 
   // 일정 색상
   const getEventColor = (event: CalendarEvent) => {
+    if (event.color === 'indigo') return 'bg-indigo-800 text-white shadow-sm ring-1 ring-white/20';
     if (event.color === 'blue') return 'bg-blue-500 text-white';
     if (event.color === 'gray') return 'bg-gray-400 text-white';
     
@@ -166,7 +167,7 @@ export default function ManagerCalendar({ calendarEvents = [], isLoading = false
             return (
               <div
                 key={idx}
-                className={`min-h-[120px] border-r border-b border-zinc-100 p-2 ${
+                className={`min-h-[140px] border-r border-b border-zinc-100 p-2 flex flex-col ${
                   idx % 7 === 6 ? 'border-r-0' : ''
                 } ${idx >= 14 ? 'border-b-0' : ''} ${
                   isWeekendDay ? 'bg-zinc-50/30' : 'bg-white'
@@ -190,9 +191,11 @@ export default function ManagerCalendar({ calendarEvents = [], isLoading = false
                 </div>
 
                 {/* 일정 목록 */}
-                <div className="space-y-1">
-                  {dayEvents.slice(0, 3).map((event, eventIdx) => {
-                    const startTime = new Date(event.start).toLocaleTimeString('ko-KR', { 
+                <div className="space-y-1 flex-1">
+                  {dayEvents.slice(0, 8).map((event, eventIdx) => {
+                    // event.start 예시: "2026-03-04 10:00" 형태도 처리되도록 정규화
+                    const normalizedStart = event.start.includes('T') ? event.start : event.start.replace(' ', 'T');
+                    const startTime = new Date(normalizedStart).toLocaleTimeString('ko-KR', { 
                       hour: '2-digit', 
                       minute: '2-digit',
                       hour12: false 
@@ -211,9 +214,9 @@ export default function ManagerCalendar({ calendarEvents = [], isLoading = false
                       </button>
                     );
                   })}
-                  {dayEvents.length > 3 && (
-                    <div className="text-[9px] text-zinc-400 font-bold text-center">
-                      +{dayEvents.length - 3}개 더보기
+                  {dayEvents.length > 8 && (
+                    <div className="text-[9px] text-zinc-400 font-bold text-center mt-1">
+                      +{dayEvents.length - 8}개 더보기
                     </div>
                   )}
                 </div>
@@ -226,12 +229,8 @@ export default function ManagerCalendar({ calendarEvents = [], isLoading = false
       {/* 범례 */}
       <div className="flex items-center gap-6 mt-4 text-xs">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-blue-500"></div>
-          <span className="text-zinc-600 font-medium">상담 일정</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-gray-400"></div>
-          <span className="text-zinc-600 font-medium">기타 일정</span>
+          <div className="w-3 h-3 rounded bg-indigo-800 shadow-sm border border-white/20"></div>
+          <span className="text-zinc-600 font-bold">확정된 상담 일정</span>
         </div>
       </div>
     </div>
