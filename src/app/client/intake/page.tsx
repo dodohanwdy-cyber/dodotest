@@ -265,6 +265,9 @@ function IntakeContent() {
     }
 
     // 최종 제출 시 n8n으로 전체 요약 데이터 전송
+    // TODO(Backend Integration): 추후 ConsentForm.tsx에서 동의된 약관 내역(agreements 객체 등)이 
+    // intakeData 상태에 포함되도록 handleStepComplete("section-4", data)를 통해 병합한 뒤, 
+    // 아래의 웹훅 전송 페이로드에 포함시켜 백엔드(DB)로 함께 전달해야 합니다.
     try {
       const res = await postToWebhook(WEBHOOK_URLS.AI_CHAT_ANALYZE, {
         ...intakeData,
@@ -494,6 +497,10 @@ function IntakeContent() {
             </Accordion.Header>
             <Accordion.Content className="px-12 pb-12 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
                <div className="pt-8">
+                {/* 
+                  TODO(Backend Integration): 추후 DB 저장이 필요해지면, ConsentForm 내부의 onNext 콜백 인자로 동의 현황 데이터를 넘겨받게 구성한 뒤
+                  이를 handleStepComplete("section-4", data)처럼 넘겨 intakeData에 병합해야 합니다.
+                */}
                 <ConsentForm 
                   onPrev={() => setValue("section-3")}
                   onNext={() => handleStepComplete("section-4", {})} 

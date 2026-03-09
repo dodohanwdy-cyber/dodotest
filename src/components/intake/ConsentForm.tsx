@@ -7,6 +7,8 @@ interface ConsentFormProps {
 }
 
 export default function ConsentForm({ onNext, onPrev }: ConsentFormProps) {
+  // TODO(Backend Integration): 추후 개인정보 및 제3자 제공 동의 여부를 DB에 저장해야 할 경우,
+  // 이 상태값(privacy, thirdParty)을 상위 컴포넌트(page.tsx)의 onNext({ privacy: true, thirdParty: true }) 형태로 전달하도록 수정하세요.
   const [agreements, setAgreements] = useState({
     privacy: false,
     thirdParty: false,
@@ -148,7 +150,9 @@ export default function ConsentForm({ onNext, onPrev }: ConsentFormProps) {
               ? "bg-primary text-white shadow-lg shadow-indigo-100 hover:shadow-xl hover:bg-indigo-600"
               : "bg-slate-100 text-slate-400 cursor-not-allowed"
           }`}
-          onClick={allAgreed ? onNext : undefined}
+          // TODO(Backend Integration): onNext 호출 시 agreements 데이터를 넘겨받아 최종 Intake 데이터에 병합되도록 상위 코드(page.tsx)와 이 라인을 맞춰서 수정하세요.
+          // 예시: onClick={() => allAgreed && onNext({ agreements })}
+          onClick={allAgreed ? (() => onNext()) : undefined}
           disabled={!allAgreed}
         >
           {allAgreed ? "동의하고 확인하기" : "약관에 동의해 주세요"}
