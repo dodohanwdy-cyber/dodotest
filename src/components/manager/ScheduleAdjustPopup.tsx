@@ -287,7 +287,7 @@ export default function ScheduleAdjustPopup({
         return {
           request_id,
           name: request?.name || '',
-          assigned_time,
+          confirmed_datetime: assigned_time,
           title: `${request?.name || ''} 상담`,
           confirmed_method: request?.preferred_method || '',
           confirmed_location: request?.preferred_location || ''
@@ -338,7 +338,7 @@ export default function ScheduleAdjustPopup({
       showToast('변경사항이 성공적으로 반영되었습니다!', 'success');
       
       // 부모 컴포넌트에 한 번만 응답 전달 (ManagerDashboard에서 파싱 및 재조회)
-      onConfirm(finalResult);
+      onConfirm(finalResult, canceledList);
       
       // 토스트 메시지를 보여주기 위해 1.5초 대기 후 팝업 닫기
       setTimeout(() => {
