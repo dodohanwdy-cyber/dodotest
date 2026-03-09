@@ -539,8 +539,11 @@ export default function ScheduleAdjustPopup({
                         </div>
 
                         <div className="space-y-2 mb-3">
-                          {sortedOptions.slice(0, 2).map((option) => {
+                          {sortedOptions.map((option) => {
                             const [datePart, timePart] = option.time.split(' ');
+                            const [year, month, day] = datePart.split('-');
+                            const formattedDate = `${parseInt(month)}월 ${parseInt(day)}일`;
+                            
                             const [hour, minute] = timePart.split(':');
                             const timeSlot = `${hour.padStart(2, '0')}:${minute}`;
                             const normalizedOptionTime = `${datePart} ${timeSlot}`;
@@ -560,9 +563,9 @@ export default function ScheduleAdjustPopup({
                             
                             return (
                               <div key={option.p} className="flex items-center gap-2 text-[10px] font-medium px-1">
-                                <span className="text-zinc-300">{option.p}순위:</span>
-                                <span className={isBusyOrConflict ? 'text-rose-300 line-through' : 'text-zinc-500'}>
-                                  {option.time.split(' ')[1]}
+                                <span className="text-zinc-400">{option.p}순위:</span>
+                                <span className={isBusyOrConflict ? 'text-rose-300 line-through' : 'text-zinc-600 font-bold'}>
+                                  {formattedDate} {timeSlot}
                                 </span>
                               </div>
                             );
