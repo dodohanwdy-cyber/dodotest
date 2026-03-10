@@ -12,7 +12,8 @@ import {
   ExternalLink,
   PlusCircle,
   Loader2,
-  Briefcase
+  Briefcase,
+  Trash2
 } from "lucide-react";
 import Link from "next/link";
 
@@ -73,6 +74,38 @@ export default function ClientDashboard() {
       setError('서버 통신 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancelApplication = async (requestId: string, e: React.MouseEvent) => {
+    e.preventDefault(); // 카드 전체 클릭 방지
+    
+    if (!user?.email) return;
+    
+    if (!window.confirm("정말 이 상담 신청을 취소하시겠습니까?\n취소 후에는 다시 되돌릴 수 없습니다.")) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await fetch('/api/applications', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ request_id: requestId, email: user.email })
+      });
+
+      const data = await res.json();
+      
+      if (res.ok) {
+        alert("상담 취소가 완료되었습니다.");
+        fetchApplications(true); // 완전 새로고침하여 캐시 업데이트 및 변경사항 화면 즉각 반영
+      } else {
+        alert(data.error || "취소 중 오류가 발생했습니다.");
+      }
+    } catch (err) {
+      console.error('Cancel application error:', err);
+      alert("서버 통신 중 오류가 발생했습니다.");
+      setLoading(false); // fetchApplications(true)가 안 돌 수 있으므로 에러 시 로딩 해제
     }
   };
 
@@ -167,10 +200,18 @@ export default function ClientDashboard() {
                     <div className="flex justify-between items-start mb-4">
                       <div className="space-y-1">
                         <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">{app.request_id || app.id}</span>
-                        <h3 className="font-bold text-zinc-900 text-lg">{app.name || '이름 없음'} ({app.age || '-'}세)</h3>
+                        <h3 className={`font-bold text-lg ${app.status === 'canceled' ? 'text-zinc-400 line-through' : 'text-zinc-900'}`}>
+                          {app.name || '이름 없음'} ({app.age || '-'}세)
+                        </h3>
                       </div>
-                      <span className="px-3 py-1 bg-indigo-50 text-primary rounded-full text-[11px] font-bold animate-pulse font-sans">
-                        {app.status || 'AI 분석 중'}
+                      <span className={`px-3 py-1 rounded-full text-[11px] font-bold font-sans ${
+                        app.status === 'canceled' ? 'bg-rose-50 text-rose-500' :
+                        app.status === 'confirmed' ? 'bg-indigo-600 text-white shadow-md' :
+                        'bg-indigo-50 text-primary animate-pulse'
+                      }`}>
+                        {app.status === 'canceled' ? '취소됨' : 
+                         app.status === 'confirmed' ? '상담 확정' : 
+                         app.status || 'AI 분석 중'}
                       </span>
                     </div>
                     
@@ -207,14 +248,24 @@ export default function ClientDashboard() {
                       ) : null;
                     })()}
 
-                    <div className="flex justify-between items-center pt-4 border-t border-zinc-50">
-                      <div className="flex -space-x-2">
-                        <div className="w-8 h-8 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-[10px] font-bold text-primary">AI</div>
-                        <div className="w-8 h-8 rounded-full border-2 border-white bg-zinc-100 flex items-center justify-center text-[10px] font-bold text-zinc-400">?</div>
+                    <div className="flex justify-between items-center pt-4 border-t border-zinc-50 mt-4">
+                      {app.status !== 'canceled' && app.status !== 'completed' && (
+                        <button 
+                          onClick={(e) => handleCancelApplication(app.request_id || app.id, e)}
+                          className="text-xs font-bold text-rose-400 hover:text-rose-600 flex items-center gap-1.5 transition-colors"
+                        >
+                          <Trash2 size={14} /> 상담 취소
+                        </button>
+                      )}
+                      
+                      <div className={`flex items-center gap-1 ml-auto group-hover:gap-2 transition-all ${
+                        app.status === 'canceled' ? 'text-zinc-400' : 'text-primary'
+                      }`}>
+                        <span className="text-xs font-bold">
+                          {app.status === 'canceled' ? '내역 보기' : '상세 보기'}
+                        </span>
+                        <ChevronRight size={14} />
                       </div>
-                      <button className="text-xs font-bold text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
-                        상세 보기 <ChevronRight size={14} />
-                      </button>
                     </div>
                   </div>
                 </Link>

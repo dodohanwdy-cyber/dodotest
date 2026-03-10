@@ -59,3 +59,43 @@ export async function GET(req: Request) {
     );
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { request_id, email } = await req.json();
+
+    if (!request_id || !email) {
+      return NextResponse.json({ error: 'Request ID and Email are required' }, { status: 400 });
+    }
+
+    // N8N 취소 웹훅 (매니저 쪽과 동일한 엔드포인트 사용)
+    const CANCEL_WEBHOOK = 'https://primary-production-1f39e.up.railway.app/webhook/cancel-assignment';
+    
+    const response = await fetch(CANCEL_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        manager_email: 'client_cancel', // N8N에서 사용자 직접 취소임을 구분하기 위한 플래그
+        canceled_requests: [request_id],
+        timestamp: new Date().toISOString()
+      }),
+    });
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: '취소 요청 처리에 실패했습니다.' },
+        { status: response.status }
+      );
+    }
+
+    // 캐시 회피용 등 추가 처리가 필요하다면 json()을 파싱할 수도 있으나, 성공 여부만 전달
+    return NextResponse.json({ success: true, message: '상담이 취소되었습니다.' });
+
+  } catch (error) {
+    console.error('[Dashboard API DELETE] Error:', error);
+    return NextResponse.json(
+      { error: '취소 요청 중 서버 오류가 발생했습니다.' },
+      { status: 500 }
+    );
+  }
+}
