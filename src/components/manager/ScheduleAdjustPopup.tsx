@@ -233,23 +233,13 @@ export default function ScheduleAdjustPopup({
     }
   };
 
-  // 배정 해제 (X 버튼) - 확정된 일정은 바로 취소 대기로 넘어가게 처리
+  // 배정 해제 (X 버튼) - 캘린더에서 빼고 무조건 미배정 대기 목록으로 이동
   const handleRemoveAssignment = (requestId: string) => {
-    const request = analyzedList.find(req => req.request_id === requestId);
-    // 확정된 상태이면서 방금 막 초기화되어 '배정 대기'로 강등된 상태가 아니라면 취소 대기열로 보냄
-    if (request?.status === 'confirmed' && !resetToAssignedIds.includes(requestId)) {
-      setCanceledList(prev => {
-        if (!prev.includes(requestId)) return [...prev, requestId];
-        return prev;
-      });
-      // 확정된 일정을 취소 대기로 보냈으므로, 별도의 assignments에서는 삭제하지 않아도 됨 
-      // (어차피 렌더링 필터에서 canceledList에 있으면 걸러짐)
-    } else {
-      const newAssignments = { ...assignments };
-      delete newAssignments[requestId];
-      setAssignments(newAssignments);
-    }
+    const newAssignments = { ...assignments };
+    delete newAssignments[requestId];
+    setAssignments(newAssignments);
     setDraggedRequest(null);
+    setHoveredCell(null);
   };
 
   // 캘린더 영역에 드롭
@@ -362,7 +352,27 @@ export default function ScheduleAdjustPopup({
           })
         });
         if (!cancelResponse.ok) hasError = true;
-        else finalResult = finalResult || await cancelResponse.json(); // 배정이 없는 경우 취소 응답을 최종으로 사용
+        else finalResult = finalResult || await cancelResponse.json();
+      }
+      
+      // 3. 재조정(배정 해제) 웹훅 호출
+      // 팝업 열릴 때 확정 상태였으나 현재 캘린더에도 없고 취소열에도 없는(미배정 대기열에 있는) ID들
+      const readjustmentIds = analyzedList
+        .filter(req => req.status === 'confirmed' && !assignments[req.request_id] && !canceledList.includes(req.request_id))
+        .map(req => req.request_id);
+
+      if (readjustmentIds.length > 0 && !hasError) {
+        const readjustResponse = await fetch('https://primary-production-1f39e.up.railway.app/webhook/request-readjustment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            manager_email: 'manager_dodo@dodo.com',
+            readjust_requests: readjustmentIds,
+            timestamp: new Date().toISOString()
+          })
+        });
+        if (!readjustResponse.ok) hasError = true;
+        else finalResult = finalResult || await readjustResponse.json();
       }
       
       if (hasError) {
@@ -439,9 +449,9 @@ export default function ScheduleAdjustPopup({
     return "bg-green-500";
   };
 
-  // 미배정 신청 목록 (배정되지 않았고 취소되지도 않은 항목)
+  // 미배정 신청 목록 (배정되지 않았고 취소되지도 않은 항목 - 기존 확정 건 포함)
   const unassignedRequests = analyzedList.filter(
-    req => !assignments[req.request_id] && !canceledList.includes(req.request_id) && req.status !== "confirmed"
+    req => !assignments[req.request_id] && !canceledList.includes(req.request_id)
   );
   
   // 확정 취소 대기 목록 (기존 배열에서 confirmed인데 취소 목록에 있는 경우, 또는 그냥 취소된 경우)
@@ -703,40 +713,53 @@ export default function ScheduleAdjustPopup({
                         </div>
 
                         <div className="space-y-2 mb-3">
-                          {sortedOptions.map((option) => {
-                            const [datePart, timePart] = option.time.split(' ');
-                            const [year, month, day] = datePart.split('-');
-                            const formattedDate = `${parseInt(month)}월 ${parseInt(day)}일`;
-                            
-                            const [hour, minute] = timePart.split(':');
-                            const timeSlot = `${hour.padStart(2, '0')}:${minute}`;
-                            const normalizedOptionTime = `${datePart} ${timeSlot}`;
-                            const optionDateTime = new Date(`${datePart}T${timeSlot}:00`);
-                            
-                            const hasCalendarConflict = calendarEvents.some(event => {
-                              const eventStart = new Date(event.start);
-                              const eventEnd = new Date(event.end);
-                              return optionDateTime >= eventStart && optionDateTime < eventEnd;
-                            });
-                            
-                            const hasAssignmentConflict = Object.entries(assignments).some(([assignedId, assignedTime]) => {
-                              return assignedTime === normalizedOptionTime;
-                            });
-                            
-                            const isBusyOrConflict = hasCalendarConflict || hasAssignmentConflict;
-                            
-                            return (
-                              <div key={option.p} className="flex items-center gap-2 text-[10px] font-medium px-1">
-                                <span className="text-zinc-400">{option.p}순위:</span>
-                                <span className={isBusyOrConflict ? 'text-rose-300 line-through' : 'text-zinc-600 font-bold'}>
-                                  {formattedDate} {timeSlot}
-                                </span>
-                              </div>
-                            );
-                          })}
+                          {request.status === 'confirmed' ? (
+                            <div className="p-2.5 bg-indigo-50/50 border border-indigo-100 rounded-lg">
+                              <p className="text-[11px] font-bold text-indigo-600 mb-1 leading-tight flex items-center gap-1">
+                                <AlertCircle size={12} /> 배정 해제됨 (원래 확정)
+                              </p>
+                              <p className="text-[10px] text-zinc-500 font-medium leading-relaxed">
+                                현재 캘린더에서 해제되었습니다.<br/>
+                                <span className="text-zinc-700">새롭게 배정</span>하거나 빈 상태로 저장 시<br/> 
+                                <span className="text-rose-500">재조정(대기) 상태</span>로 변경됩니다.
+                              </p>
+                            </div>
+                          ) : (
+                            sortedOptions.map((option) => {
+                              const [datePart, timePart] = option.time.split(' ');
+                              const [year, month, day] = datePart.split('-');
+                              const formattedDate = `${parseInt(month)}월 ${parseInt(day)}일`;
+                              
+                              const [hour, minute] = timePart.split(':');
+                              const timeSlot = `${hour.padStart(2, '0')}:${minute}`;
+                              const normalizedOptionTime = `${datePart} ${timeSlot}`;
+                              const optionDateTime = new Date(`${datePart}T${timeSlot}:00`);
+                              
+                              const hasCalendarConflict = calendarEvents.some(event => {
+                                const eventStart = new Date(event.start);
+                                const eventEnd = new Date(event.end);
+                                return optionDateTime >= eventStart && optionDateTime < eventEnd;
+                              });
+                              
+                              const hasAssignmentConflict = Object.entries(assignments).some(([assignedId, assignedTime]) => {
+                                return assignedTime === normalizedOptionTime;
+                              });
+                              
+                              const isBusyOrConflict = hasCalendarConflict || hasAssignmentConflict;
+                              
+                              return (
+                                <div key={option.p} className="flex items-center gap-2 text-[10px] font-medium px-1">
+                                  <span className="text-zinc-400">{option.p}순위:</span>
+                                  <span className={isBusyOrConflict ? 'text-rose-300 line-through' : 'text-zinc-600 font-bold'}>
+                                    {formattedDate} {timeSlot}
+                                  </span>
+                                </div>
+                              );
+                            })
+                          )}
                         </div>
 
-                        {request.recommendation.status === "auto_assigned" && (
+                        {request.recommendation.status === "auto_assigned" && request.status !== 'confirmed' && (
                           <div className="pt-2.5 border-t border-emerald-100 flex items-center gap-1.5">
                             <Sparkles size={10} className="text-emerald-500" />
                             <span className="text-[10px] font-bold text-emerald-600">추천 배정 가능</span>
