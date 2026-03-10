@@ -53,6 +53,7 @@ export default function ScheduleAdjustPopup({
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'loading' | 'success' | 'error' }[]>([]);
   const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState<boolean>(false);
 
   // 시간대 생성 (9:00 ~ 17:00, 1시간 단위)
   const timeSlots = Array.from({ length: 9 }, (_, i) => {
@@ -287,16 +288,19 @@ export default function ScheduleAdjustPopup({
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
-  // 확정 처리
-  const handleConfirm = async () => {
-    // 취소 건이 있을 경우 사용자 확인 경고창 (신청자가 취소되는 점 알림)
+  // 확정 버튼 클릭 시 분기
+  const handleConfirm = () => {
     if (canceledList.length > 0) {
-      const confirmed = window.confirm(
-        `[경고] 총 ${canceledList.length}건의 일정을 취소하려고 합니다.\n해당 상담 신청건이 삭제되므로 내담자와 사전에 합의가 되었는지 확인해주세요.\n\n정말 확정하시겠습니까?`
-      );
-      if (!confirmed) return;
+      setShowCancelConfirm(true);
+      return;
     }
+    executeConfirm();
+  };
 
+  // 실제 확정 로직 실행
+  const executeConfirm = async () => {
+    setShowCancelConfirm(false);
+    
     try {
       // 토스트 알림: 처리 시작
       const toastId = showToast('일정을 확정하는 중입니다...', 'loading');
@@ -912,31 +916,64 @@ export default function ScheduleAdjustPopup({
         ))}
       </div>
 
-      {/* 전체 초기화 커스텀 모달 (토스트 형태) */}
+      {/* 전체 초기화 확인 플로팅 알림 */}
       {showResetConfirm && (
-        <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-[24px] p-6 md:p-8 max-w-[420px] w-full mx-4 shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col items-center text-center border border-zinc-100">
-            <div className="w-14 h-14 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mb-5 shadow-sm border border-rose-100/50">
-              <AlertCircle size={28} />
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setShowResetConfirm(false)}></div>
+          <div className="bg-white rounded-[24px] p-6 max-w-[420px] w-full relative shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 mb-5 shadow-inner">
+              <AlertCircle size={24} />
             </div>
-            <h3 className="text-xl font-bold text-zinc-900 mb-2 whitespace-pre-line tracking-tight leading-snug">
-              정말 모든 신청 일정을 초기화하시겠습니까?
-            </h3>
-            <p className="text-[13px] text-zinc-500 mb-8 leading-relaxed font-medium">
-              DB에 즉시 반영되며,<br/>기존 확정 일정들이 배정 전 단계로 돌아갑니다.
-            </p>
-            <div className="flex gap-3 w-full">
+            <h3 className="text-xl font-bold text-zinc-900 mb-2">정말 모든 신청 일정을 초기화하시겠습니까?</h3>
+            <div className="text-[13px] text-zinc-500 mb-8 space-y-1">
+              <p className="font-bold">DB에 즉시 반영되며, 기존 확정 일정들이 배정 전 단계로 돌아갑니다.</p>
+              <p>이 작업은 되돌릴 수 없으며, 모든 블록이 우측 미배정 목록으로 복구됩니다.</p>
+            </div>
+            
+            <div className="flex gap-2">
               <button
                 onClick={() => setShowResetConfirm(false)}
-                className="flex-1 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-bold rounded-xl transition-colors text-[13px]"
+                className="flex-1 px-4 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-xl text-sm font-bold transition-colors"
               >
-                닫기
+                취소
               </button>
               <button
                 onClick={executeResetSchedule}
-                className="flex-1 py-3 bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold rounded-xl transition-colors border border-rose-200 border-b-rose-300 text-[13px]"
+                className="flex-1 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-bold shadow-md shadow-rose-200 transition-colors"
               >
-                초기화하기
+                초기화 진행
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 일정 취소 경고 플로팅 알림 */}
+      {showCancelConfirm && (
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setShowCancelConfirm(false)}></div>
+          <div className="bg-white rounded-[24px] p-6 max-w-[420px] w-full relative shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 mb-5 shadow-inner">
+              <X size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-zinc-900 mb-2">총 {canceledList.length}건의 일정을 취소하시겠습니까?</h3>
+            <div className="text-[13px] text-zinc-500 mb-8 space-y-1">
+              <p className="font-bold text-rose-500">주의: 해당 상담 신청건 내역이 시스템에서 완전히 삭제됩니다.</p>
+              <p>반드시 내담자와 사전에 취소 합의가 완료되었는지 다시 한 번 확인해 주세요.</p>
+            </div>
+            
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowCancelConfirm(false)}
+                className="flex-1 px-4 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-xl text-sm font-bold transition-colors"
+              >
+                돌아가기
+              </button>
+              <button
+                onClick={executeConfirm}
+                className="flex-1 px-4 py-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-sm font-bold shadow-md shadow-zinc-200 transition-colors"
+              >
+                삭제(취소) 및 확정
               </button>
             </div>
           </div>
