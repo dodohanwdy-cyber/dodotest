@@ -1,15 +1,53 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Send, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
+import React from "react";
 
 interface Message {
   role: "user" | "ai";
   content: string;
 }
+
+// 간단한 마크다운 파서 (굵은 글씨 및 줄바꿈 지원)
+const renderFormattedText = (text: string) => {
+  if (!text) return null;
+
+  // 1. 먼저 줄바꿈(\n)을 기준으로 배열로 쪼갭니다.
+  const lines = text.split('\n');
+
+  return lines.map((line, lineIdx) => {
+    // 2. 각 줄 내에서 **강조 텍스트** 패턴을 찾아 분리합니다.
+    // 캡처 그룹을 써서 매칭된 텍스트와 일반 텍스트를 배열로 나눔
+    const parts = line.split(/(\*\*.*?\*\*)/g);
+
+    return (
+      <React.Fragment key={lineIdx}>
+        {parts.map((part, partIdx) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            // 별표 제거 후 강조 UI 적용
+            const boldText = part.slice(2, -2);
+            return (
+              <strong 
+                key={partIdx} 
+                className="font-black text-indigo-700 bg-indigo-50/70 px-1.5 py-0.5 rounded-md mx-0.5 border border-indigo-100/50"
+              >
+                {boldText}
+              </strong>
+            );
+          }
+          // 일반 텍스트
+          return <span key={partIdx}>{part}</span>;
+        })}
+        {/* 마지막 줄이 아니면 <br /> 추가 */}
+        {lineIdx < lines.length - 1 && <br />}
+      </React.Fragment>
+    );
+  });
+};
 
 export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFinished }: { intakeData: any, onComplete: () => void, onUpdate?: (data: any) => void, isChatFinished?: boolean }) {
   const { user } = useAuth();
@@ -117,11 +155,11 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         {messages.map((msg, idx) => (
           msg.content && (
             <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[90%] p-4 rounded-2xl text-sm leading-relaxed ${
+              <div className={`max-w-[90%] p-4 rounded-2xl text-[15px] leading-relaxed tracking-tight ${
                 msg.role === "user" ? "bg-primary text-white rounded-br-none shadow-md" : "bg-white text-zinc-800 border border-zinc-100 rounded-bl-none shadow-sm"
               }`}>
-                {msg.role === "ai" && <div className="text-[10px] uppercase font-bold text-indigo-400 mb-1 flex items-center gap-1"><Sparkles size={10}/> AI Counselor</div>}
-                <div className="whitespace-pre-wrap">{msg.content}</div>
+                {msg.role === "ai" && <div className="text-[10px] uppercase font-bold text-indigo-400 mb-1.5 flex items-center gap-1 leading-none"><Sparkles size={11}/> AI Counselor</div>}
+                <div className="whitespace-pre-wrap break-keep">{renderFormattedText(msg.content)}</div>
               </div>
             </div>
           )
