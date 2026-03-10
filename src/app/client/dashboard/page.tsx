@@ -211,11 +211,20 @@ export default function ClientDashboard() {
                       }`}>
                         {app.status === 'canceled' ? '취소됨' : 
                          app.status === 'confirmed' ? '상담 확정' : 
+                         app.status === 'pending' ? '배정 대기 중' :
                          app.status || 'AI 분석 중'}
                       </span>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                      {app.status === 'confirmed' && app.confirmed_datetime && (
+                        <div className="col-span-2 flex items-center gap-2 text-indigo-600 bg-indigo-50/50 p-2.5 rounded-xl border border-indigo-100 mb-1">
+                          <Clock size={14} /> 
+                          <span className="font-bold text-[13px] text-indigo-700">
+                            확정 일자: {new Date(app.confirmed_datetime).toLocaleString("ko-KR", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-zinc-500">
                         <Briefcase size={14} /> <span>{app.job_status || '미입력'}</span>
                       </div>
