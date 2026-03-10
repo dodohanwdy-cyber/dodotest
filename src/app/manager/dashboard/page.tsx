@@ -164,20 +164,8 @@ export default function ManagerDashboard() {
   };
 
   const handleOpenAlarmPopup = () => {
-    // 캘린더 이벤트 중 '과거 시간'이 아닌 앞으로의 모든 상담자(오늘 포함)를 대상자로 지정
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const validEvents = (data?.calendar_events || []).filter((evt: any) => {
-      if (!evt.start || !evt.title) return false;
-      const evtDate = new Date(evt.start);
-      evtDate.setHours(0, 0, 0, 0);
-      const title = String(evt.title).trim();
-      const isCounseling = /^.+\s+상담\s*(\((online|phone)\)$|\(offline\))/i.test(title);
-      return evtDate >= today && isCounseling;
-    });
-
-    const allIds = validEvents.map((a: any) => a.id);
+    // 확정된 상담 예약자만 대상자로 지정
+    const allIds = confirmedAppointments.map(apt => apt.request_id);
     setSelectedAlarmUsers(allIds);
     setAlarmStatus("idle");
     setShowAlarmPopup(true);
@@ -262,7 +250,7 @@ export default function ManagerDashboard() {
         <div className="flex gap-3">
           <button
             onClick={handleOpenAlarmPopup}
-            disabled={!data?.calendar_events || data.calendar_events.length === 0}
+            disabled={confirmedAppointments.length === 0}
             className="px-6 py-3 bg-white text-primary border border-primary rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-blue-50/50 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             알람 보내기 <Bell size={16} />
@@ -470,46 +458,34 @@ export default function ManagerDashboard() {
             {/* 수신자 체크박스 리스트 */}
             <div className="space-y-3 max-h-[300px] overflow-y-auto mb-6 pr-2 custom-scrollbar">
               {(() => {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const validEvents = (data?.calendar_events || [])
-                  .filter((evt: any) => {
-                    if (!evt.start || !evt.title) return false;
-                    const evtDate = new Date(evt.start);
-                    evtDate.setHours(0, 0, 0, 0);
-                    const title = String(evt.title).trim();
-                    const isCounseling = /^.+\s+상담\s*(\((online|phone)\)$|\(offline\))/i.test(title);
-                    return evtDate >= today && isCounseling;
-                  })
-                  .sort((a: any, b: any) => new Date(a.start).getTime() - new Date(b.start).getTime());
-
-                if (validEvents.length === 0) {
-                  return <p className="text-center text-zinc-400 text-sm py-4">예정된 상담 일정이 없습니다.</p>;
+                if (confirmedAppointments.length === 0) {
+                  return <p className="text-center text-zinc-400 text-sm py-4">확정된 상담 일정이 없습니다.</p>;
                 }
 
-                return validEvents.map((evt: any) => {
-                  const isPending = evt.color === "gray";
-
+                return confirmedAppointments.map((apt: any) => {
                   // 날짜 시간 포맷팅 (예: "2026-02-28 14:00")
-                  const dateStr = new Date(evt.start).toLocaleString("ko-KR", {
+                  const dateStr = new Date(apt.confirmed_datetime).toLocaleString("ko-KR", {
                     month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
                   });
 
                   return (
-                    <label key={evt.id} className="flex items-center gap-3 p-4 border border-zinc-100 rounded-xl cursor-pointer hover:bg-zinc-50 transition-colors">
+                    <label key={apt.request_id} className="flex items-center gap-3 p-4 border border-zinc-100 rounded-xl cursor-pointer hover:bg-zinc-50 transition-colors">
                       <input 
                         type="checkbox" 
-                        checked={selectedAlarmUsers.includes(evt.id)}
-                        onChange={() => toggleAlarmUser(evt.id)}
-                        className="w-5 h-5 rounded border-zinc-300 text-primary focus:ring-primary focus:ring-offset-0 disabled:opacity-50"
-                        disabled={alarmStatus !== "idle"}
+                        className="w-5 h-5 rounded border-zinc-300 text-primary focus:ring-primary"
+                        checked={selectedAlarmUsers.includes(apt.request_id)}
+                        onChange={() => toggleAlarmUser(apt.request_id)}
                       />
-                      <div className={`flex-1 text-sm font-bold flex items-center gap-2 ${isPending ? "text-slate-500" : "text-blue-600"}`}>
-                        <div className={`w-2 h-2 rounded-full ${isPending ? "bg-slate-400" : "bg-blue-500"}`} />
-                        {evt.title}
-                      </div>
-                      <div className="flex flex-col text-right">
-                         <span className="text-[11px] font-bold text-zinc-500">{dateStr}</span>
+                      <div className="flex items-center justify-between flex-1">
+                        <div>
+                          <p className="font-bold text-zinc-900 text-[15px]">{apt.name}</p>
+                          <p className="text-[13px] text-zinc-500">{dateStr}</p>
+                        </div>
+                        {apt.phone && (
+                          <span className="text-xs font-medium text-zinc-400 px-2.5 py-1 bg-zinc-100 rounded-lg">
+                            {apt.phone}
+                          </span>
+                        )}
                       </div>
                     </label>
                   );
