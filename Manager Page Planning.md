@@ -29,7 +29,7 @@
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/time-check`
   - Method: POST
   - 사용: 인테이크 폼 Step 2
-- **CHOOSE_SCHEDULE** - Section 2 선택한 일정 확정
+- **CHOOSE_SCHEDULE** - Section 2 선택한 일정 확정 (배정 요청)
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/time-request`
   - Method: POST
   - 사용: 인테이크 폼 Step 2
@@ -37,101 +37,86 @@
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/request-data`
   - Method: POST
   - 사용: 인테이크 폼 Step 3
-- **SUBMIT_FINAL_REPORT** - 최종 상세 리포트 제출
+- **SUBMIT_FINAL_REPORT** - 최종 상세 리포트 제출 (요약 포함)
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/consultation-summary`
   - Method: POST
-  - 사용: 인테이크 폼 Step 4 (결과 리포트)
+  - 사용: 상담 완료 및 리포트 생성
 
-#### 기타
-- **GET_DASHBOARD_APPLICATIONS** - 클라이언트 대시보드 데이터 조회
+#### 기타 (내담자 사이드)
+- **GET_DASHBOARD_APPLICATIONS** - 클라이언트 대시보드 신청 내역 조회
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/dashboard-applications`
   - Method: POST
-  - 사용: 클라이언트 대시보드
-- **GET_APPLICATION_DETAIL** - 특정 신청의 전체 데이터 조회
+  - 사용: 클라이언트 대시보드 메인
+- **GET_APPLICATION_DETAIL** - 특정 신청의 전체 데이터 조회 (수정용)
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/application-detail`
   - Method: POST
-  - 사용: 인테이크 폼 (수정 모드)
+  - 사용: 인테이크 폼 (수정/로드 모드)
+- **CANCEL_ASSIGNMENT** - 내담자/매니저 레이어에서의 상담 신청 취소
+  - URL: `https://primary-production-1f39e.up.railway.app/webhook/cancel-assignment`
+  - Method: POST
+  - 사용: 내담자 대시보드 '취소하기', 매니저 페이지 '삭제' 구역
 
-### ⚠️ 연동 완료/진행 중 (상담사 페이지)
+### ✅ 연동 완료 (상담사 페이지)
 
 #### 3단계: 상담사 대시보드 및 상담 관리
 - **GET_MANAGER_DASHBOARD** - 전체 상담 현황 조회
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/schedule-start`
   - Method: POST
-  - 용도: 상담사 대시보드 메인 데이터
-- **GET_DASHBOARD_PREVIEW** - 대시보드용 간편 데이터 조회
+  - 용도: 상담사 대시보드 메인 데이터 (캘린더 및 미배정 목록)
+- **GET_DASHBOARD_PREVIEW** - 대시보드용 확정 목록 데이터 조회
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/send-confirmed-list-data`
   - Method: POST
-  - 용도: 상담사 대시보드 요약 정보 (확정 목록)
-- **ADJUST_SCHEDULE** - 드래그 앤 드롭 일정 변경 (신규 배정)
+  - 용도: 상담사 대시보드 하단 '확정된 상담 목록'
+- **ADJUST_SCHEDULE** - 드래그 앤 드롭 일정 확정/상태 변경
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/schedule-confirm`
   - Method: POST
-  - 용도: 상담 일정 등록 완료
-- **FETCH_CONFIRMED_SCHEDULE** - 기 확정 일정 불러오기 (취소/변경용)
-  - URL: `https://primary-production-1f39e.up.railway.app/webhook/fetch-confirmed-schedule` (예정)
-  - Method: POST
-  - 용도: 팝업 등에 기존에 배정된 리스트 노출
-- **CANCEL_ASSIGNMENT** - 특정 확정 일정 배정 취소 (미배정 복구)
-  - URL: `https://primary-production-1f39e.up.railway.app/webhook/cancel-assignment` (예정)
-  - Method: POST
-  - 용도: 배정된 일정을 다시 미배정 목록으로 되돌림
-- **RESET_SCHEDULE_ASSIGNMENTS** - 배정 내역 일괄 초기화
-  - URL: `https://primary-production-1f39e.up.railway.app/webhook/reset-schedule` (예정)
-  - Method: POST
-  - 용도: 주간/특정 기간 배정 전체 취소
+  - 용도: 미배정 건의 상담 시간 확정 처리
 - **START_CONSULTATION** - 상담 시작 시 전체 데이터 로드
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/send-all-data`
   - Method: POST
-  - 용도: 상담 시작 페이지
-- **CONSULTATION_SUMMARY** - 상담 요약 및 정리
+  - 용도: 상담 시작 페이지 진입 시 내담자 전체 정보 수신
+- **CHECK_CASE** - AI 상담 분석 데이터 즉시 준비 요청 (**신규**)
+  - URL: `https://primary-production-1f39e.up.railway.app/webhook/check-case`
+  - Method: POST
+  - 용도: 상담 상세 팝업 내 '바로 준비하기' 버튼 (AI 분석 수동 트리거)
+- **RESET_SCHEDULE** - 배정 내역 일괄 초기화
+  - URL: `https://primary-production-1f39e.up.railway.app/webhook/reset-schedule`
+  - Method: POST
+  - 용도: 주간/특정 기간 배정 전체 리셋
+- **CONSULTATION_SUMMARY** - 상담 요약 및 STT 결과 저장
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/consultation-summary`
   - Method: POST
-  - 용도: 상담 완료 후 요약 저장 (STT 결과 전송)
+  - 용도: 상담 종료 후 대화 요약 기록
 
-### ⚪ 미사용/대기
-- **AI_CHAT_INPUT** - 채팅 실시간 반응
+### ⚪ 기타/테스트
+- **GET_REPORT_EXAMPLE** - 리포트 결과 예시 데이터 조회
+  - URL: `https://primary-production-1f39e.up.railway.app/webhook/result-example`
+- **AI_CHAT_INPUT** - 채팅 실시간 반응 (대기)
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/chat-input`
-  - 상태: 현재 사용하지 않음 (Gemini API 직접 호출)
-- **SYNC_GOOGLE_SHEETS** - 구글 시트 강제 동기화
-  - URL: 미설정
-  - 상태: 필요시 구현
+  - 상태: 현재 사용하지 않음 (Edge Function 직접 호출 방식 병행)
 
 ---
 
-## 🏗️ 상담사 페이지 구성 요소
+## 🏗️ 상담사 페이지 구성 요소 (상세)
 
 ### 1. 상담사 대시보드 (`/manager/dashboard`)
-- **필요한 데이터**: 전체 상담 신청 목록, 오늘의 일정, 통계(대기/완료/긴급)
 - **주요 기능**: 
-  - 📊 통계 카드 (오늘의 상담, 대기 신청, 주간 완료 건수 등)
-  - 📅 캘린더 뷰 (월간/주간/일간, 드래그 앤 드롭 일정 조정)
-  - 📋 신청 목록 테이블 (상태별 필터링, 검색, 페이지네이션)
-  - 🔔 알림 센터 (신규 신청, 일정 변경, 긴급 요청)
+  - 📊 실시간 상담 현황 통계
+  - 📅 캘린더 인터페이스 (FullCalendar 연동)
+  - 📋 하단 확정 목록 및 알람톡 발송 기능
 - **연동 웹훅**: `GET_MANAGER_DASHBOARD`, `GET_DASHBOARD_PREVIEW`
 
-### 2. 상담 일정 관리 (`/manager/schedule` 및 `ScheduleAdjustPopup`)
-- **필요한 데이터**: 전체 상담 일정(확정/대기), 상담사 근무 시간, 휴일 정보
+### 2. 일정 조정 팝업 (`ScheduleAdjustPopup`)
 - **주요 기능**:
-  - 📅 인터랙티브 캘린더 (시간 블록 시각화, 상태별 색상 코딩, 충돌 감지)
-  - ⏰ 일정 조정 (미배정 목록 드래그앤드롭 배정)
-  - 🔙 확정 일정 취소 및 되돌리기 (기존 배정된 일정을 다시 우측 '미배정 목록'과 같은 별도 칸으로 이동/원복 기능 탑재)
-  - 🔄 자동 스케줄링 및 전체 초기화 (빈 시간대 최적 할당, 전체 리셋 후 재조정)
-- **연동 웹훅**: `ADJUST_SCHEDULE`, `GET_CALENDAR`, `FETCH_CONFIRMED_SCHEDULE`, `CANCEL_ASSIGNMENT`, `RESET_SCHEDULE_ASSIGNMENTS`
+  - ⏰ 미배정 건 드래그앤드롭 배정
+  - 🔙 확정 일정 배정 취소/복구 (미배정 상태로 원복)
+  - 🔄 배정 내역 전체 초기화
+- **연동 웹훅**: `ADJUST_SCHEDULE`, `GET_CALENDAR`, `CANCEL_ASSIGNMENT`, `RESET_SCHEDULE`
 
-### 3. 상담 진행 페이지 (`/manager/consultation/[id]`)
-- **필요한 데이터**: 내담자 기본 정보, 인테이크 응답, AI 채팅 분석 결과, 이전 기록
+### 3. 상담 상세 및 진행 (`/manager/consultation/[id]`)
 - **주요 기능**:
-  - 👤 내담자 정보 패널 (프로필, 관심 분야, 특이사항)
-  - 💬 AI 분석 결과 (고민 요약, 감정 분석, 추천 정책 제안)
-  - 📝 상담 노트 (실시간 메모, 자동 저장, 템플릿)
-  - 🎯 정책 추천 (추천 리스트 검색/추가, 신청 방법 안내)
-  - ✅ 상담 완료 처리 (요약 작성, 후속 조치 계획 전송)
-- **연동 웹훅**: `START_CONSULTATION`, `CONSULTATION_SUMMARY`
-
-### 4. 상담 리포트 페이지 (`/manager/consultation/[id]/report`)
-- **필요한 데이터**: 상담 요약, 확정 추천 정책, 상담사 코멘트, 후속 조치
-- **주요 기능**:
-  - 📄 리포트 뷰어 (최종 결과 시각화, PDF 다운로드)
-  - 📧 결과 전송 (이메일, 카카오 알림톡/SMS 발송)
-  - 📊 통계 분석 (상담 성과 지표 관리)
-- **연동 웹훅**: `SUBMIT_FINAL_REPORT`
+  - 👤 상세 인적사항 및 인테이크 응답 확인
+  - 🪄 **AI 상담 가이드**: 대화 요약, 특이사항, 추천 정책 등 제공
+  - ⚡ **바로 준비하기**: AI 분석 데이터가 즉시 필요할 때 강제 요청
+  - 📝 실시간 상담 노트 및 요약 저장
+- **연동 웹훅**: `START_CONSULTATION`, `CONSULTATION_SUMMARY`, `CHECK_CASE`

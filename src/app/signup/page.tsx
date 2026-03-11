@@ -5,7 +5,19 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
-import { Loader2, UserPlus, CheckCircle2, User, Building2, ArrowRight, Mail, Lock, AlertCircle } from "lucide-react";
+import { 
+  Loader2, 
+  UserPlus, 
+  CheckCircle2, 
+  User, 
+  Building2, 
+  ArrowRight, 
+  Mail, 
+  Lock, 
+  AlertCircle,
+  PartyPopper,
+  Sparkles
+} from "lucide-react";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -32,7 +44,7 @@ export default function SignupPage() {
         setIsSuccess(true);
         // 로그인 페이지에서 사용할 이메일 저장
         sessionStorage.setItem('signup_email', email);
-        setTimeout(() => router.push("/login"), 1500);
+        setTimeout(() => router.push("/login"), 2500); // 사용자 경험을 위해 노출 시간 소폭 연장
       } else {
         setError(response?.message || "회원가입에 실패했습니다. 잠시 후 다시 시도해 주세요.");
       }
@@ -45,13 +57,41 @@ export default function SignupPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-[calc(100vh-160px)] flex items-center justify-center p-6">
-        <div className="max-w-md w-full glass p-10 rounded-[2rem] text-center space-y-4">
-          <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 size={32} />
+      <div className="min-h-[calc(100vh-160px)] flex items-center justify-center p-6 relative overflow-hidden bg-white">
+        {/* 축하 배경 효과 */}
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-100/40 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-emerald-100/40 rounded-full blur-3xl animate-pulse delay-700" />
+        
+        <div className="max-w-md w-full relative z-10 text-center space-y-8 animate-in fade-in zoom-in duration-700">
+          <div className="relative inline-block">
+            <div className="w-24 h-24 bg-gradient-to-tr from-blue-500 to-emerald-400 text-white rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl shadow-blue-200 animate-bounce-subtle">
+              <PartyPopper size={40} />
+            </div>
+            <div className="absolute -top-2 -right-2 text-amber-400 animate-pulse">
+              <Sparkles size={24} />
+            </div>
+            <div className="absolute -bottom-2 -left-2 text-blue-400 animate-pulse delay-500">
+              <Sparkles size={20} />
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-zinc-900">회원가입 성공!</h1>
-          <p className="text-zinc-500 italic">로그인 페이지로 이동합니다...</p>
+
+          <div className="space-y-3">
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">회원가입이 완료되었습니다!</h1>
+            <p className="text-lg text-slate-500 font-bold leading-relaxed break-keep">
+              열고닫기의 가족이 되신 것을<br/>
+              진심으로 환영합니다.
+            </p>
+          </div>
+
+          <div className="pt-8 flex flex-col items-center gap-4">
+            <div className="flex items-center gap-2 text-primary font-bold animate-pulse">
+              <Loader2 className="animate-spin" size={16} />
+              <span className="text-sm">로그인 페이지로 안내해 드릴게요...</span>
+            </div>
+            <div className="h-1.5 w-48 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-50">
+              <div className="h-full bg-gradient-to-r from-blue-400 to-emerald-400 rounded-full animate-stripe" style={{ width: '100%' }} />
+            </div>
+          </div>
         </div>
       </div>
     );
