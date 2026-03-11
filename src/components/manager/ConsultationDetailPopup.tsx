@@ -49,13 +49,15 @@ interface ConsultationDetailPopupProps {
   onClose: () => void;
   data: any;
   isLoading: boolean;
+  onRefresh?: () => Promise<void>;
 }
 
 export default function ConsultationDetailPopup({
   isOpen,
   onClose,
   data,
-  isLoading
+  isLoading,
+  onRefresh
 }: ConsultationDetailPopupProps) {
   const [showExample, setShowExample] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
@@ -135,8 +137,14 @@ export default function ConsultationDetailPopup({
         postToWebhook(WEBHOOK_URLS.CHECK_CASE, { request_id: data.request_id }),
         timeoutPromise,
       ]);
+      
+      // 데이터 갱신 요청
+      if (onRefresh) {
+        await onRefresh();
+      }
+      
       setPrepareStatus('ok');
-      showToast('AI 분석 데이터 준비 요청이 완료됐습니다. 잠시 후 데이터를 확인해 주세요.', 'ok');
+      showToast('AI 분석이 완료되었습니다. 최신 리포트를 확인해 보세요!', 'ok');
       setTimeout(() => setPrepareStatus('idle'), 5000);
     } catch (err: any) {
       setPrepareStatus('error');
@@ -506,9 +514,42 @@ export default function ConsultationDetailPopup({
               </div>
 
               {/* 6. AI 상담 가이드 */}
-              <div className="bg-[#fff9eb] rounded-[32px] p-8 border border-amber-100/50">
+              <div className="bg-[#fff9eb] rounded-[32px] p-8 border border-amber-100/50 relative overflow-hidden min-h-[500px]">
+                {/* 다이내믹 로딩 오버레이 (섹션 전체를 덮도록 이동) */}
+                {isPreparing && (
+                  <div className="absolute inset-0 z-[20] bg-white/95 backdrop-blur-[4px] flex flex-col items-center justify-center p-8 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="relative mb-12">
+                      <div className="w-24 h-24 border-[4px] border-primary/10 border-t-primary rounded-full animate-spin" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Sparkles className="text-primary animate-pulse" size={32} />
+                      </div>
+                    </div>
+                    
+                    <div className={`text-center space-y-4 max-w-lg transition-all duration-500 transform ${isFading ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
+                      <p className="text-2xl font-bold text-slate-900 tracking-tight leading-tight">
+                        {LOADING_MESSAGES[loadingStep]}
+                      </p>
+                      <p className="text-sm text-slate-400 font-bold">
+                        잠시만 기다려 주세요. AI가 전문적인 상담 가이드를 생성 중입니다.
+                      </p>
+                    </div>
+
+                    {/* 프로그레스 바 형태의 시각적 요소 */}
+                    <div className="w-72 h-2 bg-slate-100 rounded-full mt-12 overflow-hidden shadow-inner">
+                      <div 
+                        className="h-full bg-primary transition-all duration-[4000ms] ease-linear shadow-[0_0_10px_rgba(0,106,255,0.5)]"
+                        style={{ width: `${(loadingStep + 1) * 20}%` }}
+                      />
+                    </div>
+                    
+                    <div className="mt-8 text-[11px] font-bold text-slate-300 uppercase tracking-widest">
+                      AI Powered Analysis System
+                    </div>
+                  </div>
+                )}
+
                 {/* 섹션 헤더 + 예시/준비 버튼 */}
-                <div className="flex items-start justify-between mb-8 flex-wrap gap-3">
+                <div className={`flex items-start justify-between mb-8 flex-wrap gap-3 transition-all duration-500 ${isPreparing ? 'blur-sm opacity-30 scale-95' : ''}`}>
                   <div className="flex items-center gap-3.5">
                     <div className="w-12 h-12 bg-white shadow-sm rounded-[20px] flex items-center justify-center">
                       <Sparkles className="text-amber-500" size={24} />
@@ -608,36 +649,7 @@ export default function ConsultationDetailPopup({
                       <Route size={20} className="text-indigo-400" />
                       <p className="font-bold text-zinc-800">맞춤 정책 로드맵 &amp; 추천</p>
                     </div>
-                    <div className="bg-white p-6 rounded-[28px] border border-indigo-50 shadow-sm space-y-6 relative overflow-hidden min-h-[400px]">
-                      {/* 다이내믹 로딩 오버레이 */}
-                      {isPreparing && (
-                        <div className="absolute inset-0 z-10 bg-white/90 backdrop-blur-[2px] flex flex-col items-center justify-center p-8 animate-in fade-in duration-500">
-                          <div className="relative mb-10">
-                            <div className="w-20 h-20 border-[3px] border-primary/10 border-t-primary rounded-full animate-spin" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <Sparkles className="text-primary animate-pulse" size={24} />
-                            </div>
-                          </div>
-                          
-                          <div className={`text-center space-y-3 transition-all duration-500 transform ${isFading ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
-                            <p className="text-xl font-bold text-slate-900 tracking-tight">
-                              {LOADING_MESSAGES[loadingStep]}
-                            </p>
-                            <p className="text-sm text-slate-400 font-medium">
-                              최대 30초 정도 소요될 수 있습니다. 잠시만 기다려 주세요.
-                            </p>
-                          </div>
-
-                          {/* 프로그레스 바 형태의 시각적 요소 */}
-                          <div className="w-64 h-1.5 bg-slate-100 rounded-full mt-10 overflow-hidden">
-                            <div 
-                              className="h-full bg-primary transition-all duration-[4000ms] ease-linear"
-                              style={{ width: `${(loadingStep + 1) * 20}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
-
+                    <div className="bg-white p-6 rounded-[28px] border border-indigo-50 shadow-sm space-y-6">
                       <div className={`space-y-8 transition-all duration-500 ${isPreparing ? 'blur-sm opacity-50' : 'blur-0 opacity-100'}`}>
                         {(() => {
                           const roadmap = aiAnalysis?.policy_roadmap;

@@ -163,6 +163,19 @@ export default function ManagerDashboard() {
     }
   };
 
+  const handleRefreshDetail = async () => {
+    if (!detailData?.request_id || !detailData?.email) return;
+    try {
+      const result = await postToWebhook(
+        "https://primary-production-1f39e.up.railway.app/webhook/send-preview-data",
+        { request_id: detailData.request_id, email: detailData.email }
+      );
+      setDetailData(Array.isArray(result) ? result[0] : result);
+    } catch (error) {
+      console.error("[상세보기 갱신] 에러:", error);
+    }
+  };
+
   const handleOpenAlarmPopup = () => {
     // 확정된 상담 예약자만 대상자로 지정
     const allIds = confirmedAppointments.map(apt => apt.request_id);
@@ -535,6 +548,7 @@ export default function ManagerDashboard() {
         }}
         data={detailData}
         isLoading={isLoadingDetail}
+        onRefresh={handleRefreshDetail}
       />
     </div>
   );
