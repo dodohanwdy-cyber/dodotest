@@ -8,7 +8,7 @@
   --font-pretendard: "Pretendard Variable", "Pretendard", -apple-system, "BlinkMacSystemFont", "system-ui", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
   --background: #ffffff;
   --foreground: #191f28; /* 토스 스타일 차분한 블랙 */
-  --primary: #3182f6; /* 토스 블루 */
+  --primary: #006AFF; /* 선명한 블루 */
   --primary-foreground: #ffffff;
   --secondary: #f2f4f6; /* 토스 스타일 배경 회색 */
   --secondary-foreground: #191f28;
@@ -20,7 +20,7 @@
 .dark {
   --background: #020617;
   --foreground: #f8fafc;
-  --primary: #3b82f6;
+  --primary: #006AFF;
   --primary-foreground: #ffffff;
   --secondary: #1e293b;
   --secondary-foreground: #f8fafc;
