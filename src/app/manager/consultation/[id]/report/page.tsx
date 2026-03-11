@@ -67,20 +67,25 @@ export default function ReportPage() {
 
   // 완료된 상담 전용 자동 로딩 함수
   const handleAutoLoadReport = async () => {
+    // 자동 로딩 시에는 화려한 분석 애니메이션 대신 심플한 로딩만 보여줌
+    // (setIsAnalyzing을 true로 하되 loadingStep을 넘기거나, 별도 로딩 상태 사용 가능)
+    // 여기서는 로직 단순화를 위해 isAnalyzing을 켜서 로딩 UI를 보여주되, 시뮬레이션 시간 없이 즉시 데이터 연동
     setIsAnalyzing(true);
     try {
-      // 완료된 상담은 GET_COMPLETED_DETAIL 주소 사용 (추천 주소)
       const res = await postToWebhook(WEBHOOK_URLS.GET_COMPLETED_DETAIL, { request_id: id });
       if (res) {
         const data = Array.isArray(res) ? res[0] : res;
         setReportData(processReportData(data));
       } else {
-        // 전용 웹훅 실패 시 기존 상세 웹훅으로 폴백(Fallback)
-        handleStartReport(false);
+        // 전용 웹훅 실패 시 기존 상세 웹훅으로 폴백
+        const fallbackRes = await postToWebhook(WEBHOOK_URLS.GET_APPLICATION_DETAIL, { request_id: id });
+        if (fallbackRes) {
+          const data = Array.isArray(fallbackRes) ? fallbackRes[0] : fallbackRes;
+          setReportData(processReportData(data));
+        }
       }
     } catch (err) {
       console.error("자동 로딩 실패:", err);
-      handleStartReport(false); // 오류 시 기존 방식으로 시도
     } finally {
       setIsAnalyzing(false);
     }

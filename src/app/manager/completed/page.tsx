@@ -143,7 +143,9 @@ export default function CompletedConsultationsPage() {
               
               <div className="px-6 py-2 min-w-[160px] text-center">
                 <span className="text-xl font-black text-slate-900 tracking-tight">
-                  {selectedMonth ? (() => {
+                  {selectedMonth === "all" ? (
+                    `${availableMonths[0]?.split("-")[0] || new Date().getFullYear()}년 전체 내역`
+                  ) : selectedMonth ? (() => {
                     const [year, month] = selectedMonth.split("-");
                     return `${year}년 ${parseInt(month)}월`;
                   })() : "데이터 없음"}
