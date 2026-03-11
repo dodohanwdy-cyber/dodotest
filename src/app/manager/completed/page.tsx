@@ -22,8 +22,18 @@ export default function CompletedConsultationsPage() {
   const [completedList, setCompletedList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
+
+  // 월 이동 핸들러
+  const handleMonthChange = (direction: 'prev' | 'next') => {
+    const currentIndex = availableMonths.indexOf(selectedMonth);
+    if (direction === 'prev' && currentIndex < availableMonths.length - 1) {
+      setSelectedMonth(availableMonths[currentIndex + 1]);
+    } else if (direction === 'next' && currentIndex > 0) {
+      setSelectedMonth(availableMonths[currentIndex - 1]);
+    }
+  };
 
   useEffect(() => {
     const fetchCompletedData = async () => {
@@ -118,52 +128,59 @@ export default function CompletedConsultationsPage() {
         </div>
       </div>
       
-      {/* Month Selection Tabs */}
-      {!isLoading && availableMonths.length > 0 && (
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 custom-scrollbar no-scrollbar">
-          <button
-            onClick={() => setSelectedMonth("all")}
-            className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all border shrink-0 ${
-              selectedMonth === "all"
-                ? "bg-primary text-white border-primary shadow-lg shadow-blue-100"
-                : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
-            }`}
-          >
-            전체보기 ({completedList.length})
-          </button>
-          <div className="w-px h-6 bg-slate-200 mx-2 shrink-0" />
-          {availableMonths.map(month => {
-            const count = completedList.filter(item => (item.confirmed_datetime || item.time)?.startsWith(month)).length;
-            const [year, monthNum] = month.split("-");
-            return (
+      {/* Calendar Style Navigation */}
+      {!isLoading && (
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm transition-all">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center bg-slate-50 rounded-2xl p-1 border border-slate-100">
               <button
-                key={month}
-                onClick={() => setSelectedMonth(month)}
-                className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all border shrink-0 ${
-                  selectedMonth === month
-                    ? "bg-primary text-white border-primary shadow-lg shadow-blue-100"
-                    : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
-                }`}
+                onClick={() => handleMonthChange('prev')}
+                disabled={availableMonths.indexOf(selectedMonth) === availableMonths.length - 1}
+                className="p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:shadow-none text-slate-600"
               >
-                {year}년 {parseInt(monthNum)}월 ({count})
+                <ChevronLeft size={20} />
               </button>
-            );
-          })}
+              
+              <div className="px-6 py-2 min-w-[160px] text-center">
+                <span className="text-xl font-black text-slate-900 tracking-tight">
+                  {selectedMonth ? (() => {
+                    const [year, month] = selectedMonth.split("-");
+                    return `${year}년 ${parseInt(month)}월`;
+                  })() : "데이터 없음"}
+                </span>
+              </div>
+
+              <button
+                onClick={() => handleMonthChange('next')}
+                disabled={availableMonths.indexOf(selectedMonth) <= 0}
+                className="p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:shadow-none text-slate-600 rotate-180"
+              >
+                <ChevronLeft size={20} />
+              </button>
+            </div>
+
+            {selectedMonth && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100 animate-in fade-in zoom-in duration-300">
+                <FileCheck size={16} />
+                <span className="text-sm font-black text-blue-700">{filteredData.length}건 완료</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSelectedMonth("all")}
+              className={`px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border ${
+                selectedMonth === "all"
+                  ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200"
+                  : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              전체 내역 보기
+            </button>
+          </div>
         </div>
       )}
-
-      {/* Summary Stats (Optional) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5">
-          <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
-            <FileCheck size={24} />
-          </div>
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">전체 완료 건수</p>
-            <p className="text-2xl font-black text-slate-900">{completedList.length}건</p>
-          </div>
-        </div>
-      </div>
 
       {/* Table Section */}
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
