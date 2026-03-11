@@ -108,7 +108,7 @@ export default function CompletedConsultationsPage() {
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">이메일</th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">나이</th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">주요 관심사</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">완료 일자</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">상담 일시</th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">관리</th>
                 </tr>
               </thead>
@@ -144,7 +144,17 @@ export default function CompletedConsultationsPage() {
                     <td className="px-6 py-4 text-sm text-slate-500">
                       <div className="flex items-center gap-2">
                         <Calendar size={14} className="text-slate-300" />
-                        {item.time?.split(" ")[0] || "-"}
+                        {(() => {
+                          const dt = item.confirmed_datetime || item.time;
+                          if (!dt) return "-";
+                          // YYYY-MM-DD HH:MM... 형식에서 HH(시)까지만 추출
+                          const parts = dt.split(" ");
+                          if (parts.length >= 2) {
+                            const timeParts = parts[1].split(":");
+                            return `${parts[0]} ${timeParts[0]}시`;
+                          }
+                          return parts[0];
+                        })()}
                       </div>
                     </td>
                     <td className="px-6 py-4">
