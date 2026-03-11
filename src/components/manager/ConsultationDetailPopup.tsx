@@ -520,41 +520,7 @@ export default function ConsultationDetailPopup({
                 </div>
               </div>
 
-              {/* 6. AI 상담 가이드 */}
               <div className="bg-[#fff9eb] rounded-[32px] p-8 border border-amber-100/50 relative overflow-hidden min-h-[500px]">
-                {/* 다이내믹 로딩 오버레이 (섹션 전체를 덮도록 이동) */}
-                {isPreparing && (
-                  <div className="absolute inset-0 z-[20] bg-white/95 backdrop-blur-[4px] flex flex-col items-center justify-center p-8 animate-in fade-in zoom-in-95 duration-500">
-                    <div className="relative mb-12">
-                      <div className="w-24 h-24 border-[4px] border-primary/10 border-t-primary rounded-full animate-spin" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Sparkles className="text-primary animate-pulse" size={32} />
-                      </div>
-                    </div>
-                    
-                    <div className={`text-center space-y-4 max-w-lg transition-all duration-500 transform ${isFading ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
-                      <p className="text-2xl font-bold text-slate-900 tracking-tight leading-tight">
-                        {LOADING_MESSAGES[loadingStep]}
-                      </p>
-                      <p className="text-sm text-slate-400 font-bold">
-                        잠시만 기다려 주세요. AI가 전문적인 상담 가이드를 생성 중입니다.
-                      </p>
-                    </div>
-
-                    {/* 프로그레스 바 형태의 시각적 요소 */}
-                    <div className="w-72 h-2 bg-slate-100 rounded-full mt-12 overflow-hidden shadow-inner">
-                      <div 
-                        className="h-full bg-primary transition-all duration-[4000ms] ease-linear shadow-[0_0_10px_rgba(0,106,255,0.5)]"
-                        style={{ width: `${(loadingStep + 1) * 20}%` }}
-                      />
-                    </div>
-                    
-                    <div className="mt-8 text-[11px] font-bold text-slate-300 uppercase tracking-widest">
-                      AI Powered Analysis System
-                    </div>
-                  </div>
-                )}
-
                 {/* 섹션 헤더 + 예시/준비 버튼 */}
                 <div className={`flex items-start justify-between mb-8 flex-wrap gap-3 transition-all duration-500 ${isPreparing ? 'blur-sm opacity-30 scale-95' : ''}`}>
                   <div className="flex items-center gap-3.5">
@@ -726,10 +692,45 @@ export default function ConsultationDetailPopup({
           )}
         </div>
 
+        {/* 다이내믹 로딩 오버레이 (팝업 전체 중앙에 배치) */}
+        {isPreparing && (
+          <div className="absolute inset-0 z-[100] bg-white/80 backdrop-blur-[6px] flex flex-col items-center justify-center p-8 animate-in fade-in duration-500">
+            <div className="bg-white/90 p-12 rounded-[40px] shadow-2xl border border-zinc-100 flex flex-col items-center max-w-lg w-full transform scale-110 animate-in zoom-in-95 duration-500">
+              <div className="relative mb-10">
+                <div className="w-24 h-24 border-[4px] border-primary/10 border-t-primary rounded-full animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Sparkles className="text-primary animate-pulse" size={32} />
+                </div>
+              </div>
+              
+              <div className={`text-center space-y-4 transition-all duration-500 transform ${isFading ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
+                <p className="text-2xl font-bold text-slate-900 tracking-tight leading-tight min-h-[64px] flex items-center justify-center">
+                  {LOADING_MESSAGES[loadingStep]}
+                </p>
+                <p className="text-sm text-slate-400 font-bold">
+                  잠시만 기다려 주세요. AI가 전문적인 상담 가이드를 생성 중입니다.
+                </p>
+              </div>
+
+              {/* 프로그레스 바 형태의 시각적 요소 */}
+              <div className="w-full h-2 bg-slate-100 rounded-full mt-12 overflow-hidden shadow-inner">
+                <div 
+                  className="h-full bg-primary transition-all duration-[4000ms] ease-linear shadow-[0_0_10px_rgba(0,106,255,0.5)]"
+                  style={{ width: `${(loadingStep + 1) * 20}%` }}
+                />
+              </div>
+              
+              <div className="mt-8 text-[11px] font-bold text-slate-300 uppercase tracking-widest">
+                AI Powered Analysis System
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 토스트 메시지 */}
         {toastMsg && (
           <div
-            className={`absolute bottom-24 left-1/2 -translate-x-1/2 flex items-start gap-3 px-5 py-4 rounded-2xl shadow-xl text-sm font-bold max-w-sm w-full animate-in slide-in-from-bottom-4 duration-300 ${
+            className={`absolute bottom-24 left-1/2 -translate-x-1/2 z-[110] flex items-start gap-3 px-5 py-4 rounded-2xl shadow-xl text-sm font-bold max-w-sm w-full animate-in slide-in-from-bottom-4 duration-300 ${
               toastType === 'ok'
                 ? 'bg-emerald-600 text-white'
                 : 'bg-red-600 text-white'
