@@ -40,8 +40,8 @@ export default function LoginPage() {
       const resData = Array.isArray(response) ? response[0] : response;
       console.groupEnd();
 
-      // 성공 케이스
-      if (resData && (resData.status === "success" || resData.success)) {
+      // 성공 케이스 (n8n 응답 status: "success", success: true, 또는 HTTP 200 대응)
+      if (resData && (resData.status === "success" || resData.success === true || resData.status === 200)) {
         // 비밀번호 해시 생성 (n8n이 반환하지 않을 경우 대비)
         const hashPassword = async (pwd: string) => {
           const encoder = new TextEncoder();
@@ -158,7 +158,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors p-1"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary transition-colors p-2 z-10 flex items-center justify-center"
                 aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}

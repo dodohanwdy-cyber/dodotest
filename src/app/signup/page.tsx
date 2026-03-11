@@ -43,13 +43,16 @@ export default function SignupPage() {
         created_at: new Date().toISOString(),
       });
 
-      if (response && response.success) {
+      const resData = Array.isArray(response) ? response[0] : response;
+
+      // n8n 응답 규격(status: "success" 또는 success: true) 모두 대응
+      if (resData && (resData.success === true || resData.status === "success" || resData.status === 200)) {
         setIsSuccess(true);
         // 로그인 페이지에서 사용할 이메일 저장
         sessionStorage.setItem('signup_email', email);
-        setTimeout(() => router.push("/login"), 2500); // 사용자 경험을 위해 노출 시간 소폭 연장
+        setTimeout(() => router.push("/login"), 2500); 
       } else {
-        setError(response?.message || "회원가입에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+        setError(resData?.message || "회원가입에 실패했습니다. 잠시 후 다시 시도해 주세요.");
       }
     } catch (err) {
       setError("서버와 통신 중 오류가 발생했습니다.");
@@ -128,7 +131,7 @@ export default function SignupPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-11 pr-12 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                 placeholder="you@example.com"
               />
             </div>
@@ -149,7 +152,7 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors p-2 z-10 flex items-center justify-center"
                 aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
