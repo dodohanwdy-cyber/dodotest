@@ -1,0 +1,177 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { 
+  FileCheck, 
+  Search, 
+  User, 
+  Mail, 
+  Calendar, 
+  MoreHorizontal,
+  ChevronLeft,
+  Loader2,
+  ExternalLink
+} from "lucide-react";
+import { postToWebhook } from "@/lib/api";
+import { WEBHOOK_URLS } from "@/config/webhooks";
+import Link from "next/link";
+
+export default function CompletedConsultationsPage() {
+  const { user } = useAuth();
+  const [completedList, setCompletedList] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const fetchCompletedData = async () => {
+      if (!user) return;
+      setIsLoading(true);
+      try {
+        // n8n에서 전체 내역을 가져오기 위해 호출 (필터링은 클라이언트에서 수행)
+        const response = await postToWebhook(WEBHOOK_URLS.GET_DASHBOARD_APPLICATIONS, {
+          email: "all_completed", // 매니저용 전체 조회를 위한 특수 플래그 (n8n 대응 필요)
+          role: "manager"
+        });
+
+        const rawData = Array.isArray(response) ? response : (response?.applications || []);
+        // status가 completed인 것만 필터링
+        const filtered = rawData.filter((item: any) => item.status === "completed");
+        setCompletedList(filtered);
+      } catch (error) {
+        console.error("Failed to fetch completed consultations:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCompletedData();
+  }, [user]);
+
+  const filteredData = completedList.filter(item => 
+    item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <Link href="/manager/dashboard" className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
+              <ChevronLeft size={24} />
+            </Link>
+            <h1 className="text-3xl font-bold text-slate-900">상담 완료 내역</h1>
+          </div>
+          <p className="text-slate-500 ml-12">과거에 완료된 모든 상담 기록을 확인하고 관리할 수 있습니다.</p>
+        </div>
+
+        <div className="relative w-full md:w-80">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <input 
+            type="text" 
+            placeholder="이름 또는 이메일로 검색"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm shadow-sm"
+          />
+        </div>
+      </div>
+
+      {/* Summary Stats (Optional) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5">
+          <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+            <FileCheck size={24} />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">전체 완료 건수</p>
+            <p className="text-2xl font-black text-slate-900">{completedList.length}건</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Table Section */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        {isLoading ? (
+          <div className="py-20 flex flex-col items-center justify-center space-y-4">
+            <Loader2 className="animate-spin text-primary" size={40} />
+            <p className="text-slate-500 font-medium">데이터를 불러오는 중입니다...</p>
+          </div>
+        ) : filteredData.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100">
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">신청자</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">이메일</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">나이</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">주요 관심사</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">완료 일자</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">관리</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {filteredData.map((item, idx) => (
+                  <tr key={item.request_id || idx} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500">
+                          <User size={18} />
+                        </div>
+                        <span className="font-bold text-slate-900">{item.name || "미입력"}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-500 font-medium">
+                      <div className="flex items-center gap-2">
+                        <Mail size={14} className="text-slate-300" />
+                        {item.email}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600 font-bold">
+                      {item.age}세
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-1">
+                        {(Array.isArray(item.interest_areas) ? item.interest_areas : (item.interest_areas?.split(",") || [])).slice(0, 2).map((area: string, i: number) => (
+                          <span key={i} className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-md">
+                            {area.trim()}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-500">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={14} className="text-slate-300" />
+                        {item.time?.split(" ")[0] || "-"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Link 
+                        href={`/manager/consultation/${item.request_id}`}
+                        className="p-2 text-slate-400 hover:text-primary transition-colors inline-flex items-center gap-1 text-xs font-bold"
+                      >
+                        상세 <ExternalLink size={14} />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="py-20 text-center space-y-4">
+            <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto text-slate-300">
+              <FileCheck size={32} />
+            </div>
+            <div className="space-y-1">
+              <p className="text-slate-900 font-bold">완료된 상담 내역이 없습니다.</p>
+              <p className="text-slate-400 text-sm">진행 중인 상담이 완료되면 이곳에 표시됩니다.</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

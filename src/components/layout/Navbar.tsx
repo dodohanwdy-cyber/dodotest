@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { LogOut, User, LayoutDashboard, FileText } from "lucide-react";
+import { LogOut, User, LayoutDashboard, FileText, PlusCircle } from "lucide-react";
 
 export default function Navbar() {
   const { user, logout, isLoading } = useAuth();
@@ -29,17 +29,34 @@ export default function Navbar() {
             <>
               {user.role === "client" ? (
                 <div className="flex items-center gap-6">
-                  <Link href="/client/dashboard" className="text-[14px] font-bold text-zinc-500 hover:text-primary transition-colors">
+                  <Link href="/client/dashboard" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
+                    <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
+                      <LayoutDashboard size={16} className="text-zinc-400 group-hover:text-primary" />
+                    </div>
                     상담 현황
                   </Link>
-                  <Link href="/client/intake" className="text-[14px] font-bold text-zinc-500 hover:text-primary transition-colors">
+                  <Link href="/client/intake" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
+                    <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
+                      <PlusCircle size={16} className="text-zinc-400 group-hover:text-primary" />
+                    </div>
                     신청하기
                   </Link>
                 </div>
               ) : (
-                <Link href="/manager/dashboard" className="text-[14px] font-bold text-zinc-500 hover:text-primary transition-colors">
-                  관리자 데스크
-                </Link>
+                <div className="flex items-center gap-6">
+                  <Link href="/manager/dashboard" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
+                    <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
+                      <LayoutDashboard size={16} className="text-zinc-400 group-hover:text-primary" />
+                    </div>
+                    관리자 데스크
+                  </Link>
+                  <Link href="/manager/completed" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
+                    <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
+                      <FileText size={16} className="text-zinc-400 group-hover:text-primary" />
+                    </div>
+                    상담 완료 내역
+                  </Link>
+                </div>
               )}
               
               <div className="h-4 w-px bg-zinc-200 mx-2" />
