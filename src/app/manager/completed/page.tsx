@@ -22,6 +22,8 @@ export default function CompletedConsultationsPage() {
   const [completedList, setCompletedList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchCompletedData = async () => {
@@ -49,6 +51,26 @@ export default function CompletedConsultationsPage() {
         // 안전을 위해 한 번 더 status 필터링
         const filtered = Array.isArray(rawData) ? rawData.filter((item: any) => item.status === "completed") : [];
         setCompletedList(filtered);
+
+        // 사용 가능한 월 리스트 추출 (YYYY-MM)
+        const months = new Set<string>();
+        filtered.forEach((item: any) => {
+          const dt = item.confirmed_datetime || item.time;
+          if (dt) {
+            const datePart = dt.split(" ")[0]; // YYYY-MM-DD
+            if (datePart) {
+              const [year, month] = datePart.split("-");
+              if (year && month) months.add(`${year}-${month}`);
+            }
+          }
+        });
+        const sortedMonths = Array.from(months).sort().reverse();
+        setAvailableMonths(sortedMonths);
+        
+        // 데이터가 있다면 가장 최근 월을 기본값으로 설정
+        if (sortedMonths.length > 0) {
+          setSelectedMonth(sortedMonths[0]);
+        }
       } catch (error) {
         console.error("Failed to fetch completed consultations:", error);
       } finally {
@@ -59,10 +81,16 @@ export default function CompletedConsultationsPage() {
     fetchCompletedData();
   }, [user]);
 
-  const filteredData = completedList.filter(item => 
-    item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredData = completedList.filter(item => {
+    const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (selectedMonth === "all") return matchesSearch;
+    
+    const dt = item.confirmed_datetime || item.time;
+    if (!dt) return false;
+    return matchesSearch && dt.startsWith(selectedMonth);
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
@@ -89,6 +117,40 @@ export default function CompletedConsultationsPage() {
           />
         </div>
       </div>
+      
+      {/* Month Selection Tabs */}
+      {!isLoading && availableMonths.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 custom-scrollbar no-scrollbar">
+          <button
+            onClick={() => setSelectedMonth("all")}
+            className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all border shrink-0 ${
+              selectedMonth === "all"
+                ? "bg-primary text-white border-primary shadow-lg shadow-blue-100"
+                : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+            }`}
+          >
+            전체보기 ({completedList.length})
+          </button>
+          <div className="w-px h-6 bg-slate-200 mx-2 shrink-0" />
+          {availableMonths.map(month => {
+            const count = completedList.filter(item => (item.confirmed_datetime || item.time)?.startsWith(month)).length;
+            const [year, monthNum] = month.split("-");
+            return (
+              <button
+                key={month}
+                onClick={() => setSelectedMonth(month)}
+                className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all border shrink-0 ${
+                  selectedMonth === month
+                    ? "bg-primary text-white border-primary shadow-lg shadow-blue-100"
+                    : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+                }`}
+              >
+                {year}년 {parseInt(monthNum)}월 ({count})
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Summary Stats (Optional) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
