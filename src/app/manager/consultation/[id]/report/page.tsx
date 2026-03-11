@@ -50,7 +50,13 @@ export default function ReportPage() {
       try {
         const res = await postToWebhook(WEBHOOK_URLS.START_CONSULTATION, { request_id: id });
         if (res) {
-          setBaseData(Array.isArray(res) ? res[0] : res);
+          const data = Array.isArray(res) ? res[0] : res;
+          setBaseData(data);
+          
+          // 이미 완료된 상담인 경우 자동으로 리포트 데이터 로드 시작
+          if (data.status === "completed") {
+             handleAutoLoadReport();
+          }
         }
       } catch (err) {
         console.error("기초 데이터 로드 실패:", err);
@@ -58,6 +64,27 @@ export default function ReportPage() {
     };
     fetchBaseData();
   }, [id]);
+
+  // 완료된 상담 전용 자동 로딩 함수
+  const handleAutoLoadReport = async () => {
+    setIsAnalyzing(true);
+    try {
+      // 완료된 상담은 GET_COMPLETED_DETAIL 주소 사용 (추천 주소)
+      const res = await postToWebhook(WEBHOOK_URLS.GET_COMPLETED_DETAIL, { request_id: id });
+      if (res) {
+        const data = Array.isArray(res) ? res[0] : res;
+        setReportData(processReportData(data));
+      } else {
+        // 전용 웹훅 실패 시 기존 상세 웹훅으로 폴백(Fallback)
+        handleStartReport(false);
+      }
+    } catch (err) {
+      console.error("자동 로딩 실패:", err);
+      handleStartReport(false); // 오류 시 기존 방식으로 시도
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   useEffect(() => {
     if (isAnalyzing) {
