@@ -34,9 +34,20 @@ export default function CompletedConsultationsPage() {
           timestamp: new Date().toISOString()
         });
 
-        const rawData = Array.isArray(response) ? response : (response?.applications || response?.completed_list || []);
-        // 안전을 위해 한 번 더 status 필터링 (n8n에서 걸러서 오더라도 프론트에서 재검증)
-        const filtered = rawData.filter((item: any) => item.status === "completed");
+        let rawData = [];
+        if (Array.isArray(response)) {
+          // [ { success: true, data: [...] } ] 형태인 경우 첫 번째 요소의 data 추출
+          if (response[0]?.data && Array.isArray(response[0].data)) {
+            rawData = response[0].data;
+          } else {
+            rawData = response;
+          }
+        } else {
+          rawData = response?.data || response?.applications || response?.completed_list || [];
+        }
+
+        // 안전을 위해 한 번 더 status 필터링
+        const filtered = Array.isArray(rawData) ? rawData.filter((item: any) => item.status === "completed") : [];
         setCompletedList(filtered);
       } catch (error) {
         console.error("Failed to fetch completed consultations:", error);
