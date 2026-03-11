@@ -52,28 +52,23 @@ export default function ReportPage() {
     const initFetch = async () => {
       try {
         if (isCompletedMode) {
-          // 완료 내역에서 접근 시 병렬로 데이터 즉시 로드 (중간 안내 페이지 스킵)
-          const [baseRes, reportRes] = await Promise.all([
-            postToWebhook(WEBHOOK_URLS.START_CONSULTATION, { request_id: id }),
-            postToWebhook(WEBHOOK_URLS.GET_COMPLETED_DETAIL, { request_id: id })
-          ]);
+          // 사용자가 한 번에 모든 데이터를 보내주므로 단일 웹훅만 호출합니다.
+          const reportRes = await postToWebhook(WEBHOOK_URLS.GET_COMPLETED_DETAIL, { request_id: id });
 
-          if (baseRes) {
-            setBaseData(Array.isArray(baseRes) ? baseRes[0] : baseRes);
-          }
-
-          let loadedReportData = null;
+          let loadedData = null;
           if (reportRes) {
-            loadedReportData = Array.isArray(reportRes) ? reportRes[0] : reportRes;
+            loadedData = Array.isArray(reportRes) ? reportRes[0] : reportRes;
           } else {
             const fallbackRes = await postToWebhook(WEBHOOK_URLS.GET_APPLICATION_DETAIL, { request_id: id });
             if (fallbackRes) {
-               loadedReportData = Array.isArray(fallbackRes) ? fallbackRes[0] : fallbackRes;
+               loadedData = Array.isArray(fallbackRes) ? fallbackRes[0] : fallbackRes;
             }
           }
 
-          if (loadedReportData) {
-            setReportData(processReportData(loadedReportData));
+          if (loadedData) {
+            // 하나의 응답 데이터로 기본 내담자 정보와 리포트 정보를 모두 세팅
+            setBaseData(loadedData);
+            setReportData(processReportData(loadedData));
           }
         } else {
           // 일반 접근 (대시보드 등)
