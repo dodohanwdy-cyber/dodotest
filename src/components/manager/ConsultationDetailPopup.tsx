@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, User, MapPin, Briefcase, Heart, Calendar, Sparkles, FileText, Lightbulb, Route, AlertCircle, Play, Eye, EyeOff, Zap, Loader2, CheckCircle2 } from 'lucide-react';
 import { postToWebhook } from '@/lib/api';
 import { WEBHOOK_URLS } from '@/config/webhooks';
@@ -114,6 +115,13 @@ export default function ConsultationDetailPopup({
     };
   }, [isPreparing]);
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
+
   const showToast = (msg: string, type: 'ok' | 'error' = 'ok') => {
     setToastMsg(msg);
     setToastType(type);
@@ -159,7 +167,7 @@ export default function ConsultationDetailPopup({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) return null; // 상단 mounted 체크로 이동됨
 
   // 실제 데이터 또는 예시 데이터
   const aiAnalysis = showExample ? EXAMPLE_AI_ANALYSIS : data?.ai_analysis;
@@ -364,26 +372,25 @@ export default function ConsultationDetailPopup({
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-[32px] shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden border border-zinc-100">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[99999] p-4 sm:p-8 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-[32px] shadow-2xl max-w-5xl w-full h-full max-h-[96vh] overflow-hidden border border-zinc-100 flex flex-col">
 
-        {/* 헤더 */}
-        <div className="bg-white px-8 py-7 flex items-center justify-between border-b border-zinc-100">
+        <div className="bg-white px-8 py-5 flex items-center justify-between border-b border-zinc-100 shrink-0">
           <div>
             <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">상담 상세 정보</h2>
-            <p className="text-zinc-500 text-sm mt-1.5 font-medium">상담 준비를 위한 모든 데이터를 한눈에 확인하세요</p>
+            <p className="text-zinc-500 text-sm mt-1 font-medium">상담 준비를 위한 모든 데이터를 한눈에 확인하세요</p>
           </div>
           <button
             onClick={onClose}
-            className="w-11 h-11 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-2xl flex items-center justify-center transition-all duration-200 active:scale-90"
+            className="w-10 h-10 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90"
           >
-            <X size={24} />
+            <X size={22} />
           </button>
         </div>
 
         {/* 내용 */}
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-180px)] custom-scrollbar">
+        <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-[#fafafa]">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="w-12 h-12 border-[3px] border-blue-500 border-t-transparent rounded-full animate-spin mb-5" />
@@ -701,19 +708,19 @@ export default function ConsultationDetailPopup({
         </div>
 
         {/* 푸터 */}
-        <div className="bg-white px-8 py-5 flex justify-end gap-3 border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+        <div className="bg-white px-8 py-5 flex justify-end gap-3 border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] shrink-0">
           <button
             onClick={onClose}
-            className="px-8 py-3.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-2xl font-bold transition-all duration-200 active:scale-95"
+            className="px-8 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-2xl font-bold transition-all duration-200 active:scale-95 text-sm"
           >
             닫기
           </button>
           {!isLoading && data && !data.error && (
             <button
               onClick={handleStartConsultation}
-              className="px-8 py-3.5 bg-primary hover:bg-primary/90 text-white rounded-2xl font-bold flex items-center gap-2 transition-all duration-200 active:scale-95 shadow-lg shadow-indigo-100"
+              className="px-8 py-3 bg-primary hover:bg-primary/90 text-white rounded-2xl font-bold flex items-center gap-2 transition-all duration-200 active:scale-95 shadow-lg shadow-indigo-100 text-sm"
             >
-              <Play size={18} fill="currentColor" />
+              <Play size={16} fill="currentColor" />
               상담 시작하기
             </button>
           )}
@@ -735,6 +742,7 @@ export default function ConsultationDetailPopup({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
