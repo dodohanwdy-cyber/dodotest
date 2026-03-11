@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { 
   FileText, 
   ArrowRight, 
@@ -31,6 +31,10 @@ import { WEBHOOK_URLS } from "@/config/webhooks";
 export default function ReportPage() {
   const { id } = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isCompletedMode = searchParams.get('status') === 'completed';
+
+  const [isInitializing, setIsInitializing] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [reportData, setReportData] = useState<any>(null);
@@ -45,31 +49,54 @@ export default function ReportPage() {
   ];
 
   useEffect(() => {
-    // 기초 데이터 로드 (내담자 프로필 등)
-    const fetchBaseData = async () => {
+    const initFetch = async () => {
       try {
-        const res = await postToWebhook(WEBHOOK_URLS.START_CONSULTATION, { request_id: id });
-        if (res) {
-          const data = Array.isArray(res) ? res[0] : res;
-          setBaseData(data);
-          
-          // 이미 완료된 상담인 경우 자동으로 리포트 데이터 로드 시작
-          if (data.status === "completed") {
-             handleAutoLoadReport();
+        if (isCompletedMode) {
+          // 완료 내역에서 접근 시 병렬로 데이터 즉시 로드 (중간 안내 페이지 스킵)
+          const [baseRes, reportRes] = await Promise.all([
+            postToWebhook(WEBHOOK_URLS.START_CONSULTATION, { request_id: id }),
+            postToWebhook(WEBHOOK_URLS.GET_COMPLETED_DETAIL, { request_id: id })
+          ]);
+
+          if (baseRes) {
+            setBaseData(Array.isArray(baseRes) ? baseRes[0] : baseRes);
+          }
+
+          let loadedReportData = null;
+          if (reportRes) {
+            loadedReportData = Array.isArray(reportRes) ? reportRes[0] : reportRes;
+          } else {
+            const fallbackRes = await postToWebhook(WEBHOOK_URLS.GET_APPLICATION_DETAIL, { request_id: id });
+            if (fallbackRes) {
+               loadedReportData = Array.isArray(fallbackRes) ? fallbackRes[0] : fallbackRes;
+            }
+          }
+
+          if (loadedReportData) {
+            setReportData(processReportData(loadedReportData));
+          }
+        } else {
+          // 일반 접근 (대시보드 등)
+          const res = await postToWebhook(WEBHOOK_URLS.START_CONSULTATION, { request_id: id });
+          if (res) {
+            const data = Array.isArray(res) ? res[0] : res;
+            setBaseData(data);
+            if (data.status === "completed") {
+               handleAutoLoadReport();
+            }
           }
         }
       } catch (err) {
-        console.error("기초 데이터 로드 실패:", err);
+        console.error("데이터 로드 실패:", err);
+      } finally {
+        setIsInitializing(false);
       }
     };
-    fetchBaseData();
-  }, [id]);
+    initFetch();
+  }, [id, isCompletedMode]);
 
-  // 완료된 상담 전용 자동 로딩 함수
+  // 완료된 상담 전용 자동 로딩 함수 (isCompletedMode가 아닐 경우 사용)
   const handleAutoLoadReport = async () => {
-    // 자동 로딩 시에는 화려한 분석 애니메이션 대신 심플한 로딩만 보여줌
-    // (setIsAnalyzing을 true로 하되 loadingStep을 넘기거나, 별도 로딩 상태 사용 가능)
-    // 여기서는 로직 단순화를 위해 isAnalyzing을 켜서 로딩 UI를 보여주되, 시뮬레이션 시간 없이 즉시 데이터 연동
     setIsAnalyzing(true);
     try {
       const res = await postToWebhook(WEBHOOK_URLS.GET_COMPLETED_DETAIL, { request_id: id });
@@ -77,7 +104,6 @@ export default function ReportPage() {
         const data = Array.isArray(res) ? res[0] : res;
         setReportData(processReportData(data));
       } else {
-        // 전용 웹훅 실패 시 기존 상세 웹훅으로 폴백
         const fallbackRes = await postToWebhook(WEBHOOK_URLS.GET_APPLICATION_DETAIL, { request_id: id });
         if (fallbackRes) {
           const data = Array.isArray(fallbackRes) ? fallbackRes[0] : fallbackRes;
@@ -178,6 +204,14 @@ export default function ReportPage() {
       setIsAnalyzing(false);
     }
   };
+
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-zinc-50 p-8 flex flex-col items-center justify-center">
+        <Loader2 size={48} className="text-primary animate-spin" />
+      </div>
+    );
+  }
 
   if (reportData) {
     return <ReportDetailView baseData={baseData} reportData={reportData} onBack={() => setReportData(null)} />;

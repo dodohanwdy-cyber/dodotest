@@ -251,7 +251,7 @@ export default function CompletedConsultationsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <Link 
-                        href={`/manager/consultation/${item.request_id}/report`}
+                        href={`/manager/consultation/${item.request_id}/report?status=completed`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 text-slate-400 hover:text-primary transition-colors inline-flex items-center gap-1 text-xs font-bold"
