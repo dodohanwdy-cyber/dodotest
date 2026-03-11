@@ -67,11 +67,20 @@ export default function ReportPage() {
 
           let loadedData = null;
           if (reportRes) {
-            loadedData = Array.isArray(reportRes) ? reportRes[0] : reportRes;
+            // 응답이 [{ success: true, data: { ... } }] 형태인 경우 처리
+            if (Array.isArray(reportRes)) {
+              loadedData = reportRes[0]?.data || reportRes[0];
+            } else {
+              loadedData = reportRes?.data || reportRes;
+            }
           } else {
             const fallbackRes = await postToWebhook(WEBHOOK_URLS.GET_APPLICATION_DETAIL, { request_id: id });
             if (fallbackRes) {
-               loadedData = Array.isArray(fallbackRes) ? fallbackRes[0] : fallbackRes;
+               if (Array.isArray(fallbackRes)) {
+                 loadedData = fallbackRes[0]?.data || fallbackRes[0];
+               } else {
+                 loadedData = fallbackRes?.data || fallbackRes;
+               }
             }
           }
 
@@ -88,9 +97,15 @@ export default function ReportPage() {
           // 일반 접근 (대시보드 등)
           const res = await postToWebhook(WEBHOOK_URLS.START_CONSULTATION, { request_id: id });
           if (res) {
-            const data = Array.isArray(res) ? res[0] : res;
+            let data = null;
+            if (Array.isArray(res)) {
+               data = res[0]?.data || res[0];
+            } else {
+               data = res?.data || res;
+            }
+
             setBaseData(data);
-            if (data.status === "completed") {
+            if (data?.status === "completed") {
                handleAutoLoadReport();
             }
           }
@@ -110,12 +125,22 @@ export default function ReportPage() {
     try {
       const res = await postToWebhook(WEBHOOK_URLS.GET_COMPLETED_DETAIL, { request_id: id });
       if (res) {
-        const data = Array.isArray(res) ? res[0] : res;
+        let data = null;
+        if (Array.isArray(res)) {
+           data = res[0]?.data || res[0];
+        } else {
+           data = res?.data || res;
+        }
         setReportData(processReportData(data));
       } else {
         const fallbackRes = await postToWebhook(WEBHOOK_URLS.GET_APPLICATION_DETAIL, { request_id: id });
         if (fallbackRes) {
-          const data = Array.isArray(fallbackRes) ? fallbackRes[0] : fallbackRes;
+          let data = null;
+          if (Array.isArray(fallbackRes)) {
+             data = fallbackRes[0]?.data || fallbackRes[0];
+          } else {
+             data = fallbackRes?.data || fallbackRes;
+          }
           setReportData(processReportData(data));
         }
       }
