@@ -71,6 +71,10 @@
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/schedule-confirm`
   - Method: POST
   - 용도: 미배정 건의 상담 시간 확정 처리
+- **GET_COMPLETED_LIST** - 완료된 전체 상담 내역 조회 (**신규**)
+  - URL: `https://primary-production-1f39e.up.railway.app/webhook/completed-list`
+  - Method: POST
+  - 용도: 상담 완료 내역 리스트 페이지용 데이터 수신 (status: completed 대상)
 - **START_CONSULTATION** - 상담 시작 시 전체 데이터 로드
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/send-all-data`
   - Method: POST

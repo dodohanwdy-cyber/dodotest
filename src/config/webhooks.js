@@ -22,6 +22,7 @@ export const WEBHOOK_URLS = {
   // 3단계: 매니저 대시보드 및 결과 처리
   GET_MANAGER_DASHBOARD: "https://primary-production-1f39e.up.railway.app/webhook/schedule-start", // 전체 상담 현황 조회
   GET_DASHBOARD_PREVIEW: "https://primary-production-1f39e.up.railway.app/webhook/send-confirmed-list-data", // 확정된 상담 상세 목록 조회
+  GET_COMPLETED_LIST: "https://primary-production-1f39e.up.railway.app/webhook/completed-list", // [신규] 완료된 전체 상담 내역 조회
   ADJUST_SCHEDULE: "https://primary-production-1f39e.up.railway.app/webhook/schedule-confirm", // 드래그 앤 드롭 일정 변경
   START_CONSULTATION: "https://primary-production-1f39e.up.railway.app/webhook/send-all-data", // 상담 시작 시 전체 데이터 로드
   CONSULTATION_SUMMARY: "https://primary-production-1f39e.up.railway.app/webhook/consultation-summary", // 상담 요약 및 정리 (STT 결과 전송)

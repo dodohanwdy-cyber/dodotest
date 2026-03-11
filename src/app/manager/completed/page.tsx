@@ -28,14 +28,14 @@ export default function CompletedConsultationsPage() {
       if (!user) return;
       setIsLoading(true);
       try {
-        // n8n에서 전체 내역을 가져오기 위해 호출 (필터링은 클라이언트에서 수행)
-        const response = await postToWebhook(WEBHOOK_URLS.GET_DASHBOARD_APPLICATIONS, {
-          email: "all_completed", // 매니저용 전체 조회를 위한 특수 플래그 (n8n 대응 필요)
-          role: "manager"
+        // n8n에서 상담 완료 내역 전용 웹훅 호출
+        const response = await postToWebhook(WEBHOOK_URLS.GET_COMPLETED_LIST, {
+          manager_email: user.email,
+          timestamp: new Date().toISOString()
         });
 
-        const rawData = Array.isArray(response) ? response : (response?.applications || []);
-        // status가 completed인 것만 필터링
+        const rawData = Array.isArray(response) ? response : (response?.applications || response?.completed_list || []);
+        // 안전을 위해 한 번 더 status 필터링 (n8n에서 걸러서 오더라도 프론트에서 재검증)
         const filtered = rawData.filter((item: any) => item.status === "completed");
         setCompletedList(filtered);
       } catch (error) {
