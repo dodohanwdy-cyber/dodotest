@@ -251,7 +251,15 @@ export default function CompletedConsultationsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <Link 
-                        href={`/manager/consultation/${item.request_id}/report?status=completed`}
+                        href={`/manager/consultation/${item.request_id}/report?${new URLSearchParams({
+                          status: 'completed',
+                          name: item.name || '',
+                          age: item.age?.toString() || '',
+                          gender: item.gender || '',
+                          location: item.location || item.full_region || '',
+                          datetime: item.confirmed_datetime || item.time || '',
+                          interest_areas: Array.isArray(item.interest_areas) ? item.interest_areas.join(',') : (item.interest_areas || '')
+                        }).toString()}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 text-slate-400 hover:text-primary transition-colors inline-flex items-center gap-1 text-xs font-bold"

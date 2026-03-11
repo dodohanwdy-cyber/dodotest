@@ -52,7 +52,17 @@ export default function ReportPage() {
     const initFetch = async () => {
       try {
         if (isCompletedMode) {
-          // 사용자가 한 번에 모든 데이터를 보내주므로 단일 웹훅만 호출합니다.
+          // 이전 화면(Manager)에서 넘어온 기본 데이터를 쿼리에서 파싱
+          const queryBaseData = {
+            request_id: id,
+            name: searchParams.get('name') || '',
+            age: searchParams.get('age') || '',
+            gender: searchParams.get('gender') || '',
+            location: searchParams.get('location') || '',
+            schedule: { datetime: searchParams.get('datetime') || '' },
+            interest_areas: searchParams.get('interest_areas') ? searchParams.get('interest_areas')?.split(',') : []
+          };
+
           const reportRes = await postToWebhook(WEBHOOK_URLS.GET_COMPLETED_DETAIL, { request_id: id });
 
           let loadedData = null;
@@ -66,9 +76,13 @@ export default function ReportPage() {
           }
 
           if (loadedData) {
-            // 하나의 응답 데이터로 기본 내담자 정보와 리포트 정보를 모두 세팅
-            setBaseData(loadedData);
-            setReportData(processReportData(loadedData));
+            // URL 쿼리로 가져온 기본 정보와 새로 불러온 분석 데이터를 병합(Merge)
+            const mergedData = { ...queryBaseData, ...loadedData };
+            setBaseData(mergedData);
+            setReportData(processReportData(mergedData));
+          } else {
+            // 응답 실패 시 파라미터 정보로라도 기본 화면 표시
+            setBaseData(queryBaseData);
           }
         } else {
           // 일반 접근 (대시보드 등)
