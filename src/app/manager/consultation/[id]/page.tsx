@@ -420,11 +420,8 @@ export default function ConsultationPage() {
   const handleEndConsultation = async () => {
     if (!confirm("상담을 종료하고 최종 보고서 작성 단계로 이동하시겠습니까?")) return;
     
-    // 내용이 없으면 바로 이동
-    if (!transcript.trim() && !notes.trim()) {
-      router.push(`/manager/consultation/${id}/report`);
-      return;
-    }
+    // 내용이 없더라도 리뷰 모달을 거치도록 바로 이동시키는 로직 제거
+    // (STT나 notes 없이도 '종료' 과정에서 빈 상태를 전송할 수 있게 함)
 
     // 녹음 중이었다면 종료 처리
     if (isRecording) {
@@ -650,7 +647,7 @@ export default function ConsultationPage() {
             {isRecording ? (
               <>
                 <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                녹음 중 (STT 활성)
+                녹음 중 (클릭 시 중단)
               </>
             ) : (
               <>
