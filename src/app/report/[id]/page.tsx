@@ -49,25 +49,37 @@ export default function ClientReportPage() {
         const data = Array.isArray(res) ? (res[0]?.data || res[0]) : (res?.data || res);
         
         if (data) {
-          // 보안 검증: 신청 이메일(email, user_email 등) 또는 request_id 소유권 확인
+          // 보안 검증: 이메일 매칭 대신 URL의 id(request_id)와 데이터 내 ID 일치 여부 우선 확인
           const userEmail = user.email.toLowerCase();
+          const requestIdParam = String(id).toLowerCase();
           
-          // 데이터 내의 모든 필드를 탐색하여 이메일 패턴 확인 (유연성 확보)
-          const dataEmailFields = ['email', 'user_email', 'userEmail', 'Email', 'UserEmail', 'client_email'];
-          const foundEmails = Object.entries(data)
-            .filter(([key, val]) => dataEmailFields.includes(key) || key.toLowerCase().includes('email'))
+          // 데이터 내의 다양한 ID 및 이메일 필드 탐색
+          const dataEmails = Object.entries(data)
+            .filter(([key, val]) => key.toLowerCase().includes('email'))
+            .map(([_, val]) => String(val).toLowerCase());
+          
+          const dataIds = Object.entries(data)
+            .filter(([key, _]) => ['request_id', 'id', 'requestId', 'requestid'].includes(key))
             .map(([_, val]) => String(val).toLowerCase());
 
+          // 1. 요청 ID가 데이터 내의 ID 필드 중 하나와 일치하거나
+          // 2. 로그인한 사용자의 이메일이 데이터 내의 이메일 필드 중 하나와 일치하면 승인
           const isOwner = 
-            foundEmails.includes(userEmail) || 
-            String(data.request_id) === String(id) ||
-            String(data.id) === String(id);
+            dataIds.includes(requestIdParam) || 
+            dataEmails.includes(userEmail) ||
+            String(data.request_id || "").toLowerCase() === requestIdParam ||
+            String(data.id || "").toLowerCase() === requestIdParam;
           
           if (isOwner) {
             setReportData(processClientData(data));
             setSecurityStatus("granted");
           } else {
-            console.warn("Access Denied for:", userEmail, "Data available emails:", foundEmails);
+            console.warn("Access Denied Details:", {
+              userEmail,
+              requestIdParam,
+              foundIds: dataIds,
+              foundEmails: dataEmails
+            });
             setError("이 리포트에 접근할 권한이 없습니다. 본인의 계정으로 로그인되어 있는지 확인해 주세요.");
             setSecurityStatus("denied");
           }
