@@ -131,7 +131,7 @@ export default function ClientDashboard() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
         <div className="animate-in fade-in slide-in-from-left duration-700">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
@@ -157,6 +157,37 @@ export default function ClientDashboard() {
           </Link>
         </div>
       </div>
+
+      {/* 상담 완료 알림 배너 */}
+      {!loading && applications.some(app => app.status === 'analyzed') && (
+        <div className="mb-10 animate-in slide-in-from-top duration-500">
+          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-600 rounded-[2.5rem] p-8 shadow-xl shadow-emerald-100/50 group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-white/20 transition-colors" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-5">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner">
+                  <Sparkles size={32} />
+                </div>
+                <div className="text-white text-center md:text-left">
+                  <h2 className="text-xl font-black tracking-tight mb-1">상담 분석 리포트가 도착했습니다! 🎉</h2>
+                  <p className="text-emerald-50/80 font-bold text-sm">기다려주셔서 감사합니다. {user?.name}님만을 위한 맞춤형 결과가 준비되었습니다.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  const firstAnalyzed = applications.find(app => app.status === 'analyzed');
+                  if (firstAnalyzed) {
+                    window.open(`/report/${firstAnalyzed.request_id || firstAnalyzed.id}`, '_blank');
+                  }
+                }}
+                className="bg-white text-emerald-700 px-8 py-4 rounded-2xl font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+              >
+                지금 리포트 확인하기 <ArrowRight size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-6">

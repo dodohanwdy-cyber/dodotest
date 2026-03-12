@@ -414,10 +414,16 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
 
       setShareUrl(generatedUrl);
       setSendResultStatus("success");
+      
+      // 2초 뒤에 모달 닫기
+      setTimeout(() => {
+        setShowResultModal(false);
+        router.push('/manager/completed');
+      }, 2500);
     } catch (err) {
-      console.error("링크 생성 및 상태 업데이트 실패:", err);
+      console.error("리포트 전송 및 상태 업데이트 실패:", err);
       setSendResultStatus("idle");
-      alert("링크를 생성하는 중 오류가 발생했습니다.");
+      alert("전송 중 오류가 발생했습니다.");
     }
   };
 
@@ -525,7 +531,7 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
               onClick={() => setShowResultModal(true)}
               className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center gap-2"
             >
-              공유용 웹 링크 생성 <LinkIcon size={16} />
+              내담자에게 리포트 전송 <Send size={16} />
             </button>
           </div>
         </div>
@@ -687,7 +693,7 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
               <X size={20} />
             </button>
             <h2 className="text-xl font-black text-zinc-900 mb-6 flex items-center gap-2">
-              <LinkIcon className="text-primary" size={24} /> 내담자용 결과 링크 생성
+              <Send className="text-primary" size={24} /> 내담자에게 리포트 전송
             </h2>
             <div className="flex-1 overflow-y-auto mb-6 border border-zinc-200 rounded-2xl p-6 bg-zinc-50 relative custom-scrollbar">
                <div className="bg-white p-8 rounded-xl shadow-sm border border-zinc-100 space-y-8">
@@ -729,7 +735,7 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
                 <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-left">
                     <p className="text-sm font-bold text-emerald-700 mb-2 flex items-center gap-2">
-                       <CheckCircle2 size={16} /> 보안 링크 생성이 완료되었습니다!
+                       <CheckCircle2 size={16} /> 내담자 대시보드로 전송이 완료되었습니다!
                     </p>
                     <div className="flex items-center gap-2 bg-white p-3 rounded-xl border border-emerald-200">
                       <p className="flex-1 text-xs text-zinc-500 truncate font-mono">{shareUrl}</p>
@@ -753,7 +759,7 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
               ) : (
                 <>
                   <p className="text-center text-[15px] font-black text-blue-600 bg-blue-50 py-4 rounded-xl border border-blue-100 flex items-center justify-center gap-2">
-                    <LinkIcon size={18} /> 내담자 공유 전용 보안 URL을 발급합니다.
+                    <MessageCircle size={18} /> 전송 시 내담자 대시보드에 즉시 알림이 표시됩니다.
                   </p>
                   <button
                     onClick={handleSendResultAction}
@@ -763,7 +769,7 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
                     {sendResultStatus === "loading" ? (
                       <span className="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
                     ) : (
-                      <>보안 링크 생성하기 <LinkIcon size={20} /></>
+                    <>전송 확인 및 알림 보내기 <Send size={20} /></>
                     )}
                   </button>
                 </>
