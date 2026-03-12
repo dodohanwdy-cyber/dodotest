@@ -49,17 +49,25 @@ export default function ClientReportPage() {
         const data = Array.isArray(res) ? (res[0]?.data || res[0]) : (res?.data || res);
         
         if (data) {
-          // 보안 검증: 신청 이메일(email, user_email) 또는 request_id 소유권 확인
+          // 보안 검증: 신청 이메일(email, user_email 등) 또는 request_id 소유권 확인
+          const userEmail = user.email.toLowerCase();
+          
+          // 데이터 내의 모든 필드를 탐색하여 이메일 패턴 확인 (유연성 확보)
+          const dataEmailFields = ['email', 'user_email', 'userEmail', 'Email', 'UserEmail', 'client_email'];
+          const foundEmails = Object.entries(data)
+            .filter(([key, val]) => dataEmailFields.includes(key) || key.toLowerCase().includes('email'))
+            .map(([_, val]) => String(val).toLowerCase());
+
           const isOwner = 
-            data.email === user.email || 
-            data.user_email === user.email || 
-            id === data.request_id ||
-            id === data.id;
+            foundEmails.includes(userEmail) || 
+            String(data.request_id) === String(id) ||
+            String(data.id) === String(id);
           
           if (isOwner) {
             setReportData(processClientData(data));
             setSecurityStatus("granted");
           } else {
+            console.warn("Access Denied for:", userEmail, "Data available emails:", foundEmails);
             setError("이 리포트에 접근할 권한이 없습니다. 본인의 계정으로 로그인되어 있는지 확인해 주세요.");
             setSecurityStatus("denied");
           }
