@@ -477,41 +477,62 @@ export default function ConsultationPage() {
     return null;
   };
 
-  // 정책 항목 객체에서 제목과 내용을 안전하게 추출
+  // 정책 항목 객체에서 제목과 내용을 안전하게 추출 (순서 보장)
   const extractItemTexts = (item: any): { title: string; desc: string } | null => {
     if (!item || typeof item !== 'object') return null;
 
-    const TITLE_KEYS = ['제목', 'title', 'name', '단계', 'step', '정책명', '항목', 'label', '이름', '단계명'];
-    const DESC_KEYS  = ['추천이유', 'reason', '내용', 'description', 'desc', '설명', 'detail', 'summary', '요약', '이유', '효과'];
+    const TITLE_KEYS = ['제목', 'title', 'name', '정책명', '지원명', '솔루션명', '이름', '항목', '단계명', '단계', 'step'];
+    const DESC_KEYS  = ['추천이유', 'reason', '내용', 'description', 'desc', '설명', 'detail', 'summary', '요약', '효과', '지원내용', '추천 배경'];
     const SKIP_KEYS  = ['ID', 'id', '_id'];
 
     let title = '';
     let desc  = '';
 
+    // 1. 명시적인 Title 키 찾기 (부분 일치 허용)
     for (const k of TITLE_KEYS) {
-      const v = extractStr(item[k]);
-      if (v) { title = v; break; }
-    }
-    for (const k of DESC_KEYS) {
-      const v = extractStr(item[k]);
-      if (v) { desc = v; break; }
+      const keyMatch = Object.keys(item).find(key => key.toLowerCase().includes(k.toLowerCase()));
+      if (keyMatch) {
+        const v = extractStr(item[keyMatch]);
+        if (v) { title = v; break; }
+      }
     }
 
-    if (!title && !desc) {
-      const allVals: string[] = [];
-      for (const k of Object.keys(item)) {
-        if (SKIP_KEYS.includes(k)) continue;
-        const v = extractStr(item[k]);
-        if (v) allVals.push(v);
+    // 2. 명시적인 Desc 키 찾기
+    for (const k of DESC_KEYS) {
+      const keyMatch = Object.keys(item).find(key => key.toLowerCase().includes(k.toLowerCase()));
+      if (keyMatch) {
+        const v = extractStr(item[keyMatch]);
+        if (v && v !== title) { 
+          desc += (desc ? ' | ' : '') + v; 
+        }
       }
-      if (allVals.length === 0) {
-        const raw = JSON.stringify(item);
-        if (raw && raw !== '{}') return { title: raw, desc: '' };
-        return null;
-      }
-      title = allVals[0];
-      desc  = allVals.slice(1).join(' | ');
     }
+
+    // 3. 만약 둘 다 못 찾았다면 (키 이름이 예상과 완전히 다를 때)
+    if (!title || !desc) {
+      const remainingVals: string[] = [];
+      for (const key of Object.keys(item)) {
+        if (SKIP_KEYS.some(skip => key.toLowerCase().includes(skip.toLowerCase()))) continue;
+        const v = extractStr(item[key]);
+        // 이미 title이나 desc로 추출된 값은 제외
+        if (v && v !== title && !desc.includes(v)) {
+            remainingVals.push(v);
+        }
+      }
+      
+      // 타이틀이 비어있으면 남은 것 중 가장 짧은 문자열을 타이틀로 추정
+      if (!title && remainingVals.length > 0) {
+        remainingVals.sort((a, b) => a.length - b.length);
+        title = remainingVals.shift() || '';
+      }
+      
+      // 나머지를 모조리 desc로 합침
+      if (remainingVals.length > 0) {
+        desc += (desc ? ' | ' : '') + remainingVals.join(' | ');
+      }
+    }
+
+    if (!title && !desc) return null;
 
     return { title: title || '(항목)', desc };
   };
@@ -522,6 +543,31 @@ export default function ConsultationPage() {
     if (typeof value === 'string' && value.trim() === '') return true;
     if (Array.isArray(value) && value.length === 0) return true;
     return false;
+  };
+
+  // 커스터마이징 전략 문장 단위 포맷팅 헬퍼
+  const formatGuideText = (text: string) => {
+    if (!text) return <p className="text-sm text-zinc-700 leading-relaxed font-medium">분석된 가이드라인이 없습니다.</p>;
+    
+    // . ? ! 등 구두점 뒤 공백을 기준으로 줄바꿈 문자로 변환 (가독성 향상)
+    const splitText = text.replace(/([.?!])\s+/g, "$1\n");
+    const lines = splitText.split('\n').filter(line => line.trim());
+
+    return (
+      <div className="space-y-3">
+        {lines.map((line, idx) => {
+          const isQuestion = line.includes('?');
+          const isImportant = line.includes('핵심') || line.includes('중요') || line.includes('목표') || line.includes('반드시');
+          
+          return (
+            <p key={idx} className={`text-[13px] leading-relaxed flex items-start gap-2 ${isQuestion ? 'font-bold text-indigo-700' : isImportant ? 'font-bold text-zinc-900' : 'font-medium text-zinc-700'}`}>
+              <span className="text-primary/40 mt-1 shrink-0">•</span>
+              <span className="flex-1">{line.trim()}</span>
+            </p>
+          );
+        })}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -696,7 +742,9 @@ export default function ConsultationPage() {
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-zinc-400 mb-0.5">인적 사항</p>
-                    <p className="font-bold text-zinc-900">{data?.name} ({data?.age}세, {data?.gender})</p>
+                    <p className="font-bold text-zinc-900">
+                      {data?.name} ({data?.age}세, {data?.gender === "male" ? "남" : data?.gender === "female" ? "여" : data?.gender})
+                    </p>
                   </div>
                 </div>
 
@@ -789,10 +837,8 @@ export default function ConsultationPage() {
                     <h2 className="text-sm font-extrabold text-zinc-900 flex items-center gap-2">
                       <Lightbulb size={18} className="text-amber-500" /> 커스터마이징 전략
                     </h2>
-                    <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[150px]">
-                       <p className="text-sm text-zinc-700 leading-relaxed font-medium whitespace-pre-wrap">
-                          {data?.ai_insights?.consultation_guide || "분석된 가이드라인이 없습니다."}
-                       </p>
+                    <div className="bg-white p-6 rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[150px]">
+                       {formatGuideText(data?.ai_insights?.consultation_guide)}
                     </div>
                   </div>
                   <div className="space-y-6">
@@ -829,8 +875,8 @@ export default function ConsultationPage() {
 
                                 return validItems.map((item: any) => (
                                   <div key={item.idx} className="flex flex-col">
-                                    <span className="text-sm font-extrabold text-zinc-800">{item.idx + 1}. {item.title}</span>
-                                    {item.desc && <span className="text-sm text-zinc-600 mt-1 pl-4 border-l-2 border-zinc-100 ml-1">{item.desc}</span>}
+                                    <span className="text-[13px] font-extrabold text-zinc-800">{item.idx + 1}. {item.title}</span>
+                                    {item.desc && <span className="text-xs text-zinc-500 mt-1.5 pl-4 border-l-2 border-zinc-100 ml-1 leading-relaxed inline-block">{item.desc}</span>}
                                   </div>
                                 ));
                               }
