@@ -213,7 +213,7 @@ export default function ClientDashboard() {
                           'bg-indigo-50 text-primary border border-indigo-100'
                         }`}>
                           {isCanceled ? '상담 취소됨' : 
-                           isAnalyzed ? '리포트 분석 완료' : 
+                           isAnalyzed ? '상담 완료' : 
                            app.status === 'confirmed' ? '상담 확정' : 
                            '신청 완료 (대기중)'}
                         </div>
