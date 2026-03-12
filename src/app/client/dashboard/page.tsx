@@ -207,7 +207,6 @@ export default function ClientDashboard() {
                       <div className="flex justify-between items-start mb-4">
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 bg-zinc-100 text-zinc-500 text-[9px] font-black rounded uppercase tracking-wider border border-zinc-200">ID {requestId?.slice(-8)}</span>
                             <span className="text-[10px] font-bold text-zinc-400 font-mono tracking-tight">{new Date(app.created_at || Date.now()).toLocaleDateString()}</span>
                           </div>
                           <h3 className={`font-black text-xl tracking-tight ${isCanceled ? 'text-zinc-400 line-through' : 'text-zinc-900'}`}>
@@ -221,8 +220,8 @@ export default function ClientDashboard() {
                         }`}>
                           {isCanceled ? '상담 취소됨' : 
                            isAnalyzed ? '상담 완료' : 
-                           app.status === 'confirmed' ? '상담 확정' : 
-                           '신청 완료 (대기중)'}
+                           app.status === 'confirmed' ? '상담 예정' : 
+                           '신청됨'}
                         </div>
                       </div>
                       
@@ -297,7 +296,7 @@ export default function ClientDashboard() {
 
         <div className="space-y-6">
           <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2 mb-4">
-            <AlertCircle size={20} className="text-amber-500" /> 리포트 확인 안내
+            <AlertCircle size={20} className="text-primary" /> 현재 진행 단계
           </h2>
           
           <div className={`card-premium p-7 space-y-8 bg-gradient-to-br from-white to-zinc-50/80 shadow-sm border-zinc-100 transition-all duration-500`}>
@@ -310,17 +309,17 @@ export default function ClientDashboard() {
             </div>
             
             <div className={`relative pl-12 transition-all duration-300 ${activeStep === 2 ? 'opacity-100 translate-x-1' : activeStep !== null ? 'opacity-30 grayscale' : 'opacity-100'}`}>
-              <div className={`absolute left-0 top-0 w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all ${activeStep === 2 ? 'bg-emerald-500 text-white scale-110 shadow-lg shadow-emerald-500/20' : 'bg-emerald-50 text-emerald-500'}`}>2</div>
+              <div className={`absolute left-0 top-0 w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all ${activeStep === 2 ? 'bg-indigo-400 text-white scale-110 shadow-lg shadow-indigo-400/20' : 'bg-indigo-50 text-indigo-400'}`}>2</div>
               <div>
-                <h4 className={`text-sm font-black tracking-tight transition-colors ${activeStep === 2 ? 'text-emerald-600' : 'text-zinc-900'}`}>담당 상담사 정밀 검토</h4>
+                <h4 className={`text-sm font-black tracking-tight transition-colors ${activeStep === 2 ? 'text-indigo-600' : 'text-zinc-900'}`}>담당 상담사 정밀 검토</h4>
                 <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">전문가가 AI 분석 결과를 최종 검토하여 맞춤 솔루션을 확정합니다.</p>
               </div>
             </div>
  
             <div className={`relative pl-12 transition-all duration-300 ${activeStep === 3 ? 'opacity-100 translate-x-1' : activeStep !== null ? 'opacity-30 grayscale' : 'opacity-100'}`}>
-              <div className={`absolute left-0 top-0 w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all ${activeStep === 3 ? 'bg-amber-500 text-white scale-110 shadow-lg shadow-amber-500/20' : 'bg-amber-50 text-amber-500'}`}>3</div>
+              <div className={`absolute left-0 top-0 w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all ${activeStep === 3 ? 'bg-indigo-300 text-white scale-110 shadow-lg shadow-indigo-300/20' : 'bg-indigo-50 text-indigo-300'}`}>3</div>
               <div>
-                <h4 className={`text-sm font-black tracking-tight transition-colors ${activeStep === 3 ? 'text-amber-600' : 'text-zinc-900'}`}>본 상담 리포트 발급</h4>
+                <h4 className={`text-sm font-black tracking-tight transition-colors ${activeStep === 3 ? 'text-indigo-500' : 'text-zinc-900'}`}>상담 리포트 발급</h4>
                 <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">진행한 상담을 바탕으로 신청자님에게 맞는 정보를 정리했습니다.</p>
               </div>
             </div>
