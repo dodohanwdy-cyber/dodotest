@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Calendar as CalendarIcon, Clock, ChevronRight, ChevronLeft, Loader2, MapPin, Phone, Video, Building2, AlertCircle } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
@@ -44,6 +44,8 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
   
   // 웹훅 전송 중 상태
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // 예약된 시간 원본 데이터 (날짜 클릭 시 참조)
+  const bookedDataRef = useRef<{ [key: string]: string[] }>({});
 
   // 기존 데이터 복원
   useEffect(() => {
@@ -121,12 +123,18 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
         
         console.log("📅 [캘린더 웹훅 응답]", response);
         
-        if (response && response.status === "success") {
-          const { work_info, booked_data } = response;
+        // 응답이 배열로 오는 경우 첫 번째 요소 사용
+        const raw = Array.isArray(response) ? response[0] : response;
+        
+        if (raw && raw.status === "success") {
+          const { work_info, booked_data } = raw;
           
           if (work_info) {
             setWorkInfo(work_info);
           }
+          
+          // booked_data를 ref에 저장해두어 날짜 클릭 시 사용
+          bookedDataRef.current = booked_data || {};
           
           const calendarData = generateCalendar(work_info || workInfo, booked_data || {});
           setCalendar(calendarData);
@@ -245,7 +253,8 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
     
     setSelectedDate(day.date);
     setAvailableTimes(day.times);
-    setBookedTimes([]);
+    // 해당 날짜의 예약된 시간 목록 설정
+    setBookedTimes(bookedDataRef.current[day.date] || []);
   };
 
   const handleTimeClick = (time: string) => {
@@ -462,13 +471,17 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
                       {availableTimes.map((time, idx) => {
                         const isSelected = isTimeSelected(time);
                         const rank = getRankForTime(time);
+                        const isBooked = bookedTimes.includes(time);
                         
                         return (
                           <button
                             key={idx}
                             onClick={() => handleTimeClick(time)}
+                            disabled={isBooked}
                             className={`w-full py-4 px-5 rounded-2xl text-sm font-black transition-all border-2 flex items-center justify-between ${
-                              isSelected
+                              isBooked
+                                ? "bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed"
+                                : isSelected
                                 ? rank === 1
                                   ? "bg-gradient-to-r from-yellow-400 to-amber-500 border-yellow-600 text-white shadow-lg shadow-yellow-200"
                                   : rank === 2
@@ -481,7 +494,10 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
                               <Clock size={18} />
                               <span className="text-base">{time}</span>
                             </div>
-                            {rank && (
+                            {isBooked && (
+                              <span className="text-xs text-slate-400 font-bold">예약됨</span>
+                            )}
+                            {!isBooked && rank && (
                               <span className="text-sm font-black bg-white/30 px-3 py-1 rounded-full">
                                 {rank}순위
                               </span>
