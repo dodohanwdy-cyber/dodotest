@@ -10,6 +10,8 @@ import {
   MessageCircle,
   Heart,
   AlertCircle,
+  ArrowRight,
+  FileText,
 } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
@@ -23,7 +25,6 @@ export default function ClientReportPage() {
 
   useEffect(() => {
     if (!id) return;
-
     const rawId = Array.isArray(id) ? id[0] : id;
 
     const loadReport = async () => {
@@ -33,7 +34,6 @@ export default function ClientReportPage() {
         const res = await postToWebhook(WEBHOOK_URLS.GET_COMPLETED_DETAIL, {
           request_id: rawId,
         });
-
         const data = Array.isArray(res)
           ? res[0]?.data || res[0]
           : res?.data || res;
@@ -41,33 +41,24 @@ export default function ClientReportPage() {
         if (data && typeof data === "object" && Object.keys(data).length > 0) {
           setReportData({
             user_name: data.name || data.user_name || "내담자",
-            main_issue:
-              data.main_issue || "주요 고민 내용이 정리되지 않았습니다.",
-            user_message:
-              data.user_message ||
-              "상담사가 전하는 메시지가 생성되지 않았습니다.",
+            main_issue: data.main_issue || "주요 고민 내용이 정리되지 않았습니다.",
+            user_message: data.user_message || "상담사가 전하는 메시지가 생성되지 않았습니다.",
             policy_match: data.policy_match
               ? typeof data.policy_match === "string"
-                ? data.policy_match
-                    .split("\n")
-                    .filter((s: string) => s.trim() !== "")
+                ? data.policy_match.split("\n").filter((s: string) => s.trim() !== "")
                 : data.policy_match
               : [],
             next_steps: data.next_step
               ? typeof data.next_step === "string"
                 ? data.next_step
                     .split("\n")
-                    .map((s: string) =>
-                      s.replace(/^\d+\.\s*/, "").trim()
-                    )
+                    .map((s: string) => s.replace(/^\d+\.\s*/, "").trim())
                     .filter((s: string) => s !== "")
                 : data.next_step
               : [],
           });
         } else {
-          setError(
-            "리포트 정보를 찾을 수 없습니다. 아직 분석이 진행 중이거나, 잘못된 링크일 수 있습니다."
-          );
+          setError("리포트 정보를 찾을 수 없습니다. 아직 분석이 진행 중이거나, 잘못된 링크일 수 있습니다.");
         }
       } catch {
         setError("서버와의 연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.");
@@ -81,17 +72,11 @@ export default function ClientReportPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-rose-50/30 flex flex-col items-center justify-center p-6">
-        <div className="relative mb-8">
-          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-sm">
-            <Loader2 size={32} className="text-rose-300 animate-spin" />
-          </div>
-          <Heart
-            className="absolute -top-1 -right-1 text-rose-400 fill-rose-400"
-            size={24}
-          />
+      <div className="min-h-screen bg-indigo-50/40 flex flex-col items-center justify-center p-6">
+        <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-lg mb-6 border border-indigo-100">
+          <Loader2 size={32} className="text-primary animate-spin" />
         </div>
-        <h2 className="text-xl font-bold text-rose-900/70 animate-pulse">
+        <h2 className="text-lg font-bold text-indigo-900/60 animate-pulse">
           리포트를 불러오는 중입니다...
         </h2>
       </div>
@@ -100,9 +85,9 @@ export default function ClientReportPage() {
 
   if (error || !reportData) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-xl mb-8 border border-zinc-100">
-          <AlertCircle size={40} className="text-amber-400" />
+      <div className="min-h-screen bg-indigo-50/40 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-xl mb-8 border border-indigo-100">
+          <AlertCircle size={40} className="text-indigo-300" />
         </div>
         <h2 className="text-2xl font-black text-zinc-900 mb-3 tracking-tight">
           리포트를 불러올 수 없습니다
@@ -121,105 +106,144 @@ export default function ClientReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFDFD] pb-12 overflow-x-hidden">
-      <div className="h-48 bg-gradient-to-br from-rose-100/50 to-indigo-100/50 absolute top-0 left-0 right-0 -z-10 blur-3xl opacity-60 rounded-full scale-150 transform -translate-y-1/2" />
-
-      <main className="max-w-md mx-auto px-6 pt-12">
-        <header className="mb-12 text-center">
-          <div className="inline-flex p-3 bg-white rounded-2xl shadow-sm border border-rose-50 mb-6">
-            <Sparkles className="text-rose-400" size={28} />
+    <div className="min-h-screen bg-slate-50 pb-20">
+      {/* 상단 헤더 배너 */}
+      <div className="bg-primary px-6 py-12 text-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-3 mb-4 opacity-70">
+            <FileText size={16} />
+            <span className="text-sm font-bold uppercase tracking-widest">
+              Consultation Analysis Report
+            </span>
           </div>
-          <h1 className="text-2xl font-black text-zinc-900 leading-tight">
-            <span className="text-rose-500">{reportData.user_name}</span>님을 위한
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight leading-tight">
+            <span className="opacity-70">{reportData.user_name}님을 위한</span>
             <br />
             상담 분석 리포트
           </h1>
-          <p className="text-sm font-medium text-zinc-400 mt-3 tracking-tight">
-            오늘 상담에서 나눈 소중한 이야기들을 정리했습니다.
+          <p className="text-indigo-200 font-medium mt-3 text-sm md:text-base">
+            오늘 상담에서 나눈 소중한 이야기들을 전문가가 정리했습니다.
           </p>
-        </header>
+        </div>
+      </div>
 
-        <div className="space-y-6">
-          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-50 animate-in slide-in-from-bottom-4 duration-500">
-            <h2 className="text-sm font-black text-rose-400/80 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <MessageCircle size={16} /> 핵심 요약
-            </h2>
-            <div className="text-lg font-bold text-zinc-800 leading-relaxed">
-              {reportData.main_issue}
-            </div>
-          </section>
+      {/* 본문 */}
+      <main className="max-w-5xl mx-auto px-4 md:px-8 -mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          <section className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-[32px] p-8 shadow-xl text-white transform hover:scale-[1.01] transition-transform animate-in slide-in-from-bottom-6 duration-700">
-            <div className="flex justify-between items-start mb-6">
-              <div className="p-2 bg-white/20 rounded-xl">
-                <Heart className="fill-white" size={24} />
+          {/* 왼쪽: 핵심 요약 + 상담사 메시지 (세로로 쌓임, 데스크탑에서는 2칸) */}
+          <div className="lg:col-span-2 space-y-6">
+
+            {/* 핵심 요약 */}
+            <section className="bg-white rounded-[28px] p-8 md:p-10 shadow-sm border border-slate-100">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <MessageCircle size={18} />
+                </div>
+                <h2 className="text-xs font-black text-primary uppercase tracking-widest">
+                  핵심 요약
+                </h2>
               </div>
-              <span className="text-xs font-bold text-white/60 tracking-widest uppercase">
-                From your counselor
-              </span>
-            </div>
-            <p className="text-xl font-bold leading-relaxed mb-4">
-              &ldquo;{reportData.user_message}&rdquo;
-            </p>
-            <div className="h-1 w-12 bg-white/30 rounded-full" />
-          </section>
+              <p className="text-lg md:text-xl font-bold text-zinc-800 leading-relaxed">
+                {reportData.main_issue}
+              </p>
+            </section>
 
-          <section className="bg-rose-50/30 rounded-[32px] p-8 border border-white shadow-sm animate-in slide-in-from-bottom-8 duration-700">
-            <h2 className="text-sm font-black text-rose-400/80 uppercase tracking-widest mb-6 flex items-center gap-2">
-              <Target size={18} /> 맞춤형 추천 정책
-            </h2>
-            <div className="space-y-3">
-              {reportData.policy_match.length > 0 ? (
-                reportData.policy_match.map((policy: string, idx: number) => (
-                  <div
-                    key={idx}
-                    className="bg-white p-4 rounded-2xl border border-rose-100/50 shadow-sm flex items-start gap-3"
-                  >
-                    <div className="mt-1 text-rose-400">
-                      <CheckCircle2 size={16} />
-                    </div>
-                    <span className="text-sm font-bold text-zinc-700 leading-tight">
-                      {policy}
-                    </span>
+            {/* 상담사 메시지 */}
+            <section className="bg-primary/5 rounded-[28px] p-8 md:p-10 border border-primary/10">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <Heart size={18} />
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-zinc-400 py-4 italic">
-                  추천 정책을 준비 중입니다.
-                </p>
-              )}
-            </div>
-          </section>
+                  <h2 className="text-xs font-black text-primary uppercase tracking-widest">
+                    상담사 메시지
+                  </h2>
+                </div>
+                <span className="text-[10px] font-bold text-primary/40 tracking-widest uppercase hidden md:block">
+                  From your counselor
+                </span>
+              </div>
+              <blockquote className="text-lg md:text-xl font-bold text-zinc-800 leading-relaxed border-l-4 border-primary/30 pl-6">
+                &ldquo;{reportData.user_message}&rdquo;
+              </blockquote>
+            </section>
 
-          <section className="bg-zinc-900 rounded-[32px] p-8 shadow-sm animate-in slide-in-from-bottom-10 duration-1000">
-            <h2 className="text-sm font-black text-zinc-500 uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-zinc-800 pb-4">
-              <Sparkles size={18} className="text-amber-400" /> 향후 실천 계획
-            </h2>
-            <div className="space-y-4">
-              {reportData.next_steps.length > 0 ? (
-                reportData.next_steps.map((step: string, idx: number) => (
-                  <div key={idx} className="flex items-start gap-4 group">
-                    <div className="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-black text-zinc-500 border border-zinc-700 group-hover:bg-amber-400 group-hover:text-zinc-900 group-hover:border-amber-400 transition-colors shrink-0 mt-0.5">
-                      {idx + 1}
+          </div>
+
+          {/* 오른쪽: 맞춤형 추천 정책 */}
+          <div className="lg:col-span-1">
+            <section className="bg-white rounded-[28px] p-8 shadow-sm border border-slate-100 h-full">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <Target size={18} />
+                </div>
+                <h2 className="text-xs font-black text-primary uppercase tracking-widest">
+                  추천 정책
+                </h2>
+              </div>
+              <div className="space-y-3">
+                {reportData.policy_match.length > 0 ? (
+                  reportData.policy_match.map((policy: string, idx: number) => (
+                    <div
+                      key={idx}
+                      className="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary/20 hover:bg-primary/5 transition-colors"
+                    >
+                      <CheckCircle2 size={16} className="text-primary mt-0.5 shrink-0" />
+                      <span className="text-sm font-bold text-zinc-700 leading-snug">
+                        {policy}
+                      </span>
                     </div>
-                    <p className="text-sm font-medium text-zinc-300 leading-relaxed group-hover:text-white transition-colors">
-                      {step}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-zinc-600 italic">
-                  다음 단계를 준비 중입니다.
-                </p>
-              )}
-            </div>
-          </section>
+                  ))
+                ) : (
+                  <p className="text-sm text-zinc-400 py-4 italic text-center">
+                    추천 정책을 준비 중입니다.
+                  </p>
+                )}
+              </div>
+            </section>
+          </div>
+
         </div>
 
-        <footer className="mt-16 text-center pb-8 border-t border-rose-100/30 pt-12">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center">
-              <Heart size={16} className="text-rose-400 fill-rose-400" />
+        {/* 하단: 향후 실천 계획 (전체 너비) */}
+        <section className="mt-6 bg-white rounded-[28px] p-8 md:p-10 shadow-sm border border-slate-100">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+              <Sparkles size={18} />
+            </div>
+            <h2 className="text-xs font-black text-primary uppercase tracking-widest">
+              향후 실천 계획
+            </h2>
+          </div>
+          {reportData.next_steps.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {reportData.next_steps.map((step: string, idx: number) => (
+                <div
+                  key={idx}
+                  className="flex items-start gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary/20 hover:bg-primary/5 transition-colors group"
+                >
+                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-black text-primary group-hover:bg-primary group-hover:text-white transition-colors shrink-0">
+                    {idx + 1}
+                  </div>
+                  <p className="text-sm font-medium text-zinc-700 leading-relaxed">
+                    {step}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-zinc-400 italic text-center py-4">
+              다음 단계를 준비 중입니다.
+            </p>
+          )}
+        </section>
+
+        {/* 푸터 */}
+        <footer className="mt-12 pb-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Heart size={14} className="text-primary" />
             </div>
             <p className="text-xs font-black text-zinc-400 uppercase tracking-[.2em]">
               OPCL Care Team
