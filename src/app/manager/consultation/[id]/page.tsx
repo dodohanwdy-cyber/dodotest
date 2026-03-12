@@ -654,29 +654,25 @@ export default function ConsultationPage() {
                 </div>
               </div>
 
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="px-2 py-0.5 bg-indigo-50 text-indigo-500 text-[10px] font-bold rounded-md">마이크 테스트</div>
-                  <span className="text-[11px] font-bold text-zinc-400">아래 문구를 읽어보세요</span>
+              <div className="flex-1 flex flex-col justify-center min-w-0">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  {isOffline ? (
+                    <div className="flex flex-shrink-0 items-center gap-1.5 px-2 py-0.5 bg-amber-50 rounded-md border border-amber-100 text-[10px] font-bold text-amber-600">
+                       <AlertCircle size={12} /> 오프라인
+                    </div>
+                  ) : (
+                    <div className="flex flex-shrink-0 items-center gap-1.5 px-2 py-0.5 bg-sky-50 rounded-md border border-sky-100 text-[10px] font-bold text-sky-600">
+                       <Mic size={12} /> 온라인 STT
+                    </div>
+                  )}
+                  <div className="w-[1px] h-3 bg-zinc-200 mx-0.5"></div>
+                  <div className="px-2 py-0.5 bg-indigo-50 text-indigo-500 text-[10px] font-bold rounded-md whitespace-nowrap shrink-0">마이크 테스트</div>
+                  <span className="text-[11px] font-bold text-zinc-400 whitespace-nowrap shrink-0 hidden sm:inline">아래 문구를 읽어보세요</span>
                 </div>
-                <p className="text-sm font-bold text-zinc-800 leading-relaxed italic">
+                <p className="text-sm font-bold text-zinc-800 leading-relaxed italic truncate">
                   "{dailyQuote.message}"
                 </p>
                 <p className="text-[10px] text-zinc-400 mt-1">— {dailyQuote.author}</p>
-              </div>
-
-              <div className="pl-4">
-                {isOffline ? (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 rounded-xl border border-amber-100 animate-bounce-subtle shrink-0">
-                     <AlertCircle className="text-amber-500" size={14} />
-                     <span className="text-[11px] font-bold text-amber-700 whitespace-nowrap">오프라인 모드</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-sky-50 rounded-xl border border-sky-100 animate-bounce-subtle shrink-0">
-                     <Mic className="text-sky-500" size={14} />
-                     <span className="text-[11px] font-bold text-sky-700 whitespace-nowrap">온라인 (STT)</span>
-                  </div>
-                )}
               </div>
            </div>
         </div>
