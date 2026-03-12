@@ -2,18 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { 
-  FileText, 
-  ArrowRight, 
-  ChevronLeft, 
-  Sparkles, 
-  Loader2, 
-  BrainCircuit, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Target, 
-  MessageCircle, 
-  TrendingUp, 
+import {
+  FileText,
+  ArrowRight,
+  ChevronLeft,
+  Sparkles,
+  Loader2,
+  BrainCircuit,
+  AlertTriangle,
+  CheckCircle2,
+  Target,
+  MessageCircle,
+  TrendingUp,
   Activity,
   User,
   Clock,
@@ -23,7 +23,9 @@ import {
   Copy,
   Check,
   X,
-  Send
+  Send,
+  Share2, // Added Share2 icon
+  Link as LinkIcon // Added LinkIcon
 } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
@@ -135,7 +137,7 @@ export default function ReportPage() {
       }
     };
     initFetch();
-  }, [id, isCompletedMode]);
+  }, [id, isCompletedMode, searchParams]); // Added searchParams to dependencies
 
   // 완료된 상담 전용 자동 로딩 함수 (isCompletedMode가 아닐 경우 사용)
   const handleAutoLoadReport = async () => {
@@ -377,7 +379,7 @@ export default function ReportPage() {
                 ) : endConsultationStatus === "success" ? (
                   <><CheckCircle2 size={18} /> 알림이 발송되었어요</>
                 ) : (
-                  <>안내 문자 보내기 <Send size={18} /></>
+                  <>우선 종료 알림 보내기 <Send size={18} /></>
                 )}
               </button>
             </div>
@@ -418,6 +420,44 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleCopyAll = () => {
+    const fullText = `[AI 상담 분석 결과 보고서]
+발급번호: ${baseData?.request_id || "N/A"}
+발급일시: ${new Date().toLocaleString()}
+
+■ 내담자 정보
+- 이름: ${baseData?.name || "내담자"} (${baseData?.age}세, ${baseData?.gender === "male" ? "남성" : "여성"})
+- 지역: ${baseData?.location ? (typeof baseData.location === 'object' ? baseData.location.regional : baseData.location) : "N/A"}
+
+■ 위기 진단 지수
+- 점수: SCORE ${reportData.summary.risk_score} / 10
+- 위험도: ${reportData.summary.risk_description}
+- 주요 이슈: ${reportData.summary.main_issue}
+- 핵심 키워드: ${reportData.summary.keywords.join(', ')}
+
+■ 상담 대화 요약
+${reportData.analysis.dialog_summary}
+
+■ 상세 분석
+[참여도 변화]
+${reportData.analysis.engagement_change}
+
+[상담사 특이사항]
+${reportData.analysis.counselor_note}
+
+■ 맞춤형 실행 계획
+[추천 정책 솔루션]
+${reportData.action_plan.policy_match.map((p: string) => "- " + p).join('\n')}
+
+[다음 액션 플랜]
+${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
+
+■ 내담자 전달 메시지
+"${reportData.feedback.user_message}"`;
+
+    handleCopy(fullText, 'all');
   };
 
   // 위험 점수 색상 설정 (0-10 기준)
@@ -473,10 +513,18 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
               PDF 저장
             </button>
             <button 
+              onClick={handleCopyAll} 
+              className="px-5 py-2.5 bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-900 transition-all text-sm flex items-center gap-2 shadow-sm"
+              title="리포트 전체 내용을 복사합니다."
+            >
+              {copiedId === 'all' ? <Check size={16} className="text-emerald-400" /> : <Copy size={16} />}
+              전체 복사
+            </button>
+            <button 
               onClick={() => setShowResultModal(true)}
               className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center gap-2"
             >
-              상담 결과 보내기 <Send size={16} />
+              공유용 웹 링크 생성 <LinkIcon size={16} />
             </button>
           </div>
         </div>
@@ -624,7 +672,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
                        className="p-1 px-2 text-primary/60 hover:text-primary hover:bg-white rounded-lg transition-all flex items-center gap-1 print:hidden"
                      >
                        {copiedId === 'policies' ? <Check size={10} /> : <Copy size={10} />}
-                       <span className="text-[9px] font-bold">전체 복사</span>
+                       <span className="text-[9px] font-bold">텍스트 복사</span>
                      </button>
                    </div>
                   <div className="space-y-3">
@@ -646,7 +694,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
                        className="p-1 px-2 text-primary/60 hover:text-primary hover:bg-white rounded-lg transition-all flex items-center gap-1 print:hidden"
                      >
                        {copiedId === 'steps' ? <Check size={10} /> : <Copy size={10} />}
-                       <span className="text-[9px] font-bold">전체 복사</span>
+                       <span className="text-[9px] font-bold">텍스트 복사</span>
                      </button>
                    </div>
                   <div className="space-y-3">
@@ -706,7 +754,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
             </button>
             
             <h2 className="text-xl font-black text-zinc-900 mb-6 shrink-0 flex items-center gap-2">
-              <Send className="text-primary" size={24} /> 상담 결과 보내기
+              <LinkIcon className="text-primary" size={24} /> 내담자용 결과 링크 생성
             </h2>
             
             {/* 원페이퍼 미리보기 창 */}
@@ -758,7 +806,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
 
             <div className="shrink-0 space-y-4">
               <p className="text-center text-[15px] font-black text-blue-600 bg-blue-50 py-4 rounded-xl border border-blue-100 flex items-center justify-center gap-2">
-                <MessageCircle size={18} /> 상담자에게 위와 같은 내용을 발송합니다.
+                <LinkIcon size={18} /> 위 내용을 요약한 내담자 공유 전용 URL 링크를 발급합니다.
               </p>
 
               <button
@@ -769,9 +817,9 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
                 {sendResultStatus === "loading" ? (
                   <span className="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
                 ) : sendResultStatus === "success" ? (
-                  <><CheckCircle2 size={20} /> 전송이 완료되었습니다!</>
+                  <><CheckCircle2 size={20} /> 링크 생성이 완료되었습니다!</>
                 ) : (
-                  <>보내기 <Send size={20} /></>
+                  <>보안 링크 생성하기 <LinkIcon size={20} /></>
                 )}
               </button>
             </div>
