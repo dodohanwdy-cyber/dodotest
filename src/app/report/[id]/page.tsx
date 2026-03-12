@@ -49,26 +49,33 @@ export default function ClientReportPage() {
         const data = Array.isArray(res) ? (res[0]?.data || res[0]) : (res?.data || res);
         
         if (data) {
-          // 보안 검증: 이메일 매칭 대신 URL의 id(request_id)와 데이터 내 ID 일치 여부 우선 확인
-          const userEmail = user.email.toLowerCase();
-          const requestIdParam = String(id).toLowerCase();
+          // 보안 검증: 이메일 매칭의 한계(매니저 이메일 기록 등)를 해결하기 위해 
+          // URL의 id(request_id)와 데이터 내 ID 일치 여부를 최우선으로 확인
+          const userEmail = (user.email || "").toLowerCase().trim();
+          const requestIdParam = String(id || "").toLowerCase().trim();
           
-          // 데이터 내의 다양한 ID 및 이메일 필드 탐색
-          const dataEmails = Object.entries(data)
-            .filter(([key, val]) => key.toLowerCase().includes('email'))
-            .map(([_, val]) => String(val).toLowerCase());
+          // 데이터 내의 모든 필드 탐색 (대소문자 무시 필드명 탐색)
+          const allEntries = Object.entries(data);
           
-          const dataIds = Object.entries(data)
-            .filter(([key, _]) => ['request_id', 'id', 'requestId', 'requestid'].includes(key))
-            .map(([_, val]) => String(val).toLowerCase());
+          const dataEmails = allEntries
+            .filter(([key]) => key.toLowerCase().includes('email'))
+            .map(([_, val]) => String(val || "").toLowerCase().trim());
+          
+          const dataIds = allEntries
+            .filter(([key]) => ['request_id', 'id', 'requestId', 'requestid', 'id_value'].includes(key.toLowerCase()))
+            .map(([_, val]) => String(val || "").toLowerCase().trim());
 
-          // 1. 요청 ID가 데이터 내의 ID 필드 중 하나와 일치하거나
-          // 2. 로그인한 사용자의 이메일이 데이터 내의 이메일 필드 중 하나와 일치하면 승인
-          const isOwner = 
-            dataIds.includes(requestIdParam) || 
-            dataEmails.includes(userEmail) ||
-            String(data.request_id || "").toLowerCase() === requestIdParam ||
-            String(data.id || "").toLowerCase() === requestIdParam;
+          // 핵심 보안 검증:
+          // 1. URL의 ID가 데이터의 ID 필드(request_id 등) 중 하나와 정확히 일치하는가?
+          // 2. 혹은 내담자의 이메일이 데이터의 이메일 필드 중 하나와 일치하는가?
+          const isIdMatched = dataIds.includes(requestIdParam) || 
+                             String(data.request_id || "").toLowerCase().trim() === requestIdParam ||
+                             String(data.id || "").toLowerCase().trim() === requestIdParam;
+                             
+          const isEmailMatched = dataEmails.includes(userEmail);
+
+          // 사용자의 요청에 따라 '내담자 페이지를 통한 링크(즉 ID 일치)'를 우선적으로 허용
+          const isOwner = isIdMatched || isEmailMatched;
           
           if (isOwner) {
             setReportData(processClientData(data));
@@ -78,7 +85,8 @@ export default function ClientReportPage() {
               userEmail,
               requestIdParam,
               foundIds: dataIds,
-              foundEmails: dataEmails
+              foundEmails: dataEmails,
+              raw_data_request_id: data.request_id
             });
             setError("이 리포트에 접근할 권한이 없습니다. 본인의 계정으로 로그인되어 있는지 확인해 주세요.");
             setSecurityStatus("denied");
