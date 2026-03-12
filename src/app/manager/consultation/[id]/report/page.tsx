@@ -308,8 +308,8 @@ export default function ReportPage() {
                   />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-zinc-800 group-hover:text-primary transition-colors">매니저에게 분석 완료 알림톡 받기</p>
-                  <p className="text-xs text-zinc-500 mt-1 leading-relaxed">AI 리포트 분석이 완료되면 카카오톡 알림으로 즉시 알려드립니다.</p>
+                  <p className="text-sm font-bold text-zinc-800 group-hover:text-primary transition-colors">매니저에게 분석 완료 알림 받기</p>
+                  <p className="text-xs text-zinc-500 mt-1 leading-relaxed">AI 리포트 분석이 완료되면 화면 우측 하단 팝업 알림으로 즉시 알려드립니다.</p>
                 </div>
               </label>
             </div>
