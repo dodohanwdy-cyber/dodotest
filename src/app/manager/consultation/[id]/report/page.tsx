@@ -41,6 +41,21 @@ export default function ReportPage() {
   const [baseData, setBaseData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // --- 알림톡 발송 모달 State ---
+  const [showEndConsultationModal, setShowEndConsultationModal] = useState(false);
+  const [endConsultationStatus, setEndConsultationStatus] = useState<"idle" | "loading" | "success">("idle");
+
+  const handleEndConsultationAction = async () => {
+    setEndConsultationStatus("loading");
+    // "상담 수고하셨습니다. 리포트는 추후 준비됩니다." 알림 발송 동작 모의
+    await new Promise((res) => setTimeout(res, 1200));
+    setEndConsultationStatus("success");
+    setTimeout(() => {
+      setShowEndConsultationModal(false);
+      setEndConsultationStatus("idle");
+    }, 2000);
+  };
+
   const loadingMessages = [
     "상담 기록을 구조화하고 있습니다...",
     "AI가 핵심 키워드와 감정 상태를 분석 중입니다...",
@@ -310,6 +325,13 @@ export default function ReportPage() {
               내담자에게 전달할 정밀 리포트를 구성합니다.
             </p>
             
+            <button 
+              onClick={() => setShowEndConsultationModal(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-zinc-100 text-zinc-700 font-bold rounded-2xl hover:bg-zinc-200 transition-all mb-8 shadow-sm"
+            >
+              종료 알림 먼저 보내기 <MessageCircle size={18} />
+            </button>
+            
              <div className="flex gap-4 w-full">
                 <button 
                   onClick={() => router.back()}
@@ -333,6 +355,51 @@ export default function ReportPage() {
              </div>
           </>
         )}
+
+        {/* 상담 종료 알림 보내기 모달 (리포트 미포함) */}
+        {showEndConsultationModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setShowEndConsultationModal(false)}></div>
+            <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full relative z-10 shadow-2xl animate-in zoom-in-95 duration-200 text-left">
+              <button 
+                onClick={() => setShowEndConsultationModal(false)}
+                className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors z-20"
+              >
+                <X size={20} />
+              </button>
+              
+              <div className="w-12 h-12 bg-zinc-50 rounded-2xl flex items-center justify-center text-zinc-500 mb-5 shadow-inner">
+                <MessageCircle size={24} />
+              </div>
+
+              <h2 className="text-xl font-bold text-zinc-900 mb-2">상담 종료 알림 발송</h2>
+              <p className="text-[13px] text-zinc-500 mb-6 font-medium leading-relaxed">
+                내담자({baseData?.name || "고객"}님)에게 상담 종료 인사말과 함께, AI 리포트가 추후 분석되어 제공될 예정이라는 안내 문자를 우선 발송합니다.
+              </p>
+
+              <button
+                onClick={handleEndConsultationAction}
+                disabled={endConsultationStatus !== "idle"}
+                className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md ${
+                  endConsultationStatus === "success" 
+                    ? "bg-green-100 text-green-700 shadow-none" 
+                    : "bg-zinc-800 text-white hover:bg-zinc-700 hover:translate-y-[-1px] active:translate-y-[1px]"
+                } disabled:opacity-50 disabled:hover:translate-y-0 disabled:cursor-not-allowed`}
+              >
+                {endConsultationStatus === "loading" ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> 
+                    발송 중...
+                  </>
+                ) : endConsultationStatus === "success" ? (
+                  <><CheckCircle2 size={18} /> 알림이 발송되었어요</>
+                ) : (
+                  <>안내 문자 보내기 <Send size={18} /></>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -352,9 +419,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
   
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
   const [showResultModal, setShowResultModal] = useState(false);
-  const [showEndConsultationModal, setShowEndConsultationModal] = useState(false);
   const [sendResultStatus, setSendResultStatus] = useState<"idle" | "loading" | "success">("idle");
-  const [endConsultationStatus, setEndConsultationStatus] = useState<"idle" | "loading" | "success">("idle");
 
   const handleSendResultAction = async () => {
     setSendResultStatus("loading");
@@ -363,18 +428,6 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
     setTimeout(() => {
       setShowResultModal(false);
       setSendResultStatus("idle");
-    }, 2000);
-  };
-
-  const handleEndConsultationAction = async () => {
-    setEndConsultationStatus("loading");
-    // STT 데이터 및 기본 상태값 등은 이전 화면에서 전송 완료되었다고 가정
-    // 여기서는 내담자에게 "상담 수고하셨습니다. 리포트는 추후 준비됩니다." 알림 발송 동작 모의
-    await new Promise((res) => setTimeout(res, 1200));
-    setEndConsultationStatus("success");
-    setTimeout(() => {
-      setShowEndConsultationModal(false);
-      setEndConsultationStatus("idle");
     }, 2000);
   };
 
@@ -435,12 +488,6 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
               className="px-5 py-2.5 bg-zinc-100 text-zinc-600 font-bold rounded-xl hover:bg-zinc-200 transition-all text-sm flex items-center gap-2"
             >
               PDF 저장
-            </button>
-            <button 
-              onClick={() => setShowEndConsultationModal(true)}
-              className="px-5 py-2.5 bg-zinc-100 text-zinc-600 font-bold rounded-xl hover:bg-zinc-200 transition-all text-sm flex items-center gap-2"
-            >
-              종료 알림 보내기 <MessageCircle size={16} />
             </button>
             <button 
               onClick={() => setShowResultModal(true)}
@@ -745,51 +792,6 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
                 )}
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* 상담 종료 알림 보내기 모달 (리포트 미포함) */}
-      {showEndConsultationModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setShowEndConsultationModal(false)}></div>
-          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full relative z-10 shadow-2xl animate-in zoom-in-95 duration-200">
-            <button 
-              onClick={() => setShowEndConsultationModal(false)}
-              className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors z-20"
-            >
-              <X size={20} />
-            </button>
-            
-            <div className="w-12 h-12 bg-zinc-50 rounded-2xl flex items-center justify-center text-zinc-500 mb-5 shadow-inner">
-              <MessageCircle size={24} />
-            </div>
-
-            <h2 className="text-xl font-bold text-zinc-900 mb-2">상담 종료 알림 발송</h2>
-            <p className="text-[13px] text-zinc-500 mb-6 font-medium leading-relaxed">
-              내담자({baseData?.name || "고객"}님)에게 상담 종료 인사말과 함께, AI 리포트가 추후 분석되어 제공될 예정이라는 안내 문자를 발송합니다.
-            </p>
-
-            <button
-              onClick={handleEndConsultationAction}
-              disabled={endConsultationStatus !== "idle"}
-              className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md ${
-                endConsultationStatus === "success" 
-                  ? "bg-green-100 text-green-700 shadow-none" 
-                  : "bg-zinc-800 text-white hover:bg-zinc-700 hover:translate-y-[-1px] active:translate-y-[1px]"
-              } disabled:opacity-50 disabled:hover:translate-y-0 disabled:cursor-not-allowed`}
-            >
-              {endConsultationStatus === "loading" ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> 
-                  발송 중...
-                </>
-              ) : endConsultationStatus === "success" ? (
-                <><CheckCircle2 size={18} /> 알림이 발송되었어요</>
-              ) : (
-                <>안내 문자 보내기 <Send size={18} /></>
-              )}
-            </button>
           </div>
         </div>
       )}
