@@ -53,8 +53,9 @@ export default function ClientDashboard() {
     try {
       setLoading(true);
       setError(null);
-      const url = `/api/applications?email=${encodeURIComponent(user.email)}${forceRefresh ? `&_t=${now}` : ''}`;
-      const res = await fetch(url);
+      // 항상 타임스탬프를 붙여 브라우저/프록시 캐시를 강제 우회
+      const url = `/api/applications?email=${encodeURIComponent(user.email)}&_t=${now}`;
+      const res = await fetch(url, { cache: 'no-store' });
       const data = await res.json();
       
       if (res.ok) {
@@ -207,6 +208,8 @@ export default function ClientDashboard() {
                 const isAnalyzed = app.status === 'analyzed';
                 const isCanceled = app.status === 'canceled';
                 const requestId = app.request_id || app.id;
+                // pending 상태: 이어하기 가능
+                const canResume = !isAnalyzed && !isCanceled;
 
                 return (
                   <div 
@@ -217,8 +220,11 @@ export default function ClientDashboard() {
                       else if (!isCanceled) setActiveStep(1);
                     }}
                     onMouseLeave={() => setActiveStep(null)}
+                    onClick={() => { if (canResume) window.location.href = '/client/intake'; }}
                     className={`card-premium p-0 overflow-hidden border-2 transition-all group ${
-                      isAnalyzed ? 'border-indigo-100 shadow-indigo-100/50 shadow-xl' : 'hover:border-primary/20 hover:shadow-lg'
+                      isAnalyzed ? 'border-indigo-100 shadow-indigo-100/50 shadow-xl' :
+                      canResume ? 'hover:border-primary/30 hover:shadow-lg cursor-pointer' :
+                      'hover:border-rose-100 hover:shadow-sm'
                     }`}
                   >
                     <div className="p-7">
@@ -280,14 +286,21 @@ export default function ClientDashboard() {
                               {isCanceled ? '취소된 신청입니다.' : '상담사가 내용을 검토하고 분석 중입니다.'}
                             </span>
                           </div>
-                          {!isCanceled && (
-                            <button 
-                              onClick={(e) => handleCancelApplication(requestId, e)}
-                              className="text-[11px] font-black text-rose-500 hover:text-rose-600 transition-colors"
-                            >
-                              신청 취소
-                            </button>
-                          )}
+                          <div className="flex items-center gap-3">
+                            {canResume && (
+                              <span className="text-[11px] font-black text-primary bg-primary/10 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                                이어하기 <ArrowRight size={13} />
+                              </span>
+                            )}
+                            {!isCanceled && (
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleCancelApplication(requestId, e); }}
+                                className="text-[11px] font-black text-rose-500 hover:text-rose-600 transition-colors"
+                              >
+                                신청 취소
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
