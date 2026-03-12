@@ -26,6 +26,7 @@ export default function ClientDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<number | null>(null);
+  const [activeStep, setActiveStep] = useState<number | null>(null);
 
   const fetchApplications = async (forceRefresh = false) => {
     if (!user?.email) {
@@ -192,6 +193,12 @@ export default function ClientDashboard() {
                 return (
                   <div 
                     key={requestId} 
+                    onMouseEnter={() => {
+                      if (isAnalyzed) setActiveStep(3);
+                      else if (app.status === 'confirmed') setActiveStep(2);
+                      else if (!isCanceled) setActiveStep(1);
+                    }}
+                    onMouseLeave={() => setActiveStep(null)}
                     className={`card-premium p-0 overflow-hidden border-2 transition-all group ${
                       isAnalyzed ? 'border-indigo-100 shadow-indigo-100/50 shadow-xl' : 'hover:border-primary/20 hover:shadow-lg'
                     }`}
@@ -293,28 +300,28 @@ export default function ClientDashboard() {
             <AlertCircle size={20} className="text-amber-500" /> 리포트 확인 안내
           </h2>
           
-          <div className="card-premium p-7 space-y-8 bg-gradient-to-br from-white to-zinc-50/80 shadow-sm border-zinc-100">
-            <div className="relative pl-12">
-              <div className="absolute left-0 top-0 w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black text-sm">1</div>
+          <div className={`card-premium p-7 space-y-8 bg-gradient-to-br from-white to-zinc-50/80 shadow-sm border-zinc-100 transition-all duration-500`}>
+            <div className={`relative pl-12 transition-all duration-300 ${activeStep === 1 ? 'opacity-100 translate-x-1' : activeStep !== null ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+              <div className={`absolute left-0 top-0 w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all ${activeStep === 1 ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/20' : 'bg-primary/10 text-primary'}`}>1</div>
               <div>
-                <h4 className="text-sm font-black text-zinc-900 tracking-tight">AI 전사 및 감정 분석</h4>
+                <h4 className={`text-sm font-black tracking-tight transition-colors ${activeStep === 1 ? 'text-primary' : 'text-zinc-900'}`}>AI 전사 및 감정 분석</h4>
                 <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">대화 내용을 바탕으로 AI가 신청 동기와 심리 상태를 다각도로 분석합니다.</p>
               </div>
             </div>
             
-            <div className="relative pl-12">
-              <div className="absolute left-0 top-0 w-8 h-8 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center font-black text-sm">2</div>
+            <div className={`relative pl-12 transition-all duration-300 ${activeStep === 2 ? 'opacity-100 translate-x-1' : activeStep !== null ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+              <div className={`absolute left-0 top-0 w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all ${activeStep === 2 ? 'bg-emerald-500 text-white scale-110 shadow-lg shadow-emerald-500/20' : 'bg-emerald-50 text-emerald-500'}`}>2</div>
               <div>
-                <h4 className="text-sm font-black text-zinc-900 tracking-tight">담당 상담사 정밀 검토</h4>
+                <h4 className={`text-sm font-black tracking-tight transition-colors ${activeStep === 2 ? 'text-emerald-600' : 'text-zinc-900'}`}>담당 상담사 정밀 검토</h4>
                 <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">전문가가 AI 분석 결과를 최종 검토하여 맞춤 솔루션을 확정합니다.</p>
               </div>
             </div>
-
-            <div className="relative pl-12">
-              <div className="absolute left-0 top-0 w-8 h-8 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center font-black text-sm">3</div>
+ 
+            <div className={`relative pl-12 transition-all duration-300 ${activeStep === 3 ? 'opacity-100 translate-x-1' : activeStep !== null ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+              <div className={`absolute left-0 top-0 w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all ${activeStep === 3 ? 'bg-amber-500 text-white scale-110 shadow-lg shadow-amber-500/20' : 'bg-amber-50 text-amber-500'}`}>3</div>
               <div>
-                <h4 className="text-sm font-black text-zinc-900 tracking-tight">내담자용 전용 리포트 발급</h4>
-                <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">분석이 완료되면 대시보드에 '완료' 버튼이 활성화되며 리포트 확인이 가능합니다.</p>
+                <h4 className={`text-sm font-black tracking-tight transition-colors ${activeStep === 3 ? 'text-amber-600' : 'text-zinc-900'}`}>본 상담 리포트 발급</h4>
+                <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">진행한 상담을 바탕으로 신청자님에게 맞는 정보를 정리했습니다.</p>
               </div>
             </div>
 
