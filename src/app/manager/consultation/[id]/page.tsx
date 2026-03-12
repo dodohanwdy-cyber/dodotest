@@ -899,16 +899,46 @@ export default function ConsultationPage() {
                         }
                         if (!Array.isArray(policies)) return null;
 
-                        const validPolicies = policies.map((policy: any, i: number) => {
-                          if (typeof policy === 'string') {
-                            if (policy === '[object Object]') return null;
-                            return { idx: i, title: policy, desc: '' };
+                        const validPolicies: any[] = [];
+                        
+                        // AI가 배열이 아닌 통문자열(String) 안에 "1. 정책: 내용 2. 정책: 내용" 형태로 준 경우 파싱
+                        if (policies.length === 1 && typeof policies[0] === 'string') {
+                          const fullText = policies[0];
+                          const regex = /(\d+)\.\s*([^:]+):\s*([^$]*?)(?=(?:\d+\.)|$)/g;
+                          let match;
+                          let mCount = 0;
+                          while ((match = regex.exec(fullText)) !== null) {
+                            validPolicies.push({ idx: mCount++, title: match[2].trim(), desc: match[3].trim() });
                           }
-                          if (typeof policy === 'object' && policy !== null) {
-                            return { idx: i, ...extractItemTexts(policy) };
+                          
+                          // 만약 정규식으로 잘 안 쪼개졌다면, 문장 단위로라도 강제 분할 시도 보완
+                          if (validPolicies.length === 0) {
+                            const lines = fullText.split(/(?=\d+\.)/);
+                            lines.forEach((line, i) => {
+                              if (line.trim()) {
+                                const parts = line.split(/[:\-]/);
+                                const title = parts[0].replace(/^\d+\.\s*/, '').trim();
+                                const desc = parts.slice(1).join(':').trim() || line.trim();
+                                validPolicies.push({ idx: i, title: title || `정책 ${i+1}`, desc });
+                              }
+                            });
                           }
-                          return null;
-                        }).filter(Boolean);
+                        } else {
+                          // 배열 형태로 잘 들어온 경우 (혹은 객체 배열 등)
+                          let pIdx = 0;
+                          policies.forEach((policy: any) => {
+                            if (typeof policy === 'string') {
+                              if (policy !== '[object Object]' && policy.trim()) {
+                                validPolicies.push({ idx: pIdx++, title: policy, desc: '' });
+                              }
+                            } else if (typeof policy === 'object' && policy !== null) {
+                              const extracted = extractItemTexts(policy);
+                              if (extracted && extracted.title && extracted.title !== '(항목)') {
+                                validPolicies.push({ idx: pIdx++, ...extracted });
+                              }
+                            }
+                          });
+                        }
 
                         return validPolicies.map((policy: any) => (
                           <div key={policy.idx} className="bg-white p-5 rounded-3xl border border-zinc-100 shadow-sm hover:border-primary/30 hover:bg-primary/[0.01] transition-all group cursor-pointer flex flex-col">
