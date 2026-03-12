@@ -62,7 +62,7 @@ export default function ClientReportPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 gap-4">
+      <div className="min-h-screen bg-blue-50/30 flex flex-col items-center justify-center p-6 gap-4">
         <Loader2 size={28} className="text-primary animate-spin" />
         <p className="text-sm text-slate-400 font-medium">리포트를 불러오는 중이에요...</p>
       </div>
@@ -71,7 +71,7 @@ export default function ClientReportPage() {
 
   if (error || !reportData) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center gap-4">
+      <div className="min-h-screen bg-blue-50/30 flex flex-col items-center justify-center p-6 text-center gap-4">
         <AlertCircle size={36} className="text-slate-300" />
         <div>
           <p className="text-base font-semibold text-slate-600 mb-1">리포트를 불러올 수 없어요</p>
@@ -88,7 +88,7 @@ export default function ClientReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
+    <div className="min-h-screen bg-blue-50/30 pb-20">
 
       {/* 헤더 */}
       <div className="bg-primary px-6 py-12">
@@ -99,11 +99,11 @@ export default function ClientReportPage() {
               Consultation Report
             </span>
           </div>
-          <p className="text-indigo-200 text-sm mb-1">안녕하세요, {reportData.user_name}님 👋</p>
+          <p className="text-blue-200 text-sm mb-1">안녕하세요, {reportData.user_name}님 👋</p>
           <h1 className="text-2xl md:text-3xl font-semibold text-white leading-snug">
             상담 분석 리포트가 준비되었어요.
           </h1>
-          <p className="text-indigo-200/70 text-sm mt-2 leading-relaxed">
+          <p className="text-blue-200/70 text-sm mt-2 leading-relaxed">
             전문 상담사가 정성껏 분석한 결과입니다. 천천히 읽어봐 주세요.
           </p>
         </div>
@@ -113,54 +113,48 @@ export default function ClientReportPage() {
       <main className="max-w-5xl mx-auto px-4 md:px-8 -mt-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-          {/* 왼쪽: 핵심 요약 + 상담사 메시지 */}
+          {/* 왼쪽 2칸: 핵심 요약 + 상담사 메시지 */}
           <div className="lg:col-span-2 space-y-5">
 
-            {/* 핵심 요약 */}
-            <section className="bg-white rounded-3xl p-7 md:p-9 shadow-sm border border-slate-100/80">
+            {/* 핵심 요약 — white 카드 */}
+            <section className="bg-white rounded-3xl p-7 md:p-9 shadow-sm border border-blue-100/60">
               <div className="flex items-center gap-2 mb-4">
-                <MessageCircle size={15} className="text-primary/60" />
-                <span className="text-[11px] font-semibold text-primary/60 uppercase tracking-widest">
-                  핵심 요약
-                </span>
+                <MessageCircle size={14} className="text-primary/50" />
+                <span className="text-[11px] font-semibold text-primary/50 uppercase tracking-widest">핵심 요약</span>
               </div>
               <p className="text-base md:text-lg text-slate-600 leading-[1.85] font-normal">
                 {reportData.main_issue}
               </p>
             </section>
 
-            {/* 상담사 메시지 */}
-            <section className="bg-primary/5 rounded-3xl p-7 md:p-9 border border-primary/10">
+            {/* 상담사 메시지 — 앰버 서브 컬러 카드 */}
+            <section className="bg-amber-50 rounded-3xl p-7 md:p-9 border border-amber-100/70">
               <div className="flex items-center gap-2 mb-5">
-                <Heart size={15} className="text-primary/60" />
-                <span className="text-[11px] font-semibold text-primary/60 uppercase tracking-widest">
-                  상담사 메시지
-                </span>
+                <Heart size={14} className="text-amber-400" />
+                <span className="text-[11px] font-semibold text-amber-500/80 uppercase tracking-widest">상담사 메시지</span>
               </div>
-              <blockquote className="text-base md:text-lg text-slate-600 leading-[1.85] font-normal pl-4 border-l-2 border-primary/20 italic">
+              <blockquote className="text-base md:text-lg text-slate-600 leading-[1.85] font-normal pl-4 border-l-2 border-amber-200 italic">
                 &ldquo;{reportData.user_message}&rdquo;
               </blockquote>
             </section>
 
           </div>
 
-          {/* 오른쪽: 추천 정책 */}
+          {/* 오른쪽 1칸: 추천 정책 — white 카드 */}
           <div className="lg:col-span-1">
-            <section className="bg-white rounded-3xl p-7 shadow-sm border border-slate-100/80 h-full">
+            <section className="bg-white rounded-3xl p-7 shadow-sm border border-blue-100/60 h-full">
               <div className="flex items-center gap-2 mb-5">
-                <Target size={15} className="text-primary/60" />
-                <span className="text-[11px] font-semibold text-primary/60 uppercase tracking-widest">
-                  추천 정책
-                </span>
+                <Target size={14} className="text-primary/50" />
+                <span className="text-[11px] font-semibold text-primary/50 uppercase tracking-widest">추천 정책</span>
               </div>
               <div className="space-y-2.5">
                 {reportData.policy_match.length > 0 ? (
                   reportData.policy_match.map((policy: string, idx: number) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-primary/5 hover:border-primary/15 transition-colors"
+                      className="flex items-start gap-3 p-3.5 rounded-2xl bg-blue-50/60 border border-blue-100/50 hover:bg-blue-50 hover:border-blue-200/60 transition-colors"
                     >
-                      <CheckCircle2 size={14} className="text-primary/50 mt-0.5 shrink-0" />
+                      <CheckCircle2 size={14} className="text-primary/40 mt-0.5 shrink-0" />
                       <span className="text-sm text-slate-600 leading-snug font-normal">{policy}</span>
                     </div>
                   ))
@@ -173,22 +167,20 @@ export default function ClientReportPage() {
 
         </div>
 
-        {/* 향후 실천 계획 */}
-        <section className="mt-5 bg-white rounded-3xl p-7 md:p-9 shadow-sm border border-slate-100/80">
+        {/* 향후 실천 계획 — 앰버 서브 컬러 라이트 카드 */}
+        <section className="mt-5 bg-white rounded-3xl p-7 md:p-9 shadow-sm border border-blue-100/60">
           <div className="flex items-center gap-2 mb-6">
-            <Sparkles size={15} className="text-primary/60" />
-            <span className="text-[11px] font-semibold text-primary/60 uppercase tracking-widest">
-              향후 실천 계획
-            </span>
+            <Sparkles size={14} className="text-amber-400" />
+            <span className="text-[11px] font-semibold text-amber-500/80 uppercase tracking-widest">향후 실천 계획</span>
           </div>
           {reportData.next_steps.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               {reportData.next_steps.map((step: string, idx: number) => (
                 <div
                   key={idx}
-                  className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-primary/5 hover:border-primary/15 transition-colors"
+                  className="flex items-start gap-4 p-4 rounded-2xl bg-amber-50/60 border border-amber-100/50 hover:bg-amber-50 hover:border-amber-200/60 transition-colors"
                 >
-                  <span className="text-xs font-semibold text-primary/50 mt-0.5 shrink-0 w-5 text-center">
+                  <span className="text-xs font-semibold text-amber-400/80 mt-0.5 shrink-0 w-5 text-center tabular-nums">
                     {idx + 1}
                   </span>
                   <p className="text-sm text-slate-600 leading-relaxed font-normal">{step}</p>
@@ -203,7 +195,7 @@ export default function ClientReportPage() {
         {/* 푸터 */}
         <footer className="mt-10 pb-2 text-center">
           <div className="flex items-center justify-center gap-2 mb-1">
-            <Heart size={12} className="text-slate-300" />
+            <Heart size={12} className="text-slate-200" />
             <p className="text-[11px] text-slate-300 uppercase tracking-widest">OPCL Care Team</p>
           </div>
           <p className="text-[10px] text-slate-300">© 2024 열고닫기. 모든 데이터는 보안으로 보호됩니다.</p>
