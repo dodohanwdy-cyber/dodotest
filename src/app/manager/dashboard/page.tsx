@@ -257,7 +257,7 @@ export default function ManagerDashboard() {
       {/* 대시보드 헤더 */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-900 mb-2">매니저 대시보드</h1>
+          <h1 className="text-3xl font-black text-zinc-900 mb-2">상담 접수 및 배정 관리</h1>
           <p className="text-zinc-500">상담 일정을 관리하고 신청 현황을 확인하세요</p>
         </div>
         <div className="flex gap-3">

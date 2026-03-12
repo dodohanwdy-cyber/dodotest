@@ -76,6 +76,7 @@ export default function ReportPage() {
           // 이전 화면(Manager)에서 넘어온 기본 데이터를 쿼리에서 파싱
           const queryBaseData = {
             request_id: id,
+            id: id, // id 필드도 호환성을 위해 추가
             name: searchParams.get('name') || '',
             age: searchParams.get('age') || '',
             gender: searchParams.get('gender') || '',
@@ -111,11 +112,9 @@ export default function ReportPage() {
             setBaseData(mergedData);
             setReportData(processReportData(mergedData));
           } else {
-            // 응답 실패 시 파라미터 정보로라도 기본 화면 표시
             setBaseData(queryBaseData);
           }
         } else {
-          // 일반 접근 (대시보드 등)
           const res = await postToWebhook(WEBHOOK_URLS.START_CONSULTATION, { request_id: id });
           if (res) {
             let data = null;
@@ -138,9 +137,8 @@ export default function ReportPage() {
       }
     };
     initFetch();
-  }, [id, isCompletedMode, searchParams]); // Added searchParams to dependencies
+  }, [id, isCompletedMode, searchParams]);
 
-  // 완료된 상담 전용 자동 로딩 함수 (isCompletedMode가 아닐 경우 사용)
   const handleAutoLoadReport = async () => {
     setIsAnalyzing(true);
     try {
@@ -181,7 +179,6 @@ export default function ReportPage() {
     }
   }, [isAnalyzing]);
 
-  // 데이터 가공 헬퍼 함수
   const processReportData = (data: any) => {
     return {
       summary: {
@@ -217,32 +214,28 @@ export default function ReportPage() {
     setError(null);
     
     try {
-      // 1. Storage에서 데이터 로드
       const sttText = sessionStorage.getItem(`consultation_${id}_stt`) || "";
       const managerNotes = sessionStorage.getItem(`consultation_${id}_notes`) || "";
 
-      // 2. 최종 상담 내용 서버 전송 (AI 분석 비동기 시작)
       await postToWebhook(WEBHOOK_URLS.CONSULTATION_SUMMARY, {
         request_id: id,
         email: baseData?.email,
         user_name: baseData?.name || baseData?.user_name,
         full_text: sttText,
         manager_notes: managerNotes,
-        wants_alert: managerWantsAlert, // 매니저 알림 수신 여부 추가
+        wants_alert: managerWantsAlert,
+        status: 'analyzed',
         timestamp: new Date().toISOString()
       });
 
-      // 3. 임시 데이터 삭제
       sessionStorage.removeItem(`consultation_${id}_stt`);
       sessionStorage.removeItem(`consultation_${id}_notes`);
-
-      // 4. 완료 목록 페이지로 이동
       router.push('/manager/completed');
 
     } catch (err) {
       console.error("최종 전송 중 오류:", err);
       setError("데이터 전송 중 오류가 발생했습니다. 다시 시도해 주세요.");
-      setIsAnalyzing(false); // 실패 시에만 로딩 해제 (성공 시엔 페이지 이동되므로 유지)
+      setIsAnalyzing(false);
     }
   };
 
@@ -257,12 +250,12 @@ export default function ReportPage() {
   if (reportData) {
     return <ReportDetailView baseData={baseData} reportData={reportData} onBack={() => setReportData(null)} />;
   }
+
   return (
     <div className="min-h-screen bg-zinc-50 p-8 flex flex-col items-center justify-center">
       <div className="max-w-2xl w-full bg-white rounded-[32px] p-12 shadow-xl border border-zinc-100 flex flex-col items-center text-center relative overflow-hidden">
         
         {isAnalyzing ? (
-          /* 분석 중 로딩 UI */
           <div className="flex flex-col items-center py-6 animate-in fade-in zoom-in duration-500">
             <div className="relative mb-12">
                <div className="w-32 h-32 bg-primary/5 rounded-full flex items-center justify-center animate-pulse">
@@ -288,7 +281,6 @@ export default function ReportPage() {
             )}
           </div>
         ) : (
-          /* 리포트 작성 시작 전 안내 UI */
           <>
             <div className="w-20 h-20 bg-primary/10 rounded-[28px] flex items-center justify-center text-primary mb-8 transition-transform hover:scale-110">
               <FileText size={40} />
@@ -342,7 +334,6 @@ export default function ReportPage() {
           </>
         )}
 
-        {/* 상담 종료 알림 보내기 모달 (리포트 미포함) */}
         {showEndConsultationModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setShowEndConsultationModal(false)}></div>
@@ -391,11 +382,9 @@ export default function ReportPage() {
   );
 }
 
-// --- 상세 리포트 뷰 컴포넌트 ---
 function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, reportData: any, onBack: () => void }) {
   const router = useRouter();
 
-  // 리포트 상세 뷰 진입 시 글로벌 내비게이션 숨기기
   useEffect(() => {
     document.body.classList.add('hide-global-navbar');
     return () => {
@@ -406,39 +395,29 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
   const [showResultModal, setShowResultModal] = useState(false);
   const [sendResultStatus, setSendResultStatus] = useState<"idle" | "loading" | "success">("idle");
-  const [notionUrl, setNotionUrl] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   const handleSendResultAction = async () => {
     setSendResultStatus("loading");
     try {
-      // 1. n8n 웹훅 호출 (노션 리포트 생성)
-      const response = await postToWebhook(WEBHOOK_URLS.GENERATE_NOTION_REPORT, {
-        request_id: baseData?.request_id,
-        client_info: {
-          name: baseData?.name,
-          age: baseData?.age,
-          gender: baseData?.gender,
-          location: baseData?.location
-        },
-        report_summary: reportData.summary,
-        analysis_detail: reportData.analysis,
-        action_plan: reportData.action_plan,
-        feedback_message: reportData.feedback.user_message,
-        completed_at: reportData.feedback.completed_at
+      const baseUrl = window.location.origin;
+      const generatedUrl = `${baseUrl}/report/${baseData?.request_id || baseData?.id}`;
+      
+      // 백엔드에 리포트 생성 완료(analyzed) 신호 전송
+      await postToWebhook(WEBHOOK_URLS.SUBMIT_FINAL_REPORT, {
+        request_id: baseData?.request_id || baseData?.id,
+        email: baseData?.email,
+        status: 'analyzed',
+        report_url: generatedUrl,
+        timestamp: new Date().toISOString()
       });
 
-      // 2. 응답에서 내담자용 공유 URL 추출
-      if (response && response.share_url) {
-        setNotionUrl(response.share_url);
-        setSendResultStatus("success");
-      } else {
-        // 응답에 URL이 없더라도 우선 성공 표시
-        setSendResultStatus("success");
-      }
+      setShareUrl(generatedUrl);
+      setSendResultStatus("success");
     } catch (err) {
-      console.error("노션 결과 생성 실패:", err);
+      console.error("링크 생성 및 상태 업데이트 실패:", err);
       setSendResultStatus("idle");
-      alert("링크 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      alert("링크를 생성하는 중 오류가 발생했습니다.");
     }
   };
 
@@ -486,7 +465,6 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
     handleCopy(fullText, 'all');
   };
 
-  // 위험 점수 색상 설정 (0-10 기준)
   const getRiskColor = (score: number) => {
     if (score >= 8) return "text-rose-600 bg-rose-50 border-rose-100";
     if (score >= 4) return "text-amber-600 bg-amber-50 border-amber-100";
@@ -501,7 +479,6 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] pb-20 animate-in fade-in duration-700 report-container print:bg-white print:pb-0">
-      {/* 프린트 전용 헤더 (화면에서는 숨김) */}
       <div className="hidden print:block mb-10 border-b-4 border-primary pb-6">
         <div className="flex justify-between items-end">
           <div>
@@ -515,7 +492,6 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
         </div>
       </div>
 
-      {/* 상단 네비게이션 */}
       <nav className="sticky top-0 z-[60] bg-white/80 backdrop-blur-md border-b border-zinc-100 px-8 py-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -541,7 +517,6 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
             <button 
               onClick={handleCopyAll} 
               className="px-5 py-2.5 bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-900 transition-all text-sm flex items-center gap-2 shadow-sm"
-              title="리포트 전체 내용을 복사합니다."
             >
               {copiedId === 'all' ? <Check size={16} className="text-emerald-400" /> : <Copy size={16} />}
               전체 복사
@@ -557,11 +532,8 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
       </nav>
 
       <main className="max-w-6xl mx-auto px-8 mt-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
-        
-        {/* 좌측: 내담자 요약 & 위기 진단 */}
         <div className="lg:col-span-1 space-y-8">
-          {/* 프로필 카드 */}
-          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-100 print:break-inside-avoid print:shadow-none print:border-zinc-300">
+          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-100 print:shadow-none print:border-zinc-300">
             <div className="flex items-center gap-5 mb-8">
               <div className="w-16 h-16 rounded-[24px] bg-zinc-50 flex items-center justify-center text-zinc-400 border border-zinc-100">
                 <User size={32} />
@@ -571,7 +543,6 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
                 <p className="text-sm font-bold text-zinc-400">{baseData?.age}세 · {baseData?.gender === "male" ? "남성" : "여성"}</p>
               </div>
             </div>
-            
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-sm font-medium text-zinc-600">
                 <MapPin size={16} className="text-zinc-300" />
@@ -581,48 +552,33 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
                 <Clock size={16} className="text-zinc-300" />
                 <span>{baseData?.schedule?.datetime || "일정 정보 없음"}</span>
               </div>
-              <div className="pt-4 flex flex-wrap gap-2">
-                {baseData?.interest_areas?.map((area: string, idx: number) => (
-                  <span key={idx} className="px-3 py-1 bg-zinc-50 text-zinc-500 rounded-lg text-[11px] font-bold border border-zinc-100">
-                    #{area}
-                  </span>
-                ))}
-              </div>
             </div>
           </section>
 
-          {/* 위기 등급 카드 */}
-          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-100 overflow-hidden relative print:break-inside-avoid print:shadow-none print:border-zinc-300">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2">
-                <Activity size={18} className="text-primary" /> 위기 진단 지수
-              </h3>
-              <div className={`px-3 py-1 rounded-full text-[11px] font-black border ${getRiskColor(reportData.summary.risk_score)}`}>
-                SCORE {reportData.summary.risk_score}/10
-              </div>
+          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-100 overflow-hidden relative print:shadow-none print:border-zinc-300">
+            <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2 mb-6">
+              <Activity size={18} className="text-primary" /> 위기 진단 지수
+            </h3>
+            <div className={`px-3 py-1 rounded-full text-[11px] font-black border mb-4 inline-block ${getRiskColor(reportData.summary.risk_score)}`}>
+              SCORE {reportData.summary.risk_score}/10
             </div>
-
             <div className="relative h-4 w-full bg-zinc-100 rounded-full mb-4 overflow-hidden">
                <div 
                  className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-out ${getRiskBarColor(reportData.summary.risk_score)}`}
                  style={{ width: `${reportData.summary.risk_score * 10}%` }}
                />
             </div>
-            
             <p className="text-sm font-bold text-zinc-900 mb-2">{reportData.summary.risk_description}</p>
-            <p className="text-xs text-zinc-500 leading-relaxed italic">
-              " {reportData.summary.main_issue} "
-            </p>
+            <p className="text-xs text-zinc-500 leading-relaxed italic">" {reportData.summary.main_issue} "</p>
           </section>
 
-          {/* 핵심 키워드 */}
-          <section className="bg-zinc-900 rounded-[32px] p-8 text-white shadow-xl shadow-zinc-200 print:bg-zinc-100 print:text-zinc-900 print:shadow-none print:break-inside-avoid print:border print:border-zinc-300">
+          <section className="bg-zinc-900 rounded-[32px] p-8 text-white shadow-xl shadow-zinc-200 print:bg-zinc-100 print:text-zinc-900 print:shadow-none print:border print:border-zinc-300">
              <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-               <Tag size={14} className="text-zinc-500" /> 핵심 키워드
+                <Tag size={14} className="text-zinc-500" /> 핵심 키워드
              </h3>
              <div className="flex flex-wrap gap-3">
                 {reportData.summary.keywords.map((word: string, idx: number) => (
-                  <span key={idx} className="px-4 py-2 bg-white/10 rounded-2xl text-xs font-bold hover:bg-white/20 transition-colors cursor-default print:border print:border-zinc-300 print:bg-white print:text-zinc-800">
+                  <span key={idx} className="px-4 py-2 bg-white/10 rounded-2xl text-xs font-bold print:border print:border-zinc-300 print:bg-white print:text-zinc-800">
                     {word}
                   </span>
                 ))}
@@ -630,11 +586,8 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
           </section>
         </div>
 
-        {/* 중앙: 상세 분석 & 전문가 소견 */}
         <div className="lg:col-span-2 space-y-10">
-          
-          {/* 대화 요약 섹션 */}
-          <section className="print:break-inside-avoid">
+          <section>
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-indigo-50 rounded-xl text-indigo-500 border border-indigo-100 print:bg-transparent print:border-none print:p-0">
                 <MessageCircle size={20} className="print:text-zinc-900" />
@@ -643,67 +596,45 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
               <button 
                 onClick={() => handleCopy(reportData.analysis.dialog_summary, 'summary')}
                 className="ml-auto p-2 text-zinc-400 hover:text-primary hover:bg-zinc-50 rounded-lg transition-all flex items-center gap-1.5 print:hidden"
-                title="텍스트 복사"
               >
                 {copiedId === 'summary' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                 <span className="text-[10px] font-bold">{copiedId === 'summary' ? '복사됨' : '복사'}</span>
               </button>
             </div>
-            <div className="bg-white rounded-[32px] p-10 shadow-sm border border-zinc-100 leading-relaxed text-zinc-700 font-medium print:shadow-none print:border-zinc-300 print:h-auto print:overflow-visible">
+            <div className="bg-white rounded-[32px] p-10 shadow-sm border border-zinc-100 leading-relaxed text-zinc-700 font-medium print:shadow-none print:border-zinc-300 h-full">
                <p className="whitespace-pre-wrap">{reportData.analysis.dialog_summary}</p>
             </div>
           </section>
 
-          {/* 진행 추이 & 특이사항 */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2">
                 <TrendingUp size={18} className="text-emerald-500" /> 참여도 변화
               </h3>
-              <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[120px] print:h-auto print:min-h-0 print:shadow-none print:border-zinc-300 print:break-inside-avoid">
-                 <p className="text-sm text-zinc-600 leading-relaxed font-medium">
-                    {reportData.analysis.engagement_change}
-                 </p>
+              <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm print:shadow-none print:border-zinc-300">
+                 <p className="text-sm text-zinc-600">{reportData.analysis.engagement_change}</p>
               </div>
             </div>
             <div className="space-y-6">
               <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2">
                 <AlertTriangle size={18} className="text-amber-500" /> 상담사 특이사항
               </h3>
-              <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[120px] print:h-auto print:min-h-0 print:shadow-none print:border-zinc-300 print:break-inside-avoid">
-                 <p className="text-sm text-zinc-600 leading-relaxed font-medium italic">
-                    {reportData.analysis.counselor_note}
-                 </p>
+              <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm print:shadow-none print:border-zinc-300">
+                 <p className="text-sm text-zinc-600 italic">{reportData.analysis.counselor_note}</p>
               </div>
             </div>
           </section>
 
-          {/* 정책 실행 계획 */}
-          <section className="bg-primary/5 rounded-[40px] p-10 border border-primary/10 print:bg-white print:border-zinc-300 print:break-inside-avoid mt-8">
-            <div className="flex items-center justify-between mb-8">
-               <h2 className="text-lg font-black text-primary flex items-center gap-3 print:text-zinc-900">
-                 <Target size={24} className="print:text-zinc-900" /> 맞춤형 실행 계획
-               </h2>
-               <div className="p-2 bg-white rounded-2xl shadow-sm border border-primary/10 animate-pulse">
-                 <Sparkles className="text-primary" size={20} />
-               </div>
-            </div>
-
+          <section className="bg-primary/5 rounded-[40px] p-10 border border-primary/10 print:bg-white print:border-zinc-300 mt-8">
+            <h2 className="text-lg font-black text-primary flex items-center gap-3 mb-8 print:text-zinc-900">
+              <Target size={24} /> 맞춤형 실행 계획
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                <div className="space-y-4">
-                   <div className="flex items-center justify-between pl-1">
-                     <p className="text-xs font-black text-primary/60 uppercase tracking-widest">Matching Policies</p>
-                     <button 
-                       onClick={() => handleCopy(reportData.action_plan.policy_match.join('\n'), 'policies')}
-                       className="p-1 px-2 text-primary/60 hover:text-primary hover:bg-white rounded-lg transition-all flex items-center gap-1 print:hidden"
-                     >
-                       {copiedId === 'policies' ? <Check size={10} /> : <Copy size={10} />}
-                       <span className="text-[9px] font-bold">텍스트 복사</span>
-                     </button>
-                   </div>
+                  <p className="text-xs font-black text-primary/60 uppercase tracking-widest pl-1">Matching Policies</p>
                   <div className="space-y-3">
                     {reportData.action_plan.policy_match.map((policy: string, idx: number) => (
-                      <div key={idx} className="bg-white p-5 rounded-2xl border border-primary/5 shadow-sm flex items-start gap-4 group hover:border-primary/20 hover:scale-[1.02] transition-all cursor-default print:border-zinc-200 print:shadow-none print:break-inside-avoid">
+                      <div key={idx} className="bg-white p-5 rounded-2xl border border-primary/5 shadow-sm flex items-start gap-4 print:border-zinc-200">
                          <div className="mt-1 p-1 bg-primary/10 rounded text-primary print:bg-transparent">
                             <ArrowUpRight size={14} />
                          </div>
@@ -713,21 +644,12 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
                   </div>
                </div>
                <div className="space-y-4">
-                   <div className="flex items-center justify-between pl-1">
-                     <p className="text-xs font-black text-primary/60 uppercase tracking-widest">Next Action Items</p>
-                     <button 
-                       onClick={() => handleCopy(reportData.action_plan.next_steps.join('\n'), 'steps')}
-                       className="p-1 px-2 text-primary/60 hover:text-primary hover:bg-white rounded-lg transition-all flex items-center gap-1 print:hidden"
-                     >
-                       {copiedId === 'steps' ? <Check size={10} /> : <Copy size={10} />}
-                       <span className="text-[9px] font-bold">텍스트 복사</span>
-                     </button>
-                   </div>
+                  <p className="text-xs font-black text-primary/60 uppercase tracking-widest pl-1">Next Action Items</p>
                   <div className="space-y-3">
                     {reportData.action_plan.next_steps.map((step: string, idx: number) => (
-                      <div key={idx} className="bg-white/50 p-4 rounded-2xl border border-zinc-200/50 flex items-start gap-3 print:bg-white print:border-zinc-200 print:break-inside-avoid">
-                        <CheckCircle2 size={18} className="text-primary mt-0.5 shrink-0" />
-                        <span className="text-sm font-medium text-zinc-700 leading-relaxed">{step}</span>
+                      <div key={idx} className="bg-white p-4 rounded-2xl border border-zinc-200 flex items-start gap-3">
+                        <CheckCircle2 size={18} className="text-primary mt-0.5" />
+                        <span className="text-sm font-medium text-zinc-700">{step}</span>
                       </div>
                     ))}
                   </div>
@@ -735,63 +657,45 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
             </div>
           </section>
 
-          {/* 내담자 전달 메시지 */}
-          <section className="bg-white rounded-[32px] p-10 border-2 border-dashed border-zinc-100 print:border-solid print:border-zinc-300 print:break-inside-avoid print:mt-8">
+          <section className="bg-white rounded-[32px] p-10 border-2 border-dashed border-zinc-100 print:border-solid print:border-zinc-300">
              <h3 className="text-sm font-black text-zinc-900 mb-6 flex items-center gap-2">
                <MessageCircle size={18} className="text-zinc-300" /> 내담자 전달 메시지
-               <button 
-                 onClick={() => handleCopy(reportData.feedback.user_message, 'feedback')}
-                 className="ml-auto p-1.5 text-zinc-400 hover:text-primary hover:bg-zinc-50 rounded-lg transition-all flex items-center gap-1 print:hidden"
-               >
-                 {copiedId === 'feedback' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-                 <span className="text-[10px] font-bold">{copiedId === 'feedback' ? '복사 완료' : '복사'}</span>
-               </button>
              </h3>
              <div className="p-8 bg-zinc-50 rounded-2xl relative">
                 <div className="absolute top-0 left-8 -translate-y-1/2 w-4 h-4 bg-zinc-50 rotate-45 border-l border-t border-zinc-100" />
-                <p className="text-zinc-700 font-bold text-lg leading-relaxed">
-                  "{reportData.feedback.user_message}"
-                </p>
+                <p className="text-zinc-700 font-bold text-lg leading-relaxed">"{reportData.feedback.user_message}"</p>
                 <div className="flex justify-between items-center mt-10">
                    <div className="flex -space-x-2">
                       <div className="w-8 h-8 rounded-full bg-primary/10 border-2 border-white" />
                       <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white" />
                    </div>
-                   <p className="text-[11px] font-bold text-zinc-400">
-                     분석 완료: {reportData.feedback.completed_at}
-                   </p>
+                   <p className="text-[11px] font-bold text-zinc-400">분석 완료: {reportData.feedback.completed_at}</p>
                 </div>
              </div>
           </section>
-
         </div>
       </main>
 
-      {/* 상담 결과 보내기 모달 */}
       {showResultModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setShowResultModal(false)}></div>
           <div className="bg-white rounded-[2rem] p-8 max-w-2xl w-full relative z-10 shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]">
             <button 
               onClick={() => setShowResultModal(false)}
-              className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors z-20"
+              className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
             >
               <X size={20} />
             </button>
-            
-            <h2 className="text-xl font-black text-zinc-900 mb-6 shrink-0 flex items-center gap-2">
+            <h2 className="text-xl font-black text-zinc-900 mb-6 flex items-center gap-2">
               <LinkIcon className="text-primary" size={24} /> 내담자용 결과 링크 생성
             </h2>
-            
-            {/* 원페이퍼 미리보기 창 */}
-            <div className="flex-1 overflow-y-auto min-h-[300px] mb-6 border border-zinc-200 rounded-2xl p-6 bg-zinc-50 relative custom-scrollbar">
+            <div className="flex-1 overflow-y-auto mb-6 border border-zinc-200 rounded-2xl p-6 bg-zinc-50 relative custom-scrollbar">
                <div className="bg-white p-8 rounded-xl shadow-sm border border-zinc-100 space-y-8">
                  <div className="text-center border-b border-zinc-100 pb-6">
                     <h3 className="text-xl font-black text-zinc-900">상담 분석 결과 보고서 요약</h3>
-                    <p className="text-xs text-zinc-400 mt-2 tracking-wide font-bold">발급번호: {baseData?.request_id || "N/A"}</p>
+                    <p className="text-xs text-zinc-400 mt-2 font-bold">발급번호: {baseData?.request_id || "N/A"}</p>
                  </div>
-                 
-                 <div className="grid grid-cols-2 gap-6">
+                 <div className="grid grid-cols-2 gap-6 text-left">
                    <div>
                       <h4 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-2">내담자 정보</h4>
                       <p className="text-sm font-bold text-zinc-800">{baseData?.name || "내담자"} <span className="text-zinc-500 font-medium">({baseData?.age}세, {baseData?.gender === "male" ? "남성" : "여성"})</span></p>
@@ -801,14 +705,12 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
                       <p className="text-sm font-bold text-amber-600">위험도 {reportData.summary.risk_score} / 10</p>
                    </div>
                  </div>
-
-                 <div>
+                 <div className="text-left">
                     <h4 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-3 bg-zinc-50 py-1.5 px-3 rounded-md inline-block">주요 이슈</h4>
                     <p className="text-sm text-zinc-800 font-bold mb-3">{reportData.summary.main_issue}</p>
                     <p className="text-sm text-zinc-600 leading-relaxed bg-zinc-50/50 p-4 rounded-xl border border-zinc-100">{reportData.analysis.dialog_summary}</p>
                  </div>
-
-                 <div>
+                 <div className="text-left">
                     <h4 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-3 bg-blue-50 py-1.5 px-3 text-blue-600 rounded-md inline-block">추천 정책 & 실행 계획</h4>
                     <ul className="text-sm text-zinc-700 space-y-2 mt-2">
                       {reportData.action_plan.policy_match.map((p: string, i: number) => (
@@ -819,36 +721,28 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
                       ))}
                     </ul>
                  </div>
-
-                 <div className="pt-4 border-t border-zinc-100">
-                    <h4 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-3">전달 메시지</h4>
-                    <div className="p-5 bg-zinc-50 rounded-xl text-sm text-zinc-700 font-bold italic leading-relaxed relative">
-                      <div className="absolute top-0 left-6 -translate-y-1/2 w-3 h-3 bg-zinc-50 rotate-45 border-l border-t border-zinc-100" />
-                      "{reportData.feedback.user_message}"
-                    </div>
-                 </div>
                </div>
             </div>
 
             <div className="shrink-0 space-y-4">
-              {sendResultStatus === "success" && notionUrl ? (
+              {sendResultStatus === "success" && shareUrl ? (
                 <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                  <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-left">
                     <p className="text-sm font-bold text-emerald-700 mb-2 flex items-center gap-2">
-                       <CheckCircle2 size={16} /> 링크 생성이 완료되었습니다!
+                       <CheckCircle2 size={16} /> 보안 링크 생성이 완료되었습니다!
                     </p>
                     <div className="flex items-center gap-2 bg-white p-3 rounded-xl border border-emerald-200">
-                      <p className="flex-1 text-xs text-zinc-500 truncate font-mono">{notionUrl}</p>
+                      <p className="flex-1 text-xs text-zinc-500 truncate font-mono">{shareUrl}</p>
                       <button 
-                        onClick={() => handleCopy(notionUrl, 'notion')}
+                        onClick={() => handleCopy(shareUrl, 'share')}
                         className="p-2 hover:bg-zinc-50 rounded-lg text-primary transition-colors"
                       >
-                        {copiedId === 'notion' ? <Check size={16} /> : <Copy size={16} />}
+                        {copiedId === 'share' ? <Check size={16} /> : <Copy size={16} />}
                       </button>
                     </div>
                   </div>
                   <a 
-                    href={notionUrl} 
+                    href={shareUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="w-full h-14 rounded-2xl bg-zinc-900 text-white font-bold flex items-center justify-center gap-2 hover:bg-zinc-800 transition-colors shadow-lg"
@@ -859,9 +753,8 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
               ) : (
                 <>
                   <p className="text-center text-[15px] font-black text-blue-600 bg-blue-50 py-4 rounded-xl border border-blue-100 flex items-center justify-center gap-2">
-                    <LinkIcon size={18} /> 위 내용을 요약한 내담자 공유 전용 URL 링크를 발급합니다.
+                    <LinkIcon size={18} /> 내담자 공유 전용 보안 URL을 발급합니다.
                   </p>
-
                   <button
                     onClick={handleSendResultAction}
                     disabled={sendResultStatus !== "idle"}
@@ -869,8 +762,6 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
                   >
                     {sendResultStatus === "loading" ? (
                       <span className="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
-                    ) : sendResultStatus === "success" ? (
-                      <><CheckCircle2 size={20} /> 링크 생성이 완료되었습니다!</>
                     ) : (
                       <>보안 링크 생성하기 <LinkIcon size={20} /></>
                     )}
@@ -881,7 +772,6 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
           </div>
         </div>
       )}
-
     </div>
   );
 }

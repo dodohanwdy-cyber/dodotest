@@ -13,7 +13,10 @@ import {
   PlusCircle,
   Loader2,
   Briefcase,
-  Trash2
+  Trash2,
+  MapPin,
+  Sparkles,
+  ArrowRight
 } from "lucide-react";
 import Link from "next/link";
 
@@ -39,7 +42,6 @@ export default function ClientDashboard() {
         localStorage.removeItem('dashboard_cache');
       }
     } else {
-      // 일반 로드 시 캐시 확인 (메모리 캐시)
       if (lastFetched && (now - lastFetched < CACHE_DURATION)) {
         console.log('캐시된 데이터 사용 중...');
         setLoading(false);
@@ -50,7 +52,6 @@ export default function ClientDashboard() {
     try {
       setLoading(true);
       setError(null);
-      // forceRefresh일 때는 API 라우트에서도 캐시를 무시하도록 타임스탬프 추가
       const url = `/api/applications?email=${encodeURIComponent(user.email)}${forceRefresh ? `&_t=${now}` : ''}`;
       const res = await fetch(url);
       const data = await res.json();
@@ -58,7 +59,6 @@ export default function ClientDashboard() {
       if (res.ok) {
         setApplications(data.applications || []);
         setLastFetched(now);
-        // 로컬 스토리지에 캐시 저장
         if (typeof window !== 'undefined') {
           localStorage.setItem('dashboard_cache', JSON.stringify({
             data: data.applications,
@@ -78,10 +78,8 @@ export default function ClientDashboard() {
   };
 
   const handleCancelApplication = async (requestId: string, e: React.MouseEvent) => {
-    e.preventDefault(); // 카드 전체 클릭 방지
-    
+    e.preventDefault();
     if (!user?.email) return;
-    
     if (!window.confirm("정말 이 상담 신청을 취소하시겠습니까?\n취소 후에는 다시 되돌릴 수 없습니다.")) {
       return;
     }
@@ -95,22 +93,20 @@ export default function ClientDashboard() {
       });
 
       const data = await res.json();
-      
       if (res.ok) {
         alert("상담 취소가 완료되었습니다.");
-        fetchApplications(true); // 완전 새로고침하여 캐시 업데이트 및 변경사항 화면 즉각 반영
+        fetchApplications(true);
       } else {
         alert(data.error || "취소 중 오류가 발생했습니다.");
       }
     } catch (err) {
       console.error('Cancel application error:', err);
       alert("서버 통신 중 오류가 발생했습니다.");
-      setLoading(false); // fetchApplications(true)가 안 돌 수 있으므로 에러 시 로딩 해제
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    // 로컬 스토리지에서 캐시 복원
     if (typeof window !== 'undefined' && user?.email) {
       const cached = localStorage.getItem('dashboard_cache');
       if (cached) {
@@ -118,13 +114,10 @@ export default function ClientDashboard() {
           const { data, timestamp, email } = JSON.parse(cached);
           const CACHE_DURATION = 5 * 60 * 1000;
           const now = Date.now();
-          
-          // 같은 사용자이고 캐시가 유효한 경우
           if (email === user.email && (now - timestamp < CACHE_DURATION)) {
             setApplications(data);
             setLastFetched(timestamp);
             setLoading(false);
-            console.log('로컬 캐시에서 데이터 복원');
             return;
           }
         } catch (e) {
@@ -132,23 +125,25 @@ export default function ClientDashboard() {
         }
       }
     }
-
     fetchApplications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-        <div>
-          <h1 className="text-3xl font-bold text-zinc-900">내 상담 현황</h1>
-          <p className="text-zinc-500 mt-2">상담 신청 내역과 상태를 실시간으로 확인하세요.</p>
+        <div className="animate-in fade-in slide-in-from-left duration-700">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Logged In</span>
+          </div>
+          <h1 className="text-3xl font-black text-zinc-900 tracking-tight">반가워요, {user?.name || "내담자"}님!</h1>
+          <p className="text-zinc-500 mt-2 font-medium">현재 진행 중인 상담 현황을 실시간으로 확인하실 수 있습니다.</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => fetchApplications(true)}
             disabled={loading}
-            className="bg-white border border-zinc-200 text-zinc-700 px-4 py-3 rounded-xl font-bold flex items-center gap-2 hover:border-primary/30 transition-all text-sm disabled:opacity-50"
+            className="bg-white border border-zinc-200 text-zinc-700 px-4 py-3 rounded-xl font-bold flex items-center gap-2 hover:border-primary/30 transition-all text-sm disabled:opacity-50 shadow-sm"
           >
             <Clock size={16} className={loading ? "animate-spin" : ""} />
             새로고침
@@ -162,174 +157,185 @@ export default function ClientDashboard() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* 현황 요약 카드 */}
+      <div className="grid lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-lg font-bold text-zinc-800 flex items-center gap-2">
-            <FileText size={20} className="text-primary" /> 신청 내역
+          <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2 mb-4">
+            <FileText size={20} className="text-primary" /> 나의 상담 리스트
           </h2>
           
-          
           {loading ? (
-            <div className="card-premium p-12 text-center space-y-4">
+            <div className="card-premium p-16 text-center space-y-4">
               <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto" />
-              <p className="text-zinc-500 text-sm">신청 내역을 불러오는 중...</p>
+              <p className="text-zinc-500 font-bold">정보를 안전하게 불러오는 중입니다...</p>
             </div>
           ) : error ? (
-            <div className="card-premium p-12 text-center space-y-4 bg-blue-50/50 border-blue-100">
-              <AlertCircle className="w-12 h-12 text-blue-400 mx-auto" />
+            <div className="card-premium p-12 text-center space-y-4 bg-rose-50/50 border-rose-100 animate-in zoom-in-95 duration-300">
+              <AlertCircle className="w-12 h-12 text-rose-400 mx-auto" />
               <div>
-                <p className="text-blue-900 font-bold mb-2">신청 내역을 불러올 수 없습니다</p>
-                <p className="text-blue-600 text-sm">{error}</p>
-                {error.includes('n8n') && (
-                  <p className="text-blue-500 text-xs mt-3">
-                    💡 아직 신청 내역이 없거나 시스템 설정 중일 수 있습니다.
-                  </p>
-                )}
+                <p className="text-rose-900 font-bold mb-2 text-lg">기록을 불러올 수 없습니다</p>
+                <p className="text-rose-600 font-medium">{error}</p>
+                <button 
+                   onClick={() => fetchApplications(true)}
+                   className="mt-6 px-6 py-2.5 bg-rose-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-rose-200"
+                >
+                   다시 시도하기
+                </button>
               </div>
             </div>
           ) : applications.length > 0 ? (
-            <div className="space-y-4">
-              {applications.map((app) => (
-                <Link 
-                  key={app.request_id || app.id} 
-                  href={`/client/intake?id=${app.request_id || app.id}`}
-                  className="block"
-                >
-                  <div className="card-premium p-6 hover:border-primary/30 hover:shadow-lg transition-all cursor-pointer group">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">{app.request_id || app.id}</span>
-                        <h3 className={`font-bold text-lg ${app.status === 'canceled' ? 'text-zinc-400 line-through' : 'text-zinc-900'}`}>
-                          {app.name || '이름 없음'} ({app.age || '-'}세)
-                        </h3>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-[11px] font-bold font-sans ${
-                        app.status === 'canceled' ? 'bg-rose-50 text-rose-500' :
-                        app.status === 'confirmed' ? 'bg-indigo-600 text-white shadow-md' :
-                        'bg-indigo-50 text-primary animate-pulse'
-                      }`}>
-                        {app.status === 'canceled' ? '취소됨' : 
-                         app.status === 'confirmed' ? '상담 확정' : 
-                         app.status === 'pending' ? '배정 대기 중' :
-                         app.status || 'AI 분석 중'}
-                      </span>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                      {app.status === 'confirmed' && app.confirmed_datetime && (
-                        <div className="col-span-2 flex items-center gap-2 text-indigo-600 bg-indigo-50/50 p-2.5 rounded-xl border border-indigo-100 mb-1">
-                          <Clock size={14} /> 
-                          <span className="font-bold text-[13px] text-indigo-700">
-                            확정 일자: {new Date(app.confirmed_datetime).toLocaleString("ko-KR", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                          </span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 text-zinc-500">
-                        <Briefcase size={14} /> <span>{app.job_status || '미입력'}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-zinc-500">
-                        <Calendar size={14} /> <span>{app.income_level || '미입력'}</span>
-                      </div>
-                    </div>
+            <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              {applications.map((app) => {
+                const isAnalyzed = app.status === 'analyzed';
+                const isCanceled = app.status === 'canceled';
+                const requestId = app.request_id || app.id;
 
-                    {(() => {
-                      // interest_areas를 안전하게 배열로 변환
-                      const interests = Array.isArray(app.interest_areas) 
-                        ? app.interest_areas 
-                        : typeof app.interest_areas === 'string' 
-                          ? app.interest_areas.split(',').map((s: string) => s.trim()).filter(Boolean)
-                          : [];
+                return (
+                  <div 
+                    key={requestId} 
+                    className={`card-premium p-0 overflow-hidden border-2 transition-all group ${
+                      isAnalyzed ? 'border-indigo-100 shadow-indigo-100/50 shadow-xl' : 'hover:border-primary/20 hover:shadow-lg'
+                    }`}
+                  >
+                    <div className="p-7">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 bg-zinc-100 text-zinc-500 text-[9px] font-black rounded uppercase tracking-wider border border-zinc-200">ID {requestId?.slice(-8)}</span>
+                            <span className="text-[10px] font-bold text-zinc-400 font-mono tracking-tight">{new Date(app.created_at || Date.now()).toLocaleDateString()}</span>
+                          </div>
+                          <h3 className={`font-black text-xl tracking-tight ${isCanceled ? 'text-zinc-400 line-through' : 'text-zinc-900'}`}>
+                            {app.name || '내담자'} <span className="text-zinc-400 font-bold text-sm ml-1">({app.age}세, {app.gender === "male" ? "남성" : "여성"})</span>
+                          </h3>
+                        </div>
+                        <div className={`px-4 py-1.5 rounded-full text-[11px] font-black ${
+                          isCanceled ? 'bg-rose-50 text-rose-500 border border-rose-100' :
+                          isAnalyzed ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm animate-bounce-subtle' :
+                          'bg-indigo-50 text-primary border border-indigo-100'
+                        }`}>
+                          {isCanceled ? '상담 취소됨' : 
+                           isAnalyzed ? '리포트 분석 완료' : 
+                           app.status === 'confirmed' ? '상담 확정' : 
+                           '신청 완료 (대기중)'}
+                        </div>
+                      </div>
                       
-                      return interests.length > 0 ? (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {interests.slice(0, 3).map((interest: string, idx: number) => (
-                            <span key={idx} className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-bold">
-                              #{interest}
+                      <div className="flex flex-wrap gap-3 mb-6">
+                        <div className="flex items-center gap-2 text-zinc-600 bg-zinc-50 px-3 py-1.5 rounded-xl border border-zinc-100/50">
+                          <MapPin size={14} className="text-zinc-400" /> 
+                          <span className="text-xs font-bold leading-none">{app.location ? (typeof app.location === 'object' ? app.location.regional : app.location) : '지역 정보 없음'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-zinc-600 bg-zinc-50 px-3 py-1.5 rounded-xl border border-zinc-100/50">
+                          <Briefcase size={14} className="text-zinc-400" /> 
+                          <span className="text-xs font-bold leading-none">{app.job_status || '미입력'}</span>
+                        </div>
+                      </div>
+
+                      {isAnalyzed ? (
+                        <Link 
+                          href={`/report/${requestId}`}
+                          className="w-full flex items-center justify-between p-5 bg-emerald-600 text-white rounded-[24px] group/btn hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 active:scale-[0.98]"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                              <Sparkles size={20} />
+                            </div>
+                            <div className="text-left">
+                              <h4 className="font-black text-sm leading-tight">상담 분석 리포트 확인하기</h4>
+                              <p className="text-[10px] text-emerald-100 font-bold opacity-80 mt-0.5">나만을 위한 맞춤형 결과가 준비되었습니다.</p>
+                            </div>
+                          </div>
+                          <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
+                        </Link>
+                      ) : (
+                        <div className="flex items-center justify-between p-4 bg-zinc-50/80 rounded-2xl border border-zinc-100 border-dashed">
+                          <div className="flex items-center gap-3">
+                            <Loader2 size={16} className="text-zinc-400 animate-spin" />
+                            <span className="text-xs font-bold text-zinc-500">
+                              {isCanceled ? '취소된 신청입니다.' : '상담사가 내용을 검토하고 분석 중입니다.'}
                             </span>
-                          ))}
-                          {interests.length > 3 && (
-                            <span className="px-2 py-1 bg-zinc-100 text-zinc-500 rounded-full text-[10px] font-bold">
-                              +{interests.length - 3}
-                            </span>
+                          </div>
+                          {!isCanceled && (
+                            <button 
+                              onClick={(e) => handleCancelApplication(requestId, e)}
+                              className="text-[11px] font-black text-rose-500 hover:text-rose-600 transition-colors"
+                            >
+                              신청 취소
+                            </button>
                           )}
                         </div>
-                      ) : null;
-                    })()}
-
-                    <div className="flex justify-between items-center pt-4 border-t border-zinc-50 mt-4">
-                      {app.status !== 'canceled' && app.status !== 'completed' && (
-                        <button 
-                          onClick={(e) => handleCancelApplication(app.request_id || app.id, e)}
-                          className="text-xs font-bold text-rose-400 hover:text-rose-600 flex items-center gap-1.5 transition-colors"
-                        >
-                          <Trash2 size={14} /> 상담 취소
-                        </button>
                       )}
-                      
-                      <div className={`flex items-center gap-1 ml-auto group-hover:gap-2 transition-all ${
-                        app.status === 'canceled' ? 'text-zinc-400' : 'text-primary'
-                      }`}>
-                        <span className="text-xs font-bold">
-                          {app.status === 'canceled' ? '내역 보기' : '상세 보기'}
-                        </span>
-                        <ChevronRight size={14} />
-                      </div>
                     </div>
                   </div>
-                </Link>
-              ))}
+                );
+              })}
             </div>
           ) : (
-            <div className="card-premium p-12 text-center space-y-4 bg-zinc-50/50 border-dashed">
-              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-sm text-zinc-300">
-                <FileText size={32} />
+            <div className="card-premium p-16 text-center space-y-6 bg-zinc-50/30 border-dashed border-2 animate-in fade-in duration-700">
+              <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto shadow-sm text-zinc-200">
+                <FileText size={40} />
               </div>
-              <p className="text-zinc-500 text-sm">아직 신청하신 상담 내역이 없습니다.</p>
+              <div>
+                <p className="text-zinc-900 font-black text-lg">아직 신청 내역이 없습니다</p>
+                <p className="text-zinc-400 text-sm mt-1 font-medium">새로운 상담 신청을 통해 맞춤 솔루션을 받아보세요.</p>
+              </div>
+              <Link 
+                href="/client/intake"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-zinc-900 text-white rounded-2xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-zinc-200"
+              >
+                <PlusCircle size={20} /> 첫 상담 신청하기
+              </Link>
             </div>
           )}
         </div>
 
-        {/* 안내 사격 관리 섹션 */}
         <div className="space-y-6">
-          <h2 className="text-lg font-bold text-zinc-800 flex items-center gap-2">
-            <AlertCircle size={20} className="text-amber-500" /> 다음 단계 안내
+          <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2 mb-4">
+            <AlertCircle size={20} className="text-amber-500" /> 리포트 확인 안내
           </h2>
           
-          <div className="card-premium p-6 space-y-6 bg-gradient-to-b from-white to-zinc-50/50">
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 text-primary flex-shrink-0 flex items-center justify-center font-bold">1</div>
+          <div className="card-premium p-7 space-y-8 bg-gradient-to-br from-white to-zinc-50/80 shadow-sm border-zinc-100">
+            <div className="relative pl-12">
+              <div className="absolute left-0 top-0 w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black text-sm">1</div>
               <div>
-                <h4 className="text-sm font-bold text-zinc-900">AI 분석 대기</h4>
-                <p className="text-xs text-zinc-500 mt-1 leading-relaxed">입력하신 내용과 채팅 대화를 AI가 분석하여 리포트를 생성 중입니다.</p>
+                <h4 className="text-sm font-black text-zinc-900 tracking-tight">AI 전사 및 감정 분석</h4>
+                <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">대화 내용을 바탕으로 AI가 신청 동기와 심리 상태를 다각도로 분석합니다.</p>
               </div>
             </div>
             
-            <div className="flex gap-4 opacity-50">
-              <div className="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-400 flex-shrink-0 flex items-center justify-center font-bold">2</div>
+            <div className="relative pl-12">
+              <div className="absolute left-0 top-0 w-8 h-8 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center font-black text-sm">2</div>
               <div>
-                <h4 className="text-sm font-bold text-zinc-900">상담사 배정</h4>
-                <p className="text-xs text-zinc-500 mt-1 leading-relaxed">전문화된 상담사가 배정되어 리포트를 검토할 예정입니다.</p>
+                <h4 className="text-sm font-black text-zinc-900 tracking-tight">담당 상담사 정밀 검토</h4>
+                <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">전문가가 AI 분석 결과를 최종 검토하여 맞춤 솔루션을 확정합니다.</p>
               </div>
             </div>
 
-            <div className="flex gap-4 opacity-50">
-              <div className="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-400 flex-shrink-0 flex items-center justify-center font-bold">3</div>
+            <div className="relative pl-12">
+              <div className="absolute left-0 top-0 w-8 h-8 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center font-black text-sm">3</div>
               <div>
-                <h4 className="text-sm font-bold text-zinc-900">본 상담 진행</h4>
-                <p className="text-xs text-zinc-500 mt-1 leading-relaxed">약속된 시간에 비대면/대면 상담이 진행됩니다.</p>
+                <h4 className="text-sm font-black text-zinc-900 tracking-tight">내담자용 전용 리포트 발급</h4>
+                <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">분석이 완료되면 대시보드에 '완료' 버튼이 활성화되며 리포트 확인이 가능합니다.</p>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-zinc-100">
-              <a href="#" className="flex items-center justify-between p-4 rounded-2xl bg-white border border-zinc-100 hover:border-primary/20 transition-all group">
+            <div className="pt-6 border-t border-zinc-100/80">
+              <a href="https://vibe-coding.notion.site" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-5 rounded-2xl bg-white border border-zinc-200 hover:border-primary/40 transition-all group shadow-sm">
                 <div className="flex items-center gap-3">
-                  <MessageSquare size={18} className="text-zinc-400" />
-                  <span className="text-xs font-bold text-zinc-600">고객센터 문의</span>
+                  <div className="w-8 h-8 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:text-primary transition-colors">
+                    <MessageSquare size={16} />
+                  </div>
+                  <span className="text-xs font-black text-zinc-700">도움말 및 문의하기</span>
                 </div>
-                <ExternalLink size={14} className="text-zinc-300 group-hover:text-primary transition-colors" />
+                <ChevronRight size={14} className="text-zinc-300 group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
               </a>
             </div>
+          </div>
+          
+          <div className="p-6 bg-blue-50/40 rounded-[2rem] border border-blue-100/50">
+            <h4 className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2 px-1">Tip</h4>
+            <p className="text-[11px] text-blue-700 font-semibold leading-relaxed px-1">
+              상담 한 시간 전까지 취소 가능하며, 긴급 문의는 채널톡을 이용해 주세요.
+            </p>
           </div>
         </div>
       </div>

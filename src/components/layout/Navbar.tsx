@@ -48,7 +48,7 @@ export default function Navbar() {
                     <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
                       <LayoutDashboard size={16} className="text-zinc-400 group-hover:text-primary" />
                     </div>
-                    관리자 데스크
+                    상담 접수 관리
                   </Link>
                   <Link href="/manager/completed" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
                     <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
