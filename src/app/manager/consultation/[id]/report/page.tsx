@@ -434,7 +434,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pb-20 animate-in fade-in duration-700 report-container">
+    <div className="min-h-screen bg-[#F8F9FA] pb-20 animate-in fade-in duration-700 report-container print:bg-white print:pb-0">
       {/* 프린트 전용 헤더 (화면에서는 숨김) */}
       <div className="hidden print:block mb-10 border-b-4 border-primary pb-6">
         <div className="flex justify-between items-end">
@@ -487,7 +487,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
         {/* 좌측: 내담자 요약 & 위기 진단 */}
         <div className="lg:col-span-1 space-y-8">
           {/* 프로필 카드 */}
-          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-100">
+          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-100 print:break-inside-avoid print:shadow-none print:border-zinc-300">
             <div className="flex items-center gap-5 mb-8">
               <div className="w-16 h-16 rounded-[24px] bg-zinc-50 flex items-center justify-center text-zinc-400 border border-zinc-100">
                 <User size={32} />
@@ -518,7 +518,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
           </section>
 
           {/* 위기 등급 카드 */}
-          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-100 overflow-hidden relative">
+          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-100 overflow-hidden relative print:break-inside-avoid print:shadow-none print:border-zinc-300">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2">
                 <Activity size={18} className="text-primary" /> 위기 진단 지수
@@ -542,13 +542,13 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
           </section>
 
           {/* 핵심 키워드 */}
-          <section className="bg-zinc-900 rounded-[32px] p-8 text-white shadow-xl shadow-zinc-200">
+          <section className="bg-zinc-900 rounded-[32px] p-8 text-white shadow-xl shadow-zinc-200 print:bg-zinc-100 print:text-zinc-900 print:shadow-none print:break-inside-avoid print:border print:border-zinc-300">
              <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-6 flex items-center gap-2">
                <Tag size={14} className="text-zinc-500" /> 핵심 키워드
              </h3>
              <div className="flex flex-wrap gap-3">
                 {reportData.summary.keywords.map((word: string, idx: number) => (
-                  <span key={idx} className="px-4 py-2 bg-white/10 rounded-2xl text-xs font-bold hover:bg-white/20 transition-colors cursor-default">
+                  <span key={idx} className="px-4 py-2 bg-white/10 rounded-2xl text-xs font-bold hover:bg-white/20 transition-colors cursor-default print:border print:border-zinc-300 print:bg-white print:text-zinc-800">
                     {word}
                   </span>
                 ))}
@@ -560,7 +560,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
         <div className="lg:col-span-2 space-y-10">
           
           {/* 대화 요약 섹션 */}
-          <section>
+          <section className="print:break-inside-avoid">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-indigo-50 rounded-xl text-indigo-500 border border-indigo-100 print:bg-transparent print:border-none print:p-0">
                 <MessageCircle size={20} className="print:text-zinc-900" />
@@ -575,7 +575,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
                 <span className="text-[10px] font-bold">{copiedId === 'summary' ? '복사됨' : '복사'}</span>
               </button>
             </div>
-            <div className="bg-white rounded-[32px] p-10 shadow-sm border border-zinc-100 leading-relaxed text-zinc-700 font-medium">
+            <div className="bg-white rounded-[32px] p-10 shadow-sm border border-zinc-100 leading-relaxed text-zinc-700 font-medium print:shadow-none print:border-zinc-300 print:h-auto print:overflow-visible">
                <p className="whitespace-pre-wrap">{reportData.analysis.dialog_summary}</p>
             </div>
           </section>
@@ -586,7 +586,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
               <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2">
                 <TrendingUp size={18} className="text-emerald-500" /> 참여도 변화
               </h3>
-              <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[120px]">
+              <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[120px] print:h-auto print:min-h-0 print:shadow-none print:border-zinc-300 print:break-inside-avoid">
                  <p className="text-sm text-zinc-600 leading-relaxed font-medium">
                     {reportData.analysis.engagement_change}
                  </p>
@@ -596,7 +596,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
               <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2">
                 <AlertTriangle size={18} className="text-amber-500" /> 상담사 특이사항
               </h3>
-              <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[120px]">
+              <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[120px] print:h-auto print:min-h-0 print:shadow-none print:border-zinc-300 print:break-inside-avoid">
                  <p className="text-sm text-zinc-600 leading-relaxed font-medium italic">
                     {reportData.analysis.counselor_note}
                  </p>
@@ -605,7 +605,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
           </section>
 
           {/* 정책 실행 계획 */}
-          <section className="bg-primary/5 rounded-[40px] p-10 border border-primary/10">
+          <section className="bg-primary/5 rounded-[40px] p-10 border border-primary/10 print:bg-white print:border-zinc-300 print:break-inside-avoid mt-8">
             <div className="flex items-center justify-between mb-8">
                <h2 className="text-lg font-black text-primary flex items-center gap-3 print:text-zinc-900">
                  <Target size={24} className="print:text-zinc-900" /> 맞춤형 실행 계획
@@ -629,8 +629,8 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
                    </div>
                   <div className="space-y-3">
                     {reportData.action_plan.policy_match.map((policy: string, idx: number) => (
-                      <div key={idx} className="bg-white p-5 rounded-2xl border border-primary/5 shadow-sm flex items-start gap-4 group hover:border-primary/20 hover:scale-[1.02] transition-all cursor-default">
-                         <div className="mt-1 p-1 bg-primary/10 rounded text-primary">
+                      <div key={idx} className="bg-white p-5 rounded-2xl border border-primary/5 shadow-sm flex items-start gap-4 group hover:border-primary/20 hover:scale-[1.02] transition-all cursor-default print:border-zinc-200 print:shadow-none print:break-inside-avoid">
+                         <div className="mt-1 p-1 bg-primary/10 rounded text-primary print:bg-transparent">
                             <ArrowUpRight size={14} />
                          </div>
                          <span className="text-sm font-bold text-zinc-800 leading-tight">{policy}</span>
@@ -651,7 +651,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
                    </div>
                   <div className="space-y-3">
                     {reportData.action_plan.next_steps.map((step: string, idx: number) => (
-                      <div key={idx} className="bg-white/50 p-4 rounded-2xl border border-zinc-200/50 flex items-start gap-3">
+                      <div key={idx} className="bg-white/50 p-4 rounded-2xl border border-zinc-200/50 flex items-start gap-3 print:bg-white print:border-zinc-200 print:break-inside-avoid">
                         <CheckCircle2 size={18} className="text-primary mt-0.5 shrink-0" />
                         <span className="text-sm font-medium text-zinc-700 leading-relaxed">{step}</span>
                       </div>
@@ -662,7 +662,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
           </section>
 
           {/* 내담자 전달 메시지 */}
-          <section className="bg-white rounded-[32px] p-10 border-2 border-dashed border-zinc-100">
+          <section className="bg-white rounded-[32px] p-10 border-2 border-dashed border-zinc-100 print:border-solid print:border-zinc-300 print:break-inside-avoid print:mt-8">
              <h3 className="text-sm font-black text-zinc-900 mb-6 flex items-center gap-2">
                <MessageCircle size={18} className="text-zinc-300" /> 내담자 전달 메시지
                <button 
