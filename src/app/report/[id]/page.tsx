@@ -34,70 +34,74 @@ export default function ClientReportPage() {
     if (isAuthLoading) return;
 
     const loadReportData = async () => {
-      // 2. 비로그인 시 즉시 차단하지 않고, 우선 데이터를 가져와서 확인 (보안 링크일 수 있음)
-      // 하지만 사용자 요구사항에 따라 '로그인한 내담자'에 초점을 맞춤
-      if (!user) {
-        setError("로그인이 필요한 서비스입니다. 로그인 후 다시 확인해 주세요.");
-        setSecurityStatus("denied");
-        setIsLoading(false);
-        return;
-      }
-
       setSecurityStatus("verifying");
+      setIsLoading(true);
+      setError(null);
+
+      // URL 파라미터 ID 추출 및 정규화
+      const rawId = Array.isArray(id) ? id[0] : id;
+      const requestIdParam = String(rawId || "").toLowerCase().trim();
+
       try {
-        const res = await postToWebhook(WEBHOOK_URLS.GET_COMPLETED_DETAIL, { request_id: id });
+        console.log(`🔍 [Report Access] Verifying for ID: ${requestIdParam}`);
+        
+        // 2. 비로그인 상태여도 우선 데이터를 가져옴 (보안 링크 우선)
+        const res = await postToWebhook(WEBHOOK_URLS.GET_COMPLETED_DETAIL, { request_id: rawId });
+        
+        // 데이터 구조 유연하게 처리
         const data = Array.isArray(res) ? (res[0]?.data || res[0]) : (res?.data || res);
         
-        if (data) {
-          // 보안 검증: 이메일 매칭의 한계(매니저 이메일 기록 등)를 해결하기 위해 
-          // URL의 id(request_id)와 데이터 내 ID 일치 여부를 최우선으로 확인
-          const userEmail = (user.email || "").toLowerCase().trim();
-          const requestIdParam = String(id || "").toLowerCase().trim();
+        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+          console.log("✅ [Report Access] Data received:", data);
           
-          // 데이터 내의 모든 필드 탐색 (대소문자 무시 필드명 탐색)
+          // 데이터 내의 모든 ID 및 이메일 관련 필드 수집
           const allEntries = Object.entries(data);
+          
+          const dataIds = allEntries
+            .filter(([key]) => ['request_id', 'id', 'requestId', 'requestid', 'id_value', 'row_id'].includes(key.toLowerCase()))
+            .map(([_, val]) => String(val || "").toLowerCase().trim());
           
           const dataEmails = allEntries
             .filter(([key]) => key.toLowerCase().includes('email'))
             .map(([_, val]) => String(val || "").toLowerCase().trim());
-          
-          const dataIds = allEntries
-            .filter(([key]) => ['request_id', 'id', 'requestId', 'requestid', 'id_value'].includes(key.toLowerCase()))
-            .map(([_, val]) => String(val || "").toLowerCase().trim());
 
-          // 핵심 보안 검증:
-          // 1. URL의 ID가 데이터의 ID 필드(request_id 등) 중 하나와 정확히 일치하는가?
-          // 2. 혹은 내담자의 이메일이 데이터의 이메일 필드 중 하나와 일치하는가?
+          // 보안 검증 핵심 로직
+          // 1. URL의 ID가 리턴된 데이터의 ID 필드 중 하나와 정확히 일치하는 경우 (가장 확실한 권한)
           const isIdMatched = dataIds.includes(requestIdParam) || 
                              String(data.request_id || "").toLowerCase().trim() === requestIdParam ||
                              String(data.id || "").toLowerCase().trim() === requestIdParam;
                              
-          const isEmailMatched = dataEmails.includes(userEmail);
+          // 2. 로그인 세션 정보와 리포트 내 이메일 정보가 일치하는 경우 (보조 권한)
+          const userEmail = (user?.email || "").toLowerCase().trim();
+          const isEmailMatched = user && userEmail !== "" && dataEmails.includes(userEmail);
 
-          // 사용자의 요청에 따라 '내담자 페이지를 통한 링크(즉 ID 일치)'를 우선적으로 허용
-          const isOwner = isIdMatched || isEmailMatched;
-          
-          if (isOwner) {
+          console.log("🔒 [Report Verification Results]:", {
+            isIdMatched,
+            isEmailMatched,
+            userLoggedIn: !!user,
+            requestIdParam,
+            foundDataIds: dataIds,
+            foundDataEmails: dataEmails
+          });
+
+          // ID가 일치하거나 로그인한 본인의 이메일이 일치하면 승인
+          // 특히 dashboard를 통해 유입된 경우(ID 일치)를 최우선으로 함
+          if (isIdMatched || isEmailMatched) {
             setReportData(processClientData(data));
             setSecurityStatus("granted");
           } else {
-            console.warn("Access Denied Details:", {
-              userEmail,
-              requestIdParam,
-              foundIds: dataIds,
-              foundEmails: dataEmails,
-              raw_data_request_id: data.request_id
-            });
-            setError("이 리포트에 접근할 권한이 없습니다. 본인의 계정으로 로그인되어 있는지 확인해 주세요.");
+            console.warn("🚫 [Report Access Denied] No ID or Email match found.");
+            setError("이 리포트에 접근할 권한이 없습니다. 본인의 데이터인지 확인해 주세요.");
             setSecurityStatus("denied");
           }
         } else {
-          setError("리포트 정보를 찾을 수 없거나 데이터 준비 중입니다.");
+          console.error("❌ [Report Access Error] No data found for this ID.");
+          setError("리포트 정보를 찾을 수 없습니다. 아직 생성 중이거나 삭제되었을 수 있습니다.");
           setSecurityStatus("denied");
         }
       } catch (err) {
-        console.error("Report Access Error:", err);
-        setError("데이터를 불러오는 중 오류가 발생했습니다.");
+        console.error("🚨 [Report System Error]:", err);
+        setError("서버와의 연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.");
         setSecurityStatus("denied");
       } finally {
         setIsLoading(false);
