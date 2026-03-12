@@ -15,6 +15,17 @@ import {
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
 
+// **텍스트** 마크다운을 <strong>으로 변환
+function renderBold(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={i} className="font-semibold text-slate-700">{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
 export default function ClientReportPage() {
   const { id } = useParams();
   const [reportData, setReportData] = useState<any>(null);
@@ -123,7 +134,7 @@ export default function ClientReportPage() {
                 <span className="text-[11px] font-semibold text-primary/50 uppercase tracking-widest">핵심 요약</span>
               </div>
               <p className="text-base md:text-lg text-slate-600 leading-[1.85] font-normal">
-                {reportData.main_issue}
+                {renderBold(reportData.main_issue)}
               </p>
             </section>
 
@@ -134,7 +145,7 @@ export default function ClientReportPage() {
                 <span className="text-[11px] font-semibold text-amber-500/80 uppercase tracking-widest">상담사 메시지</span>
               </div>
               <blockquote className="text-base md:text-lg text-slate-600 leading-[1.85] font-normal pl-4 border-l-2 border-amber-200 italic">
-                &ldquo;{reportData.user_message}&rdquo;
+                &ldquo;{renderBold(reportData.user_message)}&rdquo;
               </blockquote>
             </section>
 
@@ -155,7 +166,7 @@ export default function ClientReportPage() {
                       className="flex items-start gap-3 p-3.5 rounded-2xl bg-blue-50/60 border border-blue-100/50 hover:bg-blue-50 hover:border-blue-200/60 transition-colors"
                     >
                       <CheckCircle2 size={14} className="text-primary/40 mt-0.5 shrink-0" />
-                      <span className="text-sm text-slate-600 leading-snug font-normal">{policy}</span>
+                      <span className="text-sm text-slate-600 leading-snug font-normal">{renderBold(policy)}</span>
                     </div>
                   ))
                 ) : (
@@ -183,7 +194,7 @@ export default function ClientReportPage() {
                   <span className="text-xs font-semibold text-amber-400/80 mt-0.5 shrink-0 w-5 text-center tabular-nums">
                     {idx + 1}
                   </span>
-                  <p className="text-sm text-slate-600 leading-relaxed font-normal">{step}</p>
+                  <p className="text-sm text-slate-600 leading-relaxed font-normal">{renderBold(step)}</p>
                 </div>
               ))}
             </div>
