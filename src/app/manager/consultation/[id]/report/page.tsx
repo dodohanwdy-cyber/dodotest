@@ -24,8 +24,9 @@ import {
   Check,
   X,
   Send,
-  Share2, // Added Share2 icon
-  Link as LinkIcon // Added LinkIcon
+  Share2,
+  Link as LinkIcon,
+  ExternalLink
 } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
@@ -405,15 +406,40 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
   const [showResultModal, setShowResultModal] = useState(false);
   const [sendResultStatus, setSendResultStatus] = useState<"idle" | "loading" | "success">("idle");
+  const [notionUrl, setNotionUrl] = useState<string | null>(null);
 
   const handleSendResultAction = async () => {
     setSendResultStatus("loading");
-    await new Promise((res) => setTimeout(res, 1500));
-    setSendResultStatus("success");
-    setTimeout(() => {
-      setShowResultModal(false);
+    try {
+      // 1. n8n 웹훅 호출 (노션 리포트 생성)
+      const response = await postToWebhook(WEBHOOK_URLS.GENERATE_NOTION_REPORT, {
+        request_id: baseData?.request_id,
+        client_info: {
+          name: baseData?.name,
+          age: baseData?.age,
+          gender: baseData?.gender,
+          location: baseData?.location
+        },
+        report_summary: reportData.summary,
+        analysis_detail: reportData.analysis,
+        action_plan: reportData.action_plan,
+        feedback_message: reportData.feedback.user_message,
+        completed_at: reportData.feedback.completed_at
+      });
+
+      // 2. 응답에서 내담자용 공유 URL 추출
+      if (response && response.share_url) {
+        setNotionUrl(response.share_url);
+        setSendResultStatus("success");
+      } else {
+        // 응답에 URL이 없더라도 우선 성공 표시
+        setSendResultStatus("success");
+      }
+    } catch (err) {
+      console.error("노션 결과 생성 실패:", err);
       setSendResultStatus("idle");
-    }, 2000);
+      alert("링크 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    }
   };
 
   const handleCopy = (text: string, id: string) => {
@@ -805,23 +831,52 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
             </div>
 
             <div className="shrink-0 space-y-4">
-              <p className="text-center text-[15px] font-black text-blue-600 bg-blue-50 py-4 rounded-xl border border-blue-100 flex items-center justify-center gap-2">
-                <LinkIcon size={18} /> 위 내용을 요약한 내담자 공유 전용 URL 링크를 발급합니다.
-              </p>
+              {sendResultStatus === "success" && notionUrl ? (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                    <p className="text-sm font-bold text-emerald-700 mb-2 flex items-center gap-2">
+                       <CheckCircle2 size={16} /> 링크 생성이 완료되었습니다!
+                    </p>
+                    <div className="flex items-center gap-2 bg-white p-3 rounded-xl border border-emerald-200">
+                      <p className="flex-1 text-xs text-zinc-500 truncate font-mono">{notionUrl}</p>
+                      <button 
+                        onClick={() => handleCopy(notionUrl, 'notion')}
+                        className="p-2 hover:bg-zinc-50 rounded-lg text-primary transition-colors"
+                      >
+                        {copiedId === 'notion' ? <Check size={16} /> : <Copy size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                  <a 
+                    href={notionUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full h-14 rounded-2xl bg-zinc-900 text-white font-bold flex items-center justify-center gap-2 hover:bg-zinc-800 transition-colors shadow-lg"
+                  >
+                    생성된 페이지 확인하기 <ExternalLink size={20} />
+                  </a>
+                </div>
+              ) : (
+                <>
+                  <p className="text-center text-[15px] font-black text-blue-600 bg-blue-50 py-4 rounded-xl border border-blue-100 flex items-center justify-center gap-2">
+                    <LinkIcon size={18} /> 위 내용을 요약한 내담자 공유 전용 URL 링크를 발급합니다.
+                  </p>
 
-              <button
-                onClick={handleSendResultAction}
-                disabled={sendResultStatus !== "idle"}
-                className="w-full h-14 rounded-2xl bg-primary text-white font-bold flex items-center justify-center gap-2 hover:bg-blue-600 transition-colors disabled:opacity-50 text-lg shadow-lg shadow-blue-200"
-              >
-                {sendResultStatus === "loading" ? (
-                  <span className="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
-                ) : sendResultStatus === "success" ? (
-                  <><CheckCircle2 size={20} /> 링크 생성이 완료되었습니다!</>
-                ) : (
-                  <>보안 링크 생성하기 <LinkIcon size={20} /></>
-                )}
-              </button>
+                  <button
+                    onClick={handleSendResultAction}
+                    disabled={sendResultStatus !== "idle"}
+                    className="w-full h-14 rounded-2xl bg-primary text-white font-bold flex items-center justify-center gap-2 hover:bg-blue-600 transition-colors disabled:opacity-50 text-lg shadow-lg shadow-blue-200"
+                  >
+                    {sendResultStatus === "loading" ? (
+                      <span className="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
+                    ) : sendResultStatus === "success" ? (
+                      <><CheckCircle2 size={20} /> 링크 생성이 완료되었습니다!</>
+                    ) : (
+                      <>보안 링크 생성하기 <LinkIcon size={20} /></>
+                    )}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

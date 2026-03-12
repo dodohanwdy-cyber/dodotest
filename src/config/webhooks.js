@@ -35,4 +35,5 @@ export const WEBHOOK_URLS = {
   GET_COMPLETED_DETAIL: "https://primary-production-1f39e.up.railway.app/webhook/get-completed-detail", // [추천/신규] 완료된 상담의 최종 분석 결과 조회
   GET_REPORT_EXAMPLE: "https://primary-production-1f39e.up.railway.app/webhook/result-example", // 리포트 결과 예시 데이터 조회
   SYNC_GOOGLE_SHEETS: "", // 구글 시트 강제 동기화 (필요시)
+  GENERATE_NOTION_REPORT: "https://primary-production-1f39e.up.railway.app/webhook/notion-report", // [신규] 노션 공유용 리포트 생성
 };
