@@ -901,26 +901,30 @@ export default function ConsultationPage() {
 
                         const validPolicies: any[] = [];
                         
-                        // AI가 배열이 아닌 통문자열(String) 안에 "1. 정책: 내용 2. 정책: 내용" 형태로 준 경우 파싱
                         if (policies.length === 1 && typeof policies[0] === 'string') {
                           const fullText = policies[0];
-                          const regex = /(\d+)\.\s*([^:]+):\s*([^$]*?)(?=(?:\d+\.)|$)/g;
+                          // 1. [제목]: [내용] | 1. [제목] - [내용] | 1. [제목] \n [내용] 형태를 모두 커버하는 정규식
+                          const regex = /(\d+)\.\s*([^\n:-]+)(?:[:\-]\s*|\n)([\s\S]*?)(?=(?:\d+\.\s*[^\n:-]+(?:[:\-]\s*|\n))|$)/g;
                           let match;
                           let mCount = 0;
                           while ((match = regex.exec(fullText)) !== null) {
-                            validPolicies.push({ idx: mCount++, title: match[2].trim(), desc: match[3].trim() });
+                            const title = match[2].trim();
+                            const desc = match[3].trim();
+                            if (title) {
+                              validPolicies.push({ idx: mCount++, title, desc });
+                            }
                           }
                           
-                          // 만약 정규식으로 잘 안 쪼개졌다면, 문장 단위로라도 강제 분할 시도 보완
+                          // 정규식 매칭이 실패한 경우 (단순 문장 나열형태)
                           if (validPolicies.length === 0) {
-                            const lines = fullText.split(/(?=\d+\.)/);
-                            lines.forEach((line, i) => {
-                              if (line.trim()) {
-                                const parts = line.split(/[:\-]/);
-                                const title = parts[0].replace(/^\d+\.\s*/, '').trim();
-                                const desc = parts.slice(1).join(':').trim() || line.trim();
-                                validPolicies.push({ idx: i, title: title || `정책 ${i+1}`, desc });
-                              }
+                            const parts = fullText.split(/(?=\d+\.\s)/).filter(Boolean);
+                            parts.forEach((part, i) => {
+                              const cleanPart = part.replace(/^\d+\.\s*/, '').trim();
+                              // 첫 번째 줄이나 특정 기호 전까지를 제목으로 시도
+                              const titleEnd = cleanPart.search(/[:\-\n.]/);
+                              const title = titleEnd > -1 ? cleanPart.substring(0, titleEnd).trim() : `정책 ${i+1}`;
+                              const desc = titleEnd > -1 ? cleanPart.substring(titleEnd + 1).trim() : cleanPart;
+                              validPolicies.push({ idx: i, title: title || `정책 ${i+1}`, desc: desc.replace(/^[-\s]+/, '') });
                             });
                           }
                         } else {
