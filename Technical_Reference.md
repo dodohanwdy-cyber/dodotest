@@ -1,6 +1,6 @@
-# 열고닫기(OPCL) 기술 레퍼런스 (Technical Reference)
+# 열고닫기(OPCL) 기술 레퍼런스 (Technical Reference) - 2024.03.12 최신화
 
-본 문서는 서비스의 원활한 운영과 개발을 위한 기술적 세부 명세를 기록합니다. 주로 n8n 웹후크 연동 정보와 API 규격, 비동기 처리 로직에 대해 다룹니다.
+본 문서는 서비스의 실 서버 반영 상태에 따른 기술적 세부 명세를 기록합니다. n8n 웹후크 연동, 보안 로직, 비동기 상태 관리 규격을 포함합니다.
 
 ---
 
@@ -23,9 +23,11 @@
 - **ADJUST_SCHEDULE**: 일정 확정/상태 변경 (`/webhook/schedule-confirm`)
 - **GET_COMPLETED_LIST**: 완료된 전체 상담 내역 조회 (`/webhook/completed-list`)
 - **START_CONSULTATION**: 상담 시작 전체 데이터 로드 (`/webhook/send-all-data`)
-- **CHECK_CASE**: AI 선제 분석 요청 (`/webhook/check-case`)
 - **CONSULTATION_SUMMARY**: 상담 요약 및 STT 결과 저장 (`/webhook/consultation-summary`)
+- **SUBMIT_FINAL_REPORT**: 최종 리포트 링크 생성 및 상태 업데이트 (`/webhook/consultation-summary`)
+  - *Note: 두 웹후크는 동일 엔드포인트를 공유하거나 유사한 데이터 객체를 다룹니다.*
 - **GET_COMPLETED_DETAIL**: 완료된 상담의 최종 분석 결과 조회 (`/webhook/get-completed-detail`)
+- **CHECK_CASE**: 분석 데이터 즉시 준비 요청 (`/webhook/check-case`)
 
 ---
 
@@ -37,9 +39,13 @@
 3. n8n 워크플로우에서 AI 분석 및 구글 시트 업데이트 수행 (평균 10~20분 소요).
 4. 분석 완료 시 상태값이 `completed` -> `analyzed`로 변경되어 대시보드에 노출.
 
-### 2. 보안 접근 검증
-- **내담자 리포트**: 로그인 세션의 `email`과 데이터의 `user_email` / `requestId`를 대조하여 권한 검증.
-- **매니저 페이지**: 관리자 권한(`manager` 등) 체크 후 대시보드 진입 허용.
+### 2. 보안 접근 및 세션 관리
+- **내담자 리포트 (`/report/[id]`)**: 
+  - 로그인 세션 자동 감지 로직 적용.
+  - 로그인된 이메일(`user.email`)이 리포트의 `email` 또는 `user_email`과 일치하면 즉시 자동 승인.
+  - 일치하지 않거나 비로그인 시 접근 차단 및 로그인 유도.
+- **새 탭 접근**: 대시보드에서 `target="_blank"` 속성을 통해 원본 세션을 유지하며 리포트 열람 가능.
+- **매니저 권한**: `manager` 역할군을 가진 계정만 상담 접수 및 리포트 작성 페이지 접근 가능.
 
 ---
 
