@@ -108,23 +108,10 @@ export default function ClientDashboard() {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && user?.email) {
-      const cached = localStorage.getItem('dashboard_cache');
-      if (cached) {
-        try {
-          const { data, timestamp, email } = JSON.parse(cached);
-          const CACHE_DURATION = 5 * 60 * 1000;
-          const now = Date.now();
-          if (email === user.email && (now - timestamp < CACHE_DURATION)) {
-            setApplications(data);
-            setLastFetched(timestamp);
-            setLoading(false);
-            return;
-          }
-        } catch (e) {
-          console.error('캐시 복원 실패:', e);
-        }
-      }
+    // 로그인(user 변경) 시 캐시를 무시하고 항상 최신 데이터 조회
+    // DB에서 삭제된 내역이 캐시로 인해 남아있는 것을 방지
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('dashboard_cache');
     }
     fetchApplications();
   }, [user]);

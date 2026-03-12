@@ -153,10 +153,9 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
       }
     };
     
-    if (Object.keys(holidays).length > 0) {
-      fetchCalendar();
-    }
-  }, [holidays]);
+    // holidays 상태 대기 제거: 페이지 마운트 시 즉시 실행
+    fetchCalendar();
+  }, []); // holidays가 생성될 때까지 기다리지 않고 정적 실행
 
   // 로컬 날짜를 YYYY-MM-DD 형식으로 변환하는 헬퍼 함수
   const formatLocalDate = (date: Date): string => {
