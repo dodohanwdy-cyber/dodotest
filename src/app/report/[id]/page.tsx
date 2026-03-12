@@ -30,48 +30,45 @@ export default function ClientReportPage() {
   const [securityStatus, setSecurityStatus] = useState<"idle" | "verifying" | "denied" | "granted">("idle");
 
   useEffect(() => {
-    // 1. 인증 상태 로딩 대기
+    // 1. 인증 상태 로딩 중이면 대기
     if (isAuthLoading) return;
 
-    // 2. 비로그인 처리
-    if (!user) {
-      setError("로그인이 필요한 페이지입니다.");
-      setSecurityStatus("denied");
-      setIsLoading(false);
-      return;
-    }
+    const loadReportData = async () => {
+      // 2. 비로그인 시 즉시 차단하지 않고, 우선 데이터를 가져와서 확인 (보안 링크일 수 있음)
+      // 하지만 사용자 요구사항에 따라 '로그인한 내담자'에 초점을 맞춤
+      if (!user) {
+        setError("로그인이 필요한 서비스입니다. 로그인 후 다시 확인해 주세요.");
+        setSecurityStatus("denied");
+        setIsLoading(false);
+        return;
+      }
 
-    const fetchReport = async () => {
       setSecurityStatus("verifying");
       try {
         const res = await postToWebhook(WEBHOOK_URLS.GET_COMPLETED_DETAIL, { request_id: id });
-        if (res) {
-          let data = null;
-          if (Array.isArray(res)) {
-            data = res[0]?.data || res[0];
-          } else {
-            data = res?.data || res;
-          }
+        const data = Array.isArray(res) ? (res[0]?.data || res[0]) : (res?.data || res);
+        
+        if (data) {
+          // 보안 검증: 신청 이메일(email, user_email) 또는 request_id 소유권 확인
+          const isOwner = 
+            data.email === user.email || 
+            data.user_email === user.email || 
+            id === data.request_id ||
+            id === data.id;
           
-          if (data) {
-            // 3. 보안 검증: 신청 이메일 또는 request_id 소유권 확인
-            // n8n 데이터에 email 필드가 포함되어 있다고 가정하거나, request_id가 신청 내역에 있는지 확인
-            const isOwner = data.email === user.email || data.user_email === user.email || id === data.request_id;
-            
-            if (isOwner) {
-              setReportData(processClientData(data));
-              setSecurityStatus("granted");
-            } else {
-              setError("이 리포트를 볼 수 있는 권한이 없습니다.");
-              setSecurityStatus("denied");
-            }
+          if (isOwner) {
+            setReportData(processClientData(data));
+            setSecurityStatus("granted");
           } else {
-            setError("리포트 데이터를 찾을 수 없습니다.");
+            setError("이 리포트에 접근할 권한이 없습니다. 본인의 계정으로 로그인되어 있는지 확인해 주세요.");
             setSecurityStatus("denied");
           }
+        } else {
+          setError("리포트 정보를 찾을 수 없거나 데이터 준비 중입니다.");
+          setSecurityStatus("denied");
         }
       } catch (err) {
-        console.error("데이터 로드 실패:", err);
+        console.error("Report Access Error:", err);
         setError("데이터를 불러오는 중 오류가 발생했습니다.");
         setSecurityStatus("denied");
       } finally {
@@ -79,7 +76,7 @@ export default function ClientReportPage() {
       }
     };
 
-    fetchReport();
+    loadReportData();
   }, [id, user, isAuthLoading]);
 
   // 내담자용 데이터 필터링 (보안 강화)

@@ -239,6 +239,8 @@ export default function ClientDashboard() {
                       {isAnalyzed ? (
                         <Link 
                           href={`/report/${requestId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="w-full flex items-center justify-between p-5 bg-emerald-600 text-white rounded-[24px] group/btn hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 active:scale-[0.98]"
                         >
                           <div className="flex items-center gap-4">
