@@ -149,10 +149,11 @@ export default function CompletedConsultationsPage() {
           <button
             onClick={handleRefresh}
             disabled={isLoading}
-            className="flex-none p-3 bg-white text-slate-500 border border-slate-200 rounded-2xl hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm"
+            className="flex-none flex items-center gap-2 px-4 py-3 bg-white text-slate-600 font-bold border border-slate-200 rounded-2xl hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm"
             title="분석 상태 다시 불러오기"
           >
             <Loader2 size={18} className={isLoading ? "animate-spin" : ""} />
+            <span className="text-sm">새로고침</span>
           </button>
           <div className="relative w-full md:w-80">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />

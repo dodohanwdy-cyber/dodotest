@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Bell, X, AlertCircle, CheckCircle2 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface NotificationData {
   id: string;
@@ -16,6 +16,7 @@ interface NotificationData {
 export default function NotificationProvider() {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const pathname = usePathname();
+  const router = useRouter();
 
   // 매니저 관련 페이지 내부에서만 알림 동작하도록 제한
   const isManagerPage = pathname?.startsWith("/manager");
@@ -94,6 +95,20 @@ export default function NotificationProvider() {
             </div>
             
             <p className="text-[10px] text-zinc-400 mt-2 font-medium">완료 목록과 리포트를 확인해 보세요.</p>
+            
+            <button
+              onClick={() => {
+                removeNotification(notif.id);
+                if (pathname === '/manager/completed') {
+                  window.location.reload();
+                } else {
+                  router.push('/manager/completed');
+                }
+              }}
+              className="mt-3 w-full py-2 bg-primary/5 hover:bg-primary/10 text-primary border border-primary/10 rounded-xl text-xs font-bold transition-all shadow-sm"
+            >
+              방금 완료된 상담 확인하기
+            </button>
           </div>
           
           <button 
