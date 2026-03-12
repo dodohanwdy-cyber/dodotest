@@ -91,6 +91,10 @@
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/consultation-summary`
   - Method: POST
   - 용도: 상담 종료 후 대화 요약 기록
+- **GET_COMPLETED_DETAIL** - 완료된 상담의 최종 분석 결과 조회 (**신규**)
+  - URL: `https://primary-production-1f39e.up.railway.app/webhook/get-completed-detail`
+  - Method: POST
+  - 용도: 리포트 페이지(`isCompletedMode=true`) 접속 시 과거 분석 데이터 로드
 
 ### ⚪ 기타/테스트
 - **GET_REPORT_EXAMPLE** - 리포트 결과 예시 데이터 조회
@@ -98,6 +102,9 @@
 - **AI_CHAT_INPUT** - 채팅 실시간 반응 (대기)
   - URL: `https://primary-production-1f39e.up.railway.app/webhook/chat-input`
   - 상태: 현재 사용하지 않음 (Edge Function 직접 호출 방식 병행)
+- **SYNC_GOOGLE_SHEETS** - 구글 시트 강제 동기화 (**신규**)
+  - URL: (현재 빈 값)
+  - 상태: 필요시 동기화 용도
 
 ---
 
@@ -117,10 +124,19 @@
   - 🔄 배정 내역 전체 초기화
 - **연동 웹훅**: `ADJUST_SCHEDULE`, `GET_CALENDAR`, `CANCEL_ASSIGNMENT`, `RESET_SCHEDULE`
 
-### 3. 상담 상세 및 진행 (`/manager/consultation/[id]`)
+### 3. 상담 상세 리포트 및 진행 (`/manager/consultation/[id]/report`)
 - **주요 기능**:
   - 👤 상세 인적사항 및 인테이크 응답 확인
-  - 🪄 **AI 상담 가이드**: 대화 요약, 특이사항, 추천 정책 등 제공
-  - ⚡ **바로 준비하기**: AI 분석 데이터가 즉시 필요할 때 강제 요청
-  - 📝 실시간 상담 노트 및 요약 저장
-- **연동 웹훅**: `START_CONSULTATION`, `CONSULTATION_SUMMARY`, `CHECK_CASE`
+  - 🪄 **AI 상담 가이드**: 위험도 분석, 대화 요약, 특이사항, 추천 정책 등 제공
+  - ⚡ **바로 준비하기 / 예시 보기**: AI 분석 데이터가 즉시 필요할 때 강제 요청 또는 예시 로드
+  - 📝 **원페이퍼 상담 리포트**: 상담 결과 내용을 내담자에게 발송 가능하도록 클립보드 복사 지원
+  - 🗂️ **완료 모드 지원**: 상담 완료 내역에서 접근 시 과거 진단 결과를 바로 병합하여 표시
+- **연동 웹훅**: `START_CONSULTATION`, `CONSULTATION_SUMMARY`, `CHECK_CASE`, `GET_COMPLETED_DETAIL`, `GET_APPLICATION_DETAIL`
+
+### 4. 상담 완료 내역 (`/manager/completed`)
+- **주요 기능**:
+  - 🗓️ 연도/월별 리스트 필터링 및 캘린더형 네비게이션 조회
+  - 🔍 신청자 이름 및 이메일 기반 검색 필터링
+  - 📋 완료된 상담 내역 요약 카드 (위기 점수, 주요 관심사, 완료일시 등 표기)
+  - 🔗 상세 리포트 페이지(`?status=completed`) 연동 상세보기 지원
+- **연동 웹훅**: `GET_COMPLETED_LIST`

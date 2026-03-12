@@ -58,8 +58,8 @@ export default function CompletedConsultationsPage() {
           rawData = response?.data || response?.applications || response?.completed_list || [];
         }
 
-        // 안전을 위해 한 번 더 status 필터링
-        const filtered = Array.isArray(rawData) ? rawData.filter((item: any) => item.status === "completed") : [];
+        // 안전을 위해 한 번 더 status 필터링 (completed 와 analyzed 모두 포함)
+        const filtered = Array.isArray(rawData) ? rawData.filter((item: any) => item.status === "completed" || item.status === "analyzed") : [];
         setCompletedList(filtered);
 
         // 사용 가능한 월 리스트 추출 (YYYY-MM)
@@ -91,6 +91,35 @@ export default function CompletedConsultationsPage() {
     fetchCompletedData();
   }, [user]);
 
+  const handleRefresh = async () => {
+    if (!user) return;
+    setIsLoading(true);
+    try {
+      const response = await postToWebhook(WEBHOOK_URLS.GET_COMPLETED_LIST, {
+        manager_email: user.email,
+        timestamp: new Date().toISOString()
+      });
+
+      let rawData = [];
+      if (Array.isArray(response)) {
+        if (response[0]?.data && Array.isArray(response[0].data)) {
+          rawData = response[0].data;
+        } else {
+          rawData = response;
+        }
+      } else {
+        rawData = response?.data || response?.applications || response?.completed_list || [];
+      }
+
+      const filtered = Array.isArray(rawData) ? rawData.filter((item: any) => item.status === "completed" || item.status === "analyzed") : [];
+      setCompletedList(filtered);
+    } catch (error) {
+      console.error("Failed to refresh completed consultations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const filteredData = completedList.filter(item => {
     const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -116,15 +145,25 @@ export default function CompletedConsultationsPage() {
           <p className="text-slate-500 ml-12">과거에 완료된 모든 상담 기록을 확인하고 관리할 수 있습니다.</p>
         </div>
 
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input 
-            type="text" 
-            placeholder="이름 또는 이메일로 검색"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm shadow-sm"
-          />
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="flex-none p-3 bg-white text-slate-500 border border-slate-200 rounded-2xl hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm"
+            title="분석 상태 다시 불러오기"
+          >
+            <Loader2 size={18} className={isLoading ? "animate-spin" : ""} />
+          </button>
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="이름 또는 이메일로 검색"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm shadow-sm"
+            />
+          </div>
         </div>
       </div>
       
@@ -201,6 +240,7 @@ export default function CompletedConsultationsPage() {
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">나이</th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">주요 관심사</th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">상담 일시</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">상태</th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">관리</th>
                 </tr>
               </thead>
@@ -250,22 +290,42 @@ export default function CompletedConsultationsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <Link 
-                        href={`/manager/consultation/${item.request_id}/report?${new URLSearchParams({
-                          status: 'completed',
-                          name: item.name || '',
-                          age: item.age?.toString() || '',
-                          gender: item.gender || '',
-                          location: item.location || item.full_region || '',
-                          datetime: item.confirmed_datetime || item.time || '',
-                          interest_areas: Array.isArray(item.interest_areas) ? item.interest_areas.join(',') : (item.interest_areas || '')
-                        }).toString()}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 text-slate-400 hover:text-primary transition-colors inline-flex items-center gap-1 text-xs font-bold"
-                      >
-                        상세 <ExternalLink size={14} />
-                      </Link>
+                      {item.status === 'analyzed' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
+                          <FileCheck size={12} /> 분석 완료
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                          <Loader2 size={12} className="animate-spin" /> 분석 진행 중
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {item.status === 'analyzed' ? (
+                        <Link 
+                          href={`/manager/consultation/${item.request_id}/report?${new URLSearchParams({
+                            status: 'completed',
+                            name: item.name || '',
+                            age: item.age?.toString() || '',
+                            gender: item.gender || '',
+                            location: item.location || item.full_region || '',
+                            datetime: item.confirmed_datetime || item.time || '',
+                            interest_areas: Array.isArray(item.interest_areas) ? item.interest_areas.join(',') : (item.interest_areas || '')
+                          }).toString()}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors rounded-xl flex items-center gap-1 text-xs font-bold"
+                        >
+                          리포트 보기 <ExternalLink size={14} />
+                        </Link>
+                      ) : (
+                        <button
+                          onClick={() => alert('AI가 상담 내용을 분석 중입니다. 잠시 후 새로고침하여 확인해 주세요.')}
+                          className="px-4 py-2 bg-slate-50 text-slate-400 cursor-not-allowed rounded-xl flex items-center gap-1 text-xs font-bold"
+                        >
+                          결과 대기 중
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
