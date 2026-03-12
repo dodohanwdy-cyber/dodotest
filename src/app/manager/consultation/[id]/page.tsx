@@ -403,18 +403,13 @@ export default function ConsultationPage() {
   const submitConsultation = async (finalText: string) => {
     setIsSaving(true);
     try {
-      await postToWebhook(WEBHOOK_URLS.CONSULTATION_SUMMARY, {
-        request_id: id,
-        email: data?.email,
-        user_name: data?.name || data?.user_name,
-        full_text: finalText,
-        manager_notes: notes,
-        timestamp: new Date().toISOString()
-      });
+      // AI 타임아웃 방지를 위해, 여기서 웹훅을 호출하지 않고 브릿지 페이지(report)로 데이터를 넘긴 후 거기서 최종 전송
+      sessionStorage.setItem(`consultation_${id}_stt`, finalText);
+      sessionStorage.setItem(`consultation_${id}_notes`, notes);
 
       router.push(`/manager/consultation/${id}/report`);
     } catch (err) {
-      console.error("Failed to send consultation summary:", err);
+      console.error("Failed to transition to report page:", err);
       router.push(`/manager/consultation/${id}/report`);
     } finally {
       setIsSaving(false);

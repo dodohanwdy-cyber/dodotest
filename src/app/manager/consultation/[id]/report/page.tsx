@@ -41,6 +41,9 @@ export default function ReportPage() {
   const [baseData, setBaseData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // --- 추가된 매니저 알림톡 옵션 State ---
+  const [managerWantsAlert, setManagerWantsAlert] = useState(true);
+
   // --- 알림톡 발송 모달 State ---
   const [showEndConsultationModal, setShowEndConsultationModal] = useState(false);
   const [endConsultationStatus, setEndConsultationStatus] = useState<"idle" | "loading" | "success">("idle");
@@ -206,51 +209,37 @@ export default function ReportPage() {
     };
   };
 
-  const handleStartReport = async (isExample = false) => {
+  const handleFinishAndReturn = async () => {
     setIsAnalyzing(true);
     setError(null);
     
     try {
-      // 분석 시뮬레이션 애니메이션 (예시는 더 빠르게)
-      await new Promise(resolve => setTimeout(resolve, isExample ? 1500 : 6000));
-      
-      let data;
-      if (isExample) {
-        // [로컬 예시 데이터 전용] 외부 서버 요청 없이 즉시 채움
-        data = {
-          request_id: "EXAMPLE-MODE-24",
-          name: "홍길동 (예시)",
-          age: 28,
-          gender: "male",
-          main_issue: "주거 불안정 및 고용 중단으로 인한 심리적 무력감 호소",
-          risk_grade: "8등급 (고위기)",
-          keywords: "주거불안, 실업, 우울감, 긴급지원필요",
-          dialog_summary: "내담자는 최근 갑작스러운 권고사직 이후 월세 체납이 발생하여 주거 지원이 절실한 상황임. 초기에는 대화에 소극적이었으나 지원 정책 안내 이후 구체적인 향후 계획에 대해 의지를 보임. 현재 심리적으로 매우 위축되어 있어 즉각적인 생활 안정 지원이 병행되어야 함.",
-          engagement_change: "상담 초반 낮은 신뢰도를 보였으나, 주거 지원금 제도 안내 이후 참여도가 상향 곡선을 그리며 적극적으로 변함.",
-          counselor_note: "잠을 자지 못하는 불면 증세를 언급함. 정신건강복지센터와의 연계도 함께 고려할 필요가 있음.",
-          policy_match: "청년 월세 한시 특별지원\n긴급복지 주거지원 제도\n청년마음건강 지원사업",
-          next_step: "1. 관할 동주민센터 방문 및 월세 지원 신청 안내\n2. 2차 심층 상담 예약 (내주 목요일)\n3. 긴급 구호물품 키트 전달 및 모니터링",
-          user_message: "길동님, 혼자가 아닙니다. 지금의 불안함은 제도를 통해 충분히 해결해 나갈 수 있는 부분이기에 우리가 함께 방법을 찾겠습니다. 오늘 첫걸음을 내딛으신 것을 진심으로 응원합니다.",
-          completed_at: new Date().toLocaleString()
-        };
-      } else {
-        // [실제 데이터 모드] 웹훅 호출
-        const res = await postToWebhook(WEBHOOK_URLS.GET_APPLICATION_DETAIL, { request_id: id });
-        if (res) {
-          data = Array.isArray(res) ? res[0] : res;
-        }
-      }
-      
-      if (data) {
-        setReportData(processReportData(data));
-      } else {
-        setError("분석 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
-      }
+      // 1. Storage에서 데이터 로드
+      const sttText = sessionStorage.getItem(`consultation_${id}_stt`) || "";
+      const managerNotes = sessionStorage.getItem(`consultation_${id}_notes`) || "";
+
+      // 2. 최종 상담 내용 서버 전송 (AI 분석 비동기 시작)
+      await postToWebhook(WEBHOOK_URLS.CONSULTATION_SUMMARY, {
+        request_id: id,
+        email: baseData?.email,
+        user_name: baseData?.name || baseData?.user_name,
+        full_text: sttText,
+        manager_notes: managerNotes,
+        wants_alert: managerWantsAlert, // 매니저 알림 수신 여부 추가
+        timestamp: new Date().toISOString()
+      });
+
+      // 3. 임시 데이터 삭제
+      sessionStorage.removeItem(`consultation_${id}_stt`);
+      sessionStorage.removeItem(`consultation_${id}_notes`);
+
+      // 4. 완료 목록 페이지로 이동
+      router.push('/manager/completed');
+
     } catch (err) {
-      console.error("분석 로딩 중 오류:", err);
-      setError("데이터 통신 중 오류가 발생했습니다.");
-    } finally {
-      setIsAnalyzing(false);
+      console.error("최종 전송 중 오류:", err);
+      setError("데이터 전송 중 오류가 발생했습니다. 다시 시도해 주세요.");
+      setIsAnalyzing(false); // 실패 시에만 로딩 해제 (성공 시엔 페이지 이동되므로 유지)
     }
   };
 
@@ -284,30 +273,13 @@ export default function ReportPage() {
                </div>
             </div>
 
-            <h2 className="text-2xl font-black text-zinc-900 mb-4 tracking-tight">AI 상담 분석 진행 중</h2>
+            <h2 className="text-2xl font-black text-zinc-900 mb-4 tracking-tight">AI에 텍스트 및 분석 데이터 전송 중</h2>
             <div className="h-6 mb-10">
               <p className="text-primary font-bold animate-pulse text-lg">
-                {loadingMessages[loadingStep]}
+                완료되면 목록으로 자동 이동합니다...
               </p>
             </div>
 
-            <div className="w-full bg-zinc-50 rounded-2xl p-6 border border-zinc-100/50 space-y-3">
-              <div className="flex justify-between text-[11px] font-black text-zinc-400 uppercase tracking-widest px-1">
-                <span>Analysis Progress</span>
-                <span className="text-primary">Deep Learning...</span>
-              </div>
-              <div className="w-full h-2 bg-zinc-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary transition-all duration-[3000ms] ease-linear"
-                  style={{ width: `${(loadingStep + 1) * 25}%` }}
-                />
-              </div>
-              <p className="text-[11px] text-zinc-400 leading-relaxed font-medium">
-                대화 내용이 길 경우 분석에 최대 1~2분 정도 소요될 수 있습니다. <br />
-                창을 닫지 말고 잠시만 기다려 주세요.
-              </p>
-            </div>
-            
             {error && (
               <p className="mt-4 text-xs text-rose-500 font-bold">{error}</p>
             )}
@@ -319,11 +291,28 @@ export default function ReportPage() {
               <FileText size={40} />
             </div>
             <h1 className="text-2xl font-black text-zinc-900 mb-4">최종 상담 리포트 작성</h1>
-            <p className="text-zinc-500 font-medium leading-relaxed mb-10">
+            <p className="text-zinc-500 font-medium leading-relaxed mb-6">
               상담이 성공적으로 종료되었습니다. <br />
               기록된 실시간 전사 내용과 AI 분석 실마리를 바탕으로 <br />
-              내담자에게 전달할 정밀 리포트를 구성합니다.
+              내담자에게 전달할 정밀 리포트를 백그라운드에서 구성합니다.
             </p>
+
+            <div className="w-full max-w-sm bg-zinc-50 border border-zinc-100 rounded-2xl p-4 mb-8 text-left">
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <div className="relative flex items-center justify-center mt-1">
+                  <input 
+                    type="checkbox" 
+                    checked={managerWantsAlert}
+                    onChange={(e) => setManagerWantsAlert(e.target.checked)}
+                    className="w-5 h-5 rounded border-zinc-300 text-primary focus:ring-primary/20 transition-all cursor-pointer"
+                  />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-zinc-800 group-hover:text-primary transition-colors">매니저에게 분석 완료 알림톡 받기</p>
+                  <p className="text-xs text-zinc-500 mt-1 leading-relaxed">AI 리포트 분석이 완료되면 카카오톡 알림으로 즉시 알려드립니다.</p>
+                </div>
+              </label>
+            </div>
             
             <button 
               onClick={() => setShowEndConsultationModal(true)}
@@ -340,16 +329,10 @@ export default function ReportPage() {
                   <ChevronLeft size={18} />
                 </button>
                 <button 
-                  onClick={() => handleStartReport(true)}
-                  className="flex-1 px-5 py-4 bg-white border-2 border-primary/20 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2 active:scale-95"
+                  onClick={handleFinishAndReturn}
+                  className="flex-1 px-8 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
                 >
-                  <Sparkles size={18} /> 예시 보기
-                </button>
-                <button 
-                  onClick={() => handleStartReport(false)}
-                  className="flex-[1.5] px-8 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
-                >
-                  리포트 분석 및 작성 시작 
+                  완료하고 상담 내역으로 돌아가기 
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
              </div>

@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import NotificationProvider from "@/components/layout/NotificationProvider";
 
 export const metadata: Metadata = {
   title: "열고닫기 - AI 기반 청년정책 맞춤 상담",
@@ -24,6 +25,7 @@ export default function RootLayout({
               {children}
             </div>
             <Footer />
+            <NotificationProvider />
           </div>
         </AuthProvider>
       </body>
