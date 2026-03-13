@@ -95,8 +95,14 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
     });
   }, []);
 
+  // 중복 호출 방지용 Ref
+  const lastFetchRef = useRef<string>("");
+
   useEffect(() => {
     const fetchCalendar = async () => {
+      const currentFetchKey = `${data.request_id}-${data.email}`;
+      if (lastFetchRef.current === currentFetchKey) return;
+      
       setIsLoading(true);
       try {
         const response = await postToWebhook(WEBHOOK_URLS.GET_CALENDAR, {
@@ -104,44 +110,41 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
           email: data.email || ""
         });
         
-        console.log("📅 [캘린더 웹훅 응답]", response);
+        console.log("📅 [캘린더 웹훅 응답 원본]", response);
         
+        // n8n 응답이 [{...}] 배열 형태이거나 {...} 객체 형태인 경우 모두 대응
         const raw = Array.isArray(response) ? response[0] : response;
-        
-        // n8n 플레이스홀더('{{ $json... }}') 감지 및 방어 로직
         const isPlaceholder = (val: any) => typeof val === 'string' && val.includes('{{');
-        
-        if (raw && (raw.status === "success" || raw.booked_data || (raw.data && (raw.data.booked_data || raw.data.work_info)))) {
-          // 데이터가 루트에 있거나 data 속성 내부에 있는 경우 모두 대응
-          let work_info = raw.work_info || (raw.data && raw.data.work_info);
-          let booked_data = raw.booked_data || (raw.data && raw.data.booked_data);
+
+        if (raw) {
+          // 데이터 추출 우선순위: raw.data.X > raw.X 
+          let work_info = (raw.data && raw.data.work_info) || raw.work_info;
+          let booked_data = (raw.data && raw.data.booked_data) || raw.booked_data;
           
-          // n8n 플레이스홀더('{{ $json... }}') 감지 및 방어 로직
           if (isPlaceholder(work_info)) work_info = null;
           if (isPlaceholder(booked_data)) booked_data = {};
 
-          if (work_info) {
-            setWorkInfo(work_info);
-          }
+          if (work_info) setWorkInfo(work_info);
           
           setRawCalendarData({
             work_info: work_info || workInfo,
             booked_data: booked_data || {}
           });
-          console.log("✅ [캘린더 데이터 서버 수신 완료]", { work_info, booked_data });
-        } else {
-          console.warn("⚠️ [응답 형식 오류 또는 데이터 없음]", response);
-          setRawCalendarData({ work_info: workInfo, booked_data: {} });
+          
+          lastFetchRef.current = currentFetchKey;
+          console.log("✅ [최종 추출 데이터]", { work_info, booked_data });
         }
       } catch (err) {
-        console.error("🚨 [캘린더 로드 실패]", err);
+        console.error("🚨 [캘린더 로드 패닉]", err);
         setRawCalendarData({ work_info: workInfo, booked_data: {} });
       } finally {
         setIsLoading(false);
       }
     };
     
-    fetchCalendar();
+    if (data.request_id) {
+      fetchCalendar();
+    }
   }, [data.request_id, data.email]);
 
   // 로컬 날짜를 YYYY-MM-DD 형식으로 변환하는 헬퍼 함수
