@@ -223,7 +223,7 @@ export default function ClientDashboard() {
                       else if (!isCanceled) setActiveStep(1);
                     }}
                     onMouseLeave={() => setActiveStep(null)}
-                    onClick={() => { if (canResume) window.location.href = '/client/intake'; }}
+                    onClick={() => { if (canResume) window.location.href = `/client/intake?id=${requestId}`; }}
                     className={`card-premium p-0 overflow-hidden border-2 transition-all group ${
                       isAnalyzed ? 'border-indigo-100 shadow-indigo-100/50 shadow-xl' :
                       canResume ? 'hover:border-primary/30 hover:shadow-lg cursor-pointer' :
@@ -244,11 +244,13 @@ export default function ClientDashboard() {
                           isCanceled ? 'bg-rose-50 text-rose-500 border border-rose-100' :
                           isAnalyzed ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm animate-bounce-subtle' :
                           app.status === 'confirmed' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' :
+                          (app.status === 'final_submitted' || app.status === 'submitted') ? 'bg-blue-50 text-blue-600 border border-blue-100' :
                           'bg-indigo-50 text-primary border border-indigo-100'
                         }`}>
                           {isCanceled ? '상담 취소됨' : 
                            isAnalyzed ? '상담 완료' : 
                            app.status === 'confirmed' ? '상담 확정' : 
+                           (app.status === 'final_submitted' || app.status === 'submitted') ? '분석 대기중' :
                            '신청 작성중'}
                         </div>
                       </div>
@@ -345,9 +347,12 @@ export default function ClientDashboard() {
                           </div>
                           <div className="flex items-center gap-3">
                             {canResume && (
-                              <span className="text-[11px] font-black text-primary bg-primary/10 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                              <Link 
+                                href={`/client/intake?id=${requestId}`}
+                                className="text-[11px] font-black text-primary bg-primary/10 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-primary/20 transition-colors"
+                              >
                                 이어하기 <ArrowRight size={13} />
-                              </span>
+                              </Link>
                             )}
                             {!isCanceled && (
                               <button 
