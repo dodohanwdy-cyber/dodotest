@@ -346,7 +346,10 @@ export default function ClientDashboard() {
                               <Loader2 size={16} className="text-zinc-400 animate-spin" />
                             )}
                             <span className="text-xs font-bold text-zinc-500">
-                              {app.status === 'confirmed' ? '상담 대기 중입니다. 정해진 시간에 상담을 시작합니다.' : '상담 신청을 진행 중입니다. 나머지 단계를 완료해 주세요.'}
+                              {app.status === 'confirmed' ? '상담 대기 중입니다. 정해진 시간에 상담을 시작합니다.' : 
+                               (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? 
+                               '상담 신청이 완료되었습니다. 수정이 필요하시면 \'수정하기\' 버튼을 눌러주세요.' : 
+                               '상담 신청을 진행 중입니다. 나머지 단계를 완료해 주세요.'}
                             </span>
                           </div>
                           <div className="flex items-center gap-3">
