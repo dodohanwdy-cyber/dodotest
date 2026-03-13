@@ -111,10 +111,12 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
         // n8n 플레이스홀더('{{ $json... }}') 감지 및 방어 로직
         const isPlaceholder = (val: any) => typeof val === 'string' && val.includes('{{');
         
-        if (raw && (raw.status === "success" || raw.booked_data)) {
-          let { work_info, booked_data } = raw;
+        if (raw && (raw.status === "success" || raw.booked_data || (raw.data && (raw.data.booked_data || raw.data.work_info)))) {
+          // 데이터가 루트에 있거나 data 속성 내부에 있는 경우 모두 대응
+          let work_info = raw.work_info || (raw.data && raw.data.work_info);
+          let booked_data = raw.booked_data || (raw.data && raw.data.booked_data);
           
-          // 데이터가 실제 값이 아닌 n8n 변수명인 경우 처리
+          // n8n 플레이스홀더('{{ $json... }}') 감지 및 방어 로직
           if (isPlaceholder(work_info)) work_info = null;
           if (isPlaceholder(booked_data)) booked_data = {};
 
@@ -126,7 +128,7 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
             work_info: work_info || workInfo,
             booked_data: booked_data || {}
           });
-          console.log("✅ [캘린더 데이터 서버 수신 완료]");
+          console.log("✅ [캘린더 데이터 서버 수신 완료]", { work_info, booked_data });
         } else {
           console.warn("⚠️ [응답 형식 오류 또는 데이터 없음]", response);
           setRawCalendarData({ work_info: workInfo, booked_data: {} });
