@@ -16,7 +16,8 @@ import {
   Trash2,
   MapPin,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  CheckCircle
 } from "lucide-react";
 import Link from "next/link";
 
@@ -341,7 +342,9 @@ export default function ClientDashboard() {
                         <div className="flex items-center justify-between p-4 bg-zinc-50/80 rounded-2xl border border-zinc-100 border-dashed">
                           <div className="flex items-center gap-3">
                             {app.status === 'confirmed' ? (
-                              <Clock size={16} className="text-indigo-400 animate-pulse" />
+                              <Clock size={16} className="text-indigo-400" />
+                            ) : (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? (
+                              <CheckCircle size={16} className="text-emerald-500" />
                             ) : (
                               <Loader2 size={16} className="text-zinc-400 animate-spin" />
                             )}
