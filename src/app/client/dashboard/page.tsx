@@ -249,7 +249,7 @@ export default function ClientDashboard() {
                         }`}>
                           {isCanceled ? '상담 취소됨' : 
                            isAnalyzed ? '상담 완료' : 
-                           app.status === 'confirmed' ? '상담 확정' : 
+                           app.status === 'confirmed' ? '일정 정해짐' : 
                            (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? '신청됨' :
                            '신청 작성중'}
                         </div>
@@ -340,20 +340,28 @@ export default function ClientDashboard() {
                       ) : (
                         <div className="flex items-center justify-between p-4 bg-zinc-50/80 rounded-2xl border border-zinc-100 border-dashed">
                           <div className="flex items-center gap-3">
-                            <Loader2 size={16} className="text-zinc-400 animate-spin" />
+                            {app.status === 'confirmed' ? (
+                              <Clock size={16} className="text-indigo-400 animate-pulse" />
+                            ) : (
+                              <Loader2 size={16} className="text-zinc-400 animate-spin" />
+                            )}
                             <span className="text-xs font-bold text-zinc-500">
-                              {app.status === 'confirmed' ? '상담사가 일정을 확인했습니다. 시간에 맞춰 접속해주세요.' : '상담 신청을 진행 중입니다. 나머지 단계를 완료해 주세요.'}
+                              {app.status === 'confirmed' ? '상담 대기 중입니다. 정해진 시간에 상담을 시작합니다.' : '상담 신청을 진행 중입니다. 나머지 단계를 완료해 주세요.'}
                             </span>
                           </div>
                           <div className="flex items-center gap-3">
-                            {canResume && (
+                            {app.status === 'confirmed' ? (
+                              <span className="text-[11px] font-black text-indigo-500 bg-indigo-50 px-4 py-2 rounded-xl flex items-center gap-1 border border-indigo-100/50 cursor-default">
+                                <MessageSquare size={13} /> 상담 준비
+                              </span>
+                            ) : canResume ? (
                               <Link 
                                 href={`/client/intake?id=${requestId}`}
                                 className="text-[11px] font-black text-primary bg-primary/10 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-primary/20 transition-colors"
                               >
                                 {app.status === 'pending' ? '수정하기' : '이어하기'} <ArrowRight size={13} />
                               </Link>
-                            )}
+                            ) : null}
                             {!isCanceled && (
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleCancelApplication(requestId, e); }}
