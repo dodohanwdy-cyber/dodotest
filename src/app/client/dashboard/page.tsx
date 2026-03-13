@@ -97,9 +97,12 @@ export default function ClientDashboard() {
       const data = await res.json();
       if (res.ok) {
         alert("상담 취소가 완료되었습니다.");
+        // 상태에서 즉시 제거하여 새로고침 없이도 안 보이게 함
+        setApplications(prev => prev.filter(app => (app.request_id || app.id) !== requestId));
         fetchApplications(true);
       } else {
         alert(data.error || "취소 중 오류가 발생했습니다.");
+        setLoading(false);
       }
     } catch (err) {
       console.error('Cancel application error:', err);
@@ -202,9 +205,9 @@ export default function ClientDashboard() {
                 </button>
               </div>
             </div>
-          ) : applications.length > 0 ? (
+          ) : applications.filter(app => app.status !== 'canceled').length > 0 ? (
             <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              {applications.map((app) => {
+              {applications.filter(app => app.status !== 'canceled').map((app) => {
                 const isAnalyzed = app.status === 'analyzed';
                 const isCanceled = app.status === 'canceled';
                 const requestId = app.request_id || app.id;
@@ -240,14 +243,39 @@ export default function ClientDashboard() {
                         <div className={`px-4 py-1.5 rounded-full text-[11px] font-black ${
                           isCanceled ? 'bg-rose-50 text-rose-500 border border-rose-100' :
                           isAnalyzed ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm animate-bounce-subtle' :
+                          app.status === 'confirmed' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' :
                           'bg-indigo-50 text-primary border border-indigo-100'
                         }`}>
                           {isCanceled ? '상담 취소됨' : 
                            isAnalyzed ? '상담 완료' : 
-                           app.status === 'confirmed' ? '상담 예정' : 
-                           '신청됨'}
+                           app.status === 'confirmed' ? '상담 확정' : 
+                           '신청 검토중'}
                         </div>
                       </div>
+
+                      {/* 확정된 상담 시간 표시 (Step 2 연동 확인용) */}
+                      {app.status === 'confirmed' && (app.confirmed_datetime || app.confirmed_time) && (
+                        <div className="mb-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 shadow-sm">
+                              <Calendar size={20} />
+                            </div>
+                            <div>
+                              <p className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider">확정된 상담 일시</p>
+                              <p className="text-sm font-black text-indigo-900">{app.confirmed_datetime || app.confirmed_time}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                             <p className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider">방식</p>
+                             <p className="text-sm font-black text-indigo-900">
+                               {app.confirmed_method === 'online' ? '온라인(비대면)' : 
+                                app.confirmed_method === 'offline' ? '오프라인(센터)' : 
+                                app.confirmed_method === 'phone' ? '전화 상담' : 
+                                (app.confirmed_method || '대면 상담')}
+                             </p>
+                          </div>
+                        </div>
+                      )}
                       
                       <div className="flex flex-wrap gap-3 mb-6">
                         <div className="flex items-center gap-2 text-zinc-600 bg-zinc-50 px-3 py-1.5 rounded-xl border border-zinc-100/50">
@@ -259,6 +287,35 @@ export default function ClientDashboard() {
                           <span className="text-xs font-bold leading-none">{app.job_status || '미입력'}</span>
                         </div>
                       </div>
+
+                      {/* 희망 상담 시간 표시 (검토 중일 때) */}
+                      {!isAnalyzed && app.status !== 'confirmed' && (app.request_time_1 || app.request_time_2 || app.request_time_3) && (
+                        <div className="mb-4 bg-zinc-50 border border-zinc-100 border-dashed rounded-2xl p-4">
+                          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                            <Clock size={10} /> 희망 상담 일시 (조율 대기중)
+                          </p>
+                          <div className="space-y-1.5">
+                            {app.request_time_1 && (
+                              <div className="flex items-center justify-between text-[11px]">
+                                <span className="text-zinc-500">1순위</span>
+                                <span className="font-black text-zinc-700">{app.request_time_1}</span>
+                              </div>
+                            )}
+                            {app.request_time_2 && (
+                              <div className="flex items-center justify-between text-[11px]">
+                                <span className="text-zinc-500">2순위</span>
+                                <span className="font-black text-zinc-700">{app.request_time_2}</span>
+                              </div>
+                            )}
+                            {app.request_time_3 && (
+                              <div className="flex items-center justify-between text-[11px]">
+                                <span className="text-zinc-500">3순위</span>
+                                <span className="font-black text-zinc-700">{app.request_time_3}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
                       {isAnalyzed ? (
                         <Link 
@@ -283,7 +340,7 @@ export default function ClientDashboard() {
                           <div className="flex items-center gap-3">
                             <Loader2 size={16} className="text-zinc-400 animate-spin" />
                             <span className="text-xs font-bold text-zinc-500">
-                              {isCanceled ? '취소된 신청입니다.' : '상담사가 내용을 검토하고 분석 중입니다.'}
+                              {app.status === 'confirmed' ? '상담사가 일정을 확인했습니다. 시간에 맞춰 접속해주세요.' : '상담사가 내용을 검토하고 분석 중입니다.'}
                             </span>
                           </div>
                           <div className="flex items-center gap-3">

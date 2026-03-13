@@ -42,10 +42,9 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
   const [preferredLocation, setPreferredLocation] = useState<"center" | string>("center");
   const [customLocation, setCustomLocation] = useState("");
   
-  // 웹훅 전송 중 상태
+  // 웹훅 전송 및 수신 데이터 저장
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // 예약된 시간 원본 데이터 (날짜 클릭 시 참조)
-  const bookedDataRef = useRef<{ [key: string]: string[] }>({});
+  const [rawCalendarData, setRawCalendarData] = useState<{work_info: any, booked_data: any} | null>(null);
 
   // 기존 데이터 복원
   useEffect(() => {
@@ -119,43 +118,43 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
     const fetchCalendar = async () => {
       setIsLoading(true);
       try {
-        const response = await postToWebhook(WEBHOOK_URLS.GET_CALENDAR, {});
+        // 백엔드 요청 시 현재 신청 건에 대한 정보를 함께 전달 (컨텍스트 유지를 위해)
+        const response = await postToWebhook(WEBHOOK_URLS.GET_CALENDAR, {
+          request_id: data.request_id || "",
+          email: data.email || ""
+        });
         
         console.log("📅 [캘린더 웹훅 응답]", response);
         
-        // 응답이 배열로 오는 경우 첫 번째 요소 사용
         const raw = Array.isArray(response) ? response[0] : response;
         
-        if (raw && raw.status === "success") {
+        if (raw && (raw.status === "success" || raw.booked_data)) {
           const { work_info, booked_data } = raw;
           
           if (work_info) {
             setWorkInfo(work_info);
           }
           
-          // booked_data를 ref에 저장해두어 날짜 클릭 시 사용
-          bookedDataRef.current = booked_data || {};
-          
-          const calendarData = generateCalendar(work_info || workInfo, booked_data || {});
-          setCalendar(calendarData);
-          console.log("✅ [캘린더 생성 완료]", calendarData.length, "일");
+          // 로드된 데이터를 상태에 저장하여 useMemo에서 캘린더를 생성하게 함
+          setRawCalendarData({
+            work_info: work_info || workInfo,
+            booked_data: booked_data || {}
+          });
+          console.log("✅ [캘린더 데이터 서버 수신 완료]");
         } else {
-          console.warn("⚠️ [응답 형식 오류]", response);
-          const calendarData = generateCalendar(workInfo, {});
-          setCalendar(calendarData);
+          console.warn("⚠️ [응답 형식 오류 또는 데이터 없음]", response);
+          setRawCalendarData({ work_info: workInfo, booked_data: {} });
         }
       } catch (err) {
         console.error("🚨 [캘린더 로드 실패]", err);
-        const calendarData = generateCalendar(workInfo, {});
-        setCalendar(calendarData);
+        setRawCalendarData({ work_info: workInfo, booked_data: {} });
       } finally {
         setIsLoading(false);
       }
     };
     
-    // holidays 상태 대기 제거: 페이지 마운트 시 즉시 실행
     fetchCalendar();
-  }, []); // holidays가 생성될 때까지 기다리지 않고 정적 실행
+  }, [data.request_id, data.email]);
 
   // 로컬 날짜를 YYYY-MM-DD 형식으로 변환하는 헬퍼 함수
   const formatLocalDate = (date: Date): string => {
@@ -165,38 +164,35 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
     return `${year}-${month}-${day}`;
   };
 
+  // 공휴일 정보나 서버 데이터가 변경될 때마다 캘린더 슬롯을 다시 생성 (의존성 해결)
+  useEffect(() => {
+    if (rawCalendarData) {
+      const generated = generateCalendar(rawCalendarData.work_info, rawCalendarData.booked_data);
+      setCalendar(generated);
+    }
+  }, [rawCalendarData, holidays]);
+
   const generateCalendar = (workInfo: any, bookedData: any): DaySlot[] => {
     const days: DaySlot[] = [];
-    
-    // 현재 시각을 직접 사용 (브라우저의 로컬 시간이 한국 시간)
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
-    console.log("🕐 [현재 시각]", now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }));
-    console.log("📆 [오늘 날짜]", formatLocalDate(today));
-    console.log("📅 [오늘 요일]", ['일', '월', '화', '수', '목', '금', '토'][today.getDay()]);
-    
-    // 내일부터 시작
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
     
-    // 2주 뒤까지 (14일)
     const endDate = new Date(tomorrow);
     endDate.setDate(tomorrow.getDate() + 14);
     
-    // 달력 시작일: 내일이 속한 주의 일요일
     const calendarStart = new Date(tomorrow);
     const dayOfWeek = tomorrow.getDay();
     calendarStart.setDate(tomorrow.getDate() - dayOfWeek);
     
-    // 달력 종료일: 종료일이 속한 주의 토요일
     const calendarEnd = new Date(endDate);
     const endDayOfWeek = endDate.getDay();
     calendarEnd.setDate(endDate.getDate() + (6 - endDayOfWeek));
     
     const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
     
-    // 달력 시작일부터 종료일까지 모든 날짜 생성
     const currentDate = new Date(calendarStart);
     while (currentDate <= calendarEnd) {
       const dayOfWeekNum = currentDate.getDay();
@@ -205,24 +201,27 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
       const dateStr = formatLocalDate(currentDate);
       const isInRange = currentDate >= tomorrow && currentDate <= endDate;
       
-      // 공휴일 체크
-      const isHoliday = holidays.hasOwnProperty(dateStr);
+      const isHoliday = !!holidays[dateStr];
       const holidayName = holidays[dateStr];
       
-      // n8n에서 보낸 종일 예약 또는 공휴일
-      const isFullBooked = bookedData[dateStr] === "FULL_BOOKED" || isHoliday;
+      // 예약 데이터 확인 (객체 형태 권장, 배열 형태 대응)
+      let dayBookedStatus = null;
+      if (bookedData && typeof bookedData === 'object' && !Array.isArray(bookedData)) {
+        dayBookedStatus = bookedData[dateStr];
+      } else if (Array.isArray(bookedData)) {
+        // [{date: '...', status: '...'}] 형태일 경우 대비
+        const match = bookedData.find((item: any) => item.date === dateStr);
+        dayBookedStatus = match ? (match.status || match.times) : null;
+      }
+
+      const isFullBooked = dayBookedStatus === "FULL_BOOKED" || isHoliday;
       
-      const bookedTimesForDay = Array.isArray(bookedData[dateStr]) ? bookedData[dateStr] : [];
-      
-      // 시간 슬롯 생성
       const times: string[] = [];
       for (let hour = workInfo.start; hour < workInfo.end; hour++) {
         if (hour === workInfo.lunch) continue;
         const timeStr = `${hour.toString().padStart(2, '0')}:00`;
         times.push(timeStr);
       }
-      
-      console.log(`📅 ${dateStr} (${dayNames[dayOfWeekNum]}) - 범위내: ${isInRange}, 공휴일: ${isHoliday}`);
       
       days.push({
         date: dateStr,
@@ -252,8 +251,29 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
     
     setSelectedDate(day.date);
     setAvailableTimes(day.times);
+    
     // 해당 날짜의 예약된 시간 목록 설정
-    setBookedTimes(bookedDataRef.current[day.date] || []);
+    let dayBookedTimes: string[] = [];
+    const bookedData = rawCalendarData?.booked_data;
+    
+    if (bookedData) {
+      if (typeof bookedData === 'object' && !Array.isArray(bookedData)) {
+        dayBookedTimes = Array.isArray(bookedData[day.date]) ? bookedData[day.date] : [];
+      } else if (Array.isArray(bookedData)) {
+        const match = bookedData.find((item: any) => item.date === day.date);
+        dayBookedTimes = match && Array.isArray(match.times) ? match.times : [];
+      }
+    }
+    
+    // 시간 형식 통일: '9:00' -> '09:00' (안전한 비교를 위해)
+    const normalizedTimes = dayBookedTimes.map(t => {
+      if (typeof t !== 'string') return '';
+      const parts = t.trim().split(':');
+      if (parts.length < 2) return t;
+      return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
+    }).filter(Boolean);
+
+    setBookedTimes(normalizedTimes);
   };
 
   const handleTimeClick = (time: string) => {
