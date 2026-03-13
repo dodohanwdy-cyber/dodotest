@@ -249,7 +249,7 @@ export default function ClientDashboard() {
                           {isCanceled ? '상담 취소됨' : 
                            isAnalyzed ? '상담 완료' : 
                            app.status === 'confirmed' ? '상담 확정' : 
-                           '신청 검토중'}
+                           '신청 작성중'}
                         </div>
                       </div>
 
@@ -340,7 +340,7 @@ export default function ClientDashboard() {
                           <div className="flex items-center gap-3">
                             <Loader2 size={16} className="text-zinc-400 animate-spin" />
                             <span className="text-xs font-bold text-zinc-500">
-                              {app.status === 'confirmed' ? '상담사가 일정을 확인했습니다. 시간에 맞춰 접속해주세요.' : '상담사가 내용을 검토하고 분석 중입니다.'}
+                              {app.status === 'confirmed' ? '상담사가 일정을 확인했습니다. 시간에 맞춰 접속해주세요.' : '상담 신청을 진행 중입니다. 나머지 단계를 완료해 주세요.'}
                             </span>
                           </div>
                           <div className="flex items-center gap-3">
