@@ -414,8 +414,8 @@ export default function ClientDashboard() {
             <div className={`relative pl-12 transition-all duration-300 ${activeStep === 2 ? 'opacity-100 translate-x-1' : activeStep !== null ? 'opacity-30 grayscale' : 'opacity-100'}`}>
               <div className={`absolute left-0 top-0 w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all ${activeStep === 2 ? 'bg-indigo-400 text-white scale-110 shadow-lg shadow-indigo-400/20' : 'bg-indigo-50 text-indigo-400'}`}>2</div>
               <div>
-                <h4 className={`text-sm font-black tracking-tight transition-colors ${activeStep === 2 ? 'text-indigo-600' : 'text-zinc-900'}`}>담당 상담사 정밀 검토</h4>
-                <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">전문가가 AI 분석 결과를 최종 검토하여 맞춤 솔루션을 확정합니다.</p>
+                <h4 className={`text-sm font-black tracking-tight transition-colors ${activeStep === 2 ? 'text-indigo-600' : 'text-zinc-900'}`}>전문 상담사의 진심 어린 준비</h4>
+                <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">내담자님의 상황에 실질적인 도움을 드릴 수 있도록, 전문가가 들려주신 고민을 세밀하게 분석하며 정성을 다해 상담을 설계 중입니다.</p>
               </div>
             </div>
  
