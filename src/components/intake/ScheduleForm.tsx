@@ -73,52 +73,32 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
     setTimeout(() => setToast(""), 3000);
   };
 
-  // 한국 공휴일 API 호출
+  // 한국 공휴일 설정 (정적 데이터 사용)
   useEffect(() => {
-    const fetchHolidays = async () => {
-      try {
-        const year = new Date().getFullYear();
-        // 공공데이터포털 API - 실제 사용 시 API 키 필요
-        // 여기서는 간단한 공휴일 데이터를 사용
-        const response = await fetch(`https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?solYear=${year}&ServiceKey=YOUR_API_KEY&_type=json`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          // API 응답 파싱 로직
-          console.log("📅 [공휴일 API 응답]", data);
-        }
-      } catch (err) {
-        console.warn("⚠️ [공휴일 API 실패, 기본 데이터 사용]", err);
-      }
-      
-      // 기본 공휴일 데이터 (2026년)
-      setHolidays({
-        "2026-01-01": "신정",
-        "2026-02-16": "설날 연휴",
-        "2026-02-17": "설날",
-        "2026-02-18": "설날 연휴",
-        "2026-03-01": "삼일절",
-        "2026-05-05": "어린이날",
-        "2026-05-19": "석가탄신일",
-        "2026-06-06": "현충일",
-        "2026-08-15": "광복절",
-        "2026-09-24": "추석 연휴",
-        "2026-09-25": "추석",
-        "2026-09-26": "추석 연휴",
-        "2026-10-03": "개천절",
-        "2026-10-09": "한글날",
-        "2026-12-25": "크리스마스"
-      });
-    };
-    
-    fetchHolidays();
+    // 기본 공휴일 데이터 (2026년)
+    setHolidays({
+      "2026-01-01": "신정",
+      "2026-02-16": "설날 연휴",
+      "2026-02-17": "설날",
+      "2026-02-18": "설날 연휴",
+      "2026-03-01": "삼일절",
+      "2026-05-05": "어린이날",
+      "2026-05-19": "석가탄신일",
+      "2026-06-06": "현충일",
+      "2026-08-15": "광복절",
+      "2026-09-24": "추석 연휴",
+      "2026-09-25": "추석",
+      "2026-09-26": "추석 연휴",
+      "2026-10-03": "개천절",
+      "2026-10-09": "한글날",
+      "2026-12-25": "크리스마스"
+    });
   }, []);
 
   useEffect(() => {
     const fetchCalendar = async () => {
       setIsLoading(true);
       try {
-        // 백엔드 요청 시 현재 신청 건에 대한 정보를 함께 전달 (컨텍스트 유지를 위해)
         const response = await postToWebhook(WEBHOOK_URLS.GET_CALENDAR, {
           request_id: data.request_id || "",
           email: data.email || ""
@@ -128,14 +108,20 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
         
         const raw = Array.isArray(response) ? response[0] : response;
         
+        // n8n 플레이스홀더('{{ $json... }}') 감지 및 방어 로직
+        const isPlaceholder = (val: any) => typeof val === 'string' && val.includes('{{');
+        
         if (raw && (raw.status === "success" || raw.booked_data)) {
-          const { work_info, booked_data } = raw;
+          let { work_info, booked_data } = raw;
           
+          // 데이터가 실제 값이 아닌 n8n 변수명인 경우 처리
+          if (isPlaceholder(work_info)) work_info = null;
+          if (isPlaceholder(booked_data)) booked_data = {};
+
           if (work_info) {
             setWorkInfo(work_info);
           }
           
-          // 로드된 데이터를 상태에 저장하여 useMemo에서 캘린더를 생성하게 함
           setRawCalendarData({
             work_info: work_info || workInfo,
             booked_data: booked_data || {}
