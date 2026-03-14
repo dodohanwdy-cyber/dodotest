@@ -13,11 +13,13 @@ import {
   PlusCircle,
   Loader2,
   Briefcase,
-  Trash2,
   MapPin,
   Sparkles,
   ArrowRight,
-  CheckCircle
+  CheckCircle,
+  X,
+  Trash2,
+  Send
 } from "lucide-react";
 import Link from "next/link";
 
@@ -28,6 +30,11 @@ export default function ClientDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<number | null>(null);
   const [activeStep, setActiveStep] = useState<number | null>(null);
+
+  // 취소 모달 상태
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
+  const [cancelStatus, setCancelStatus] = useState<"idle" | "loading" | "success">("idle");
 
   const fetchApplications = async (forceRefresh = false) => {
     if (!user?.email) {
@@ -82,33 +89,42 @@ export default function ClientDashboard() {
 
   const handleCancelApplication = async (requestId: string, e: React.MouseEvent) => {
     e.preventDefault();
-    if (!user?.email) return;
-    if (!window.confirm("정말 이 상담 신청을 취소하시겠습니까?\n취소 후에는 다시 되돌릴 수 없습니다.")) {
-      return;
-    }
+    setCancelingId(requestId);
+    setCancelStatus("idle");
+    setShowCancelModal(true);
+  };
+
+  const confirmCancelAction = async () => {
+    if (!cancelingId || !user?.email) return;
+    
+    setCancelStatus("loading");
 
     try {
-      setLoading(true);
       const res = await fetch('/api/applications', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ request_id: requestId, email: user.email })
+        body: JSON.stringify({ request_id: cancelingId, email: user.email })
       });
 
       const data = await res.json();
       if (res.ok) {
-        alert("상담 취소가 완료되었습니다.");
-        // 상태에서 즉시 제거하여 새로고침 없이도 안 보이게 함
-        setApplications(prev => prev.filter(app => (app.request_id || app.id) !== requestId));
-        fetchApplications(true);
+        setCancelStatus("success");
+        // 상태에서 즉시 제거
+        setApplications(prev => prev.filter(app => (app.request_id || app.id) !== cancelingId));
+        
+        // 2초 뒤 모달 닫기 및 데이터 갱신
+        setTimeout(() => {
+          setShowCancelModal(false);
+          fetchApplications(true);
+        }, 2000);
       } else {
         alert(data.error || "취소 중 오류가 발생했습니다.");
-        setLoading(false);
+        setCancelStatus("idle");
       }
     } catch (err) {
       console.error('Cancel application error:', err);
       alert("서버 통신 중 오류가 발생했습니다.");
-      setLoading(false);
+      setCancelStatus("idle");
     }
   };
 
@@ -459,6 +475,67 @@ export default function ClientDashboard() {
           </div>
         </div>
       </div>
+      {/* 취소 확인 모달 (매니저 프리미엄 스타일 적용) */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => cancelStatus !== "loading" && setShowCancelModal(false)}></div>
+          <div className="bg-white rounded-[2.5rem] p-8 max-w-md w-full relative z-10 shadow-2xl animate-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setShowCancelModal(false)}
+              disabled={cancelStatus === "loading"}
+              className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors disabled:opacity-50"
+            >
+              <X size={20} />
+            </button>
+            
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-inner ${
+              cancelStatus === "success" ? "bg-green-50 text-green-600" : "bg-rose-50 text-rose-500"
+            }`}>
+              {cancelStatus === "success" ? <CheckCircle size={28} /> : <Trash2 size={28} />}
+            </div>
+
+            <h2 className="text-2xl font-black text-zinc-900 mb-2">
+              {cancelStatus === "success" ? "취소가 완료되었습니다" : "상담 신청을 취소할까요?"}
+            </h2>
+            <p className="text-[14px] text-zinc-500 mb-8 font-bold leading-relaxed">
+              {cancelStatus === "success" 
+                ? "상담 취소 처리가 안전하게 완료되었습니다. 새로운 상담이 필요하시면 언제든 다시 신청해 주세요."
+                : "취소된 신청 정보는 다시 복구할 수 없으며, 상담사에게도 취소 알림이 전달됩니다. 정말 취소하시겠습니까?"}
+            </p>
+
+            <div className="flex gap-3">
+              {cancelStatus !== "success" && (
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  disabled={cancelStatus === "loading"}
+                  className="flex-1 py-4 rounded-2xl font-bold text-zinc-500 bg-zinc-100 hover:bg-zinc-200 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  돌아가기
+                </button>
+              )}
+              <button
+                onClick={confirmCancelAction}
+                disabled={cancelStatus === "loading" || cancelStatus === "success"}
+                className={`flex-1 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-md ${
+                  cancelStatus === "success" 
+                    ? "bg-green-600 text-white w-full" 
+                    : "bg-rose-600 text-white hover:bg-rose-700 hover:shadow-lg active:scale-95"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {cancelStatus === "loading" ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin" /> 처리 중...
+                  </>
+                ) : cancelStatus === "success" ? (
+                  "확인"
+                ) : (
+                  "취소하기"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
