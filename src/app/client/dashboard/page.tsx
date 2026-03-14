@@ -244,7 +244,6 @@ export default function ClientDashboard() {
                               if (g === "female" || g === "여성" || g === "여") return "여성";
                               return g || "성별미정";
                             })()})</span>
-                            <span className="hidden debug-gender-data">{JSON.stringify(app)}</span>
                           </h3>
                         </div>
                         <div className={`px-4 py-1.5 rounded-full text-[11px] font-black ${
