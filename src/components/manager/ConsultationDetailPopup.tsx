@@ -422,7 +422,7 @@ export default function ConsultationDetailPopup({
                   </div>
                   <div>
                     <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">성별</p>
-                    {renderField(data.gender === 'male' ? '남성' : data.gender === 'female' ? '여성' : data.gender)}
+                    {renderField((data.gender?.toLowerCase() === 'male' || data.gender === '남성' || data.gender === '남') ? '남성' : (data.gender?.toLowerCase() === 'female' || data.gender === '여성' || data.gender === '여') ? '여성' : data.gender)}
                   </div>
                 </div>
               </div>
