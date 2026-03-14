@@ -41,7 +41,7 @@ export default function ClientDashboard() {
     if (forceRefresh) {
       console.log('강제 새로고침: 캐시 무시');
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('dashboard_cache');
+        sessionStorage.removeItem('dashboard_cache');
       }
     } else {
       if (lastFetched && (now - lastFetched < CACHE_DURATION)) {
@@ -63,7 +63,7 @@ export default function ClientDashboard() {
         setApplications(data.applications || []);
         setLastFetched(now);
         if (typeof window !== 'undefined') {
-          localStorage.setItem('dashboard_cache_v2', JSON.stringify({
+          sessionStorage.setItem('dashboard_cache_v2', JSON.stringify({
             data: data.applications,
             timestamp: now,
             email: user.email
@@ -116,7 +116,7 @@ export default function ClientDashboard() {
     // 로그인(user 변경) 시 캐시를 무시하고 항상 최신 데이터 조회
     // DB에서 삭제된 내역이 캐시로 인해 남아있는 것을 방지
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('dashboard_cache');
+      sessionStorage.removeItem('dashboard_cache');
     }
     fetchApplications();
   }, [user]);

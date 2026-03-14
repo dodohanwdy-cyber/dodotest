@@ -39,21 +39,29 @@ function IntakeContent() {
     if (applicationId && user?.email) {
       fetchApplicationDetail(applicationId);
     } else {
-      // 신규 모드: localStorage에서 데이터 복구
-      const savedData = localStorage.getItem("intake_persistence");
+      // 1-1. 신규 모드: 세션 저장소(현재 탭) 확인
+      let savedData = sessionStorage.getItem("intake_persistence");
+      
+      // 1-2. 세션에 없으면 로컬 백업(계정별) 확인
+      if (!savedData && user?.email) {
+        savedData = localStorage.getItem(`intake_backup_${user.email}`);
+        console.log("세션 데이터가 없어 로컬 백업에서 복구를 시도합니다.");
+      }
+
       if (savedData) {
         try {
           const { data, activeStep, completed, chatFinished, timestamp } = JSON.parse(savedData);
           
-          // 지난번 세션이 비정상 종료되어 chatFinished가 true인 상태로 남아있거나, 하루가 지난 데이터면 초기화
           const now = new Date().getTime();
           const isStale = timestamp ? (now - timestamp > 24 * 60 * 60 * 1000) : false;
           
           if (chatFinished || isStale) {
-            console.log("기존 임시 저장 데이터가 완료 상태이거나 오래되어 초기화합니다.");
-            localStorage.removeItem("intake_persistence");
+            console.log("기존 저장 데이터가 완료 상태이거나 오래되어 초기화합니다.");
+            sessionStorage.removeItem("intake_persistence");
+            if (user?.email) localStorage.removeItem(`intake_backup_${user.email}`);
           } else {
-            if (data) setIntakeData((prev: any) => ({ ...prev, ...data, request_id: prev.request_id })); // request_id는 새로 생성된 것 유지
+            console.log("신청 데이터를 복구했습니다.");
+            if (data) setIntakeData((prev: any) => ({ ...prev, ...data, request_id: prev.request_id }));
             if (activeStep) setValue(activeStep);
             if (completed) setCompletedSteps(completed);
             if (chatFinished) setIsChatFinished(chatFinished);
@@ -130,7 +138,7 @@ function IntakeContent() {
     }
   };
 
-  // 2. 상태 변경 시마다 localStorage에 자동 저장 (신규 작성(isEditMode=false)일 때만!)
+  // 2. 상태 변경 시마다 자동 저장 (신규 작성(isEditMode=false)일 때만!)
   React.useEffect(() => {
     if (isHydrated && !isEditMode) {
       const persistence = {
@@ -140,9 +148,14 @@ function IntakeContent() {
         chatFinished: isChatFinished,
         timestamp: new Date().getTime()
       };
-      localStorage.setItem("intake_persistence", JSON.stringify(persistence));
+      // 탭 내 독립 세션 저장
+      sessionStorage.setItem("intake_persistence", JSON.stringify(persistence));
+      // 데이터 유실 방지용 계정별 백업 (탭 닫혀도 유지)
+      if (user?.email) {
+        localStorage.setItem(`intake_backup_${user.email}`, JSON.stringify(persistence));
+      }
     }
-  }, [intakeData, value, completedSteps, isChatFinished, isHydrated, isEditMode]);
+  }, [intakeData, value, completedSteps, isChatFinished, isHydrated, isEditMode, user?.email]);
 
   // 유저 정보가 뒤늦게 로드되거나 변경될 경우 intakeData에 동기화
   React.useEffect(() => {
@@ -286,8 +299,11 @@ function IntakeContent() {
 
       if (isSuccess) {
         setIsFinished(true);
-        // 제출 성공 시 localStorage 데이터 삭제
-        localStorage.removeItem("intake_persistence");
+        // 제출 성공 시 저장 데이터 삭제
+        sessionStorage.removeItem("intake_persistence");
+        if (storedUser?.email) {
+          localStorage.removeItem(`intake_backup_${storedUser.email}`);
+        }
         // 페이지 상단으로 스크롤
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
