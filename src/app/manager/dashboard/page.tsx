@@ -364,7 +364,12 @@ export default function ManagerDashboard() {
                         <div className="flex items-center gap-3 mb-3">
                           <h3 className="font-bold text-xl text-zinc-900">{appointment.name}</h3>
                           <span className="text-sm text-zinc-500">
-                            {appointment.age}세 · {(appointment.gender?.toLowerCase() === "male" || appointment.gender === "남성" || appointment.gender === "남") ? "남성" : "여성"}
+                            {appointment.age}세 · {(() => {
+                              const g = (appointment.gender || appointment.Gender || "").toString().toLowerCase().trim();
+                              if (g === "male" || g === "남성" || g === "남") return "남성";
+                              if (g === "female" || g === "여성" || g === "여") return "여성";
+                              return g || "성별미정";
+                            })()}
                           </span>
                           <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
                             {appointment.job_status}

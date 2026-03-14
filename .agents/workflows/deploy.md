@@ -37,6 +37,9 @@ git -C "g:\재택근무\바이브코딩" commit -m "fix: [수정 내용 한 줄 
 git -C "g:\재택근무\바이브코딩" push origin main
 ```
 
-Push가 완료되면 Vercel이 자동으로 빌드를 시작합니다.
-배포 진행 상황은 https://vercel.com 대시보드에서 확인할 수 있습니다.
-일반적으로 1~3분 내에 배포가 완료됩니다.
+### 4단계: 배포 상태 자동 확인 (내부 프로세스)
+Vercel 배포 성공 여부를 브라우저 서브에이전트를 통해 내부적으로 확인합니다. 사용자가 별도로 브라우저를 열어 확인하지 않아도 됩니다.
+
+1. `browser_subagent`가 https://github.com/dodohanwdy-cyber/dodotest/commits/main 에 접속하여 빌드 상태를 확인합니다.
+2. 배포가 완료되면 사용자에게 성공 메시지만을 보고합니다.
+3. 배포 실패 시 상세 에러 원인을 파악하여 별도 보고합니다.

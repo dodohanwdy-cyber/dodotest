@@ -63,7 +63,7 @@ export default function ClientDashboard() {
         setApplications(data.applications || []);
         setLastFetched(now);
         if (typeof window !== 'undefined') {
-          localStorage.setItem('dashboard_cache', JSON.stringify({
+          localStorage.setItem('dashboard_cache_v2', JSON.stringify({
             data: data.applications,
             timestamp: now,
             email: user.email
@@ -238,7 +238,12 @@ export default function ClientDashboard() {
                             <span className="text-[10px] font-bold text-zinc-400 font-mono tracking-tight">{new Date(app.created_at || Date.now()).toLocaleDateString()}</span>
                           </div>
                           <h3 className={`font-black text-xl tracking-tight ${isCanceled ? 'text-zinc-400 line-through' : 'text-zinc-900'}`}>
-                            {app.name || '내담자'} <span className="text-zinc-400 font-bold text-sm ml-1">({app.age}세, {(app.gender?.toLowerCase() === "male" || app.gender === "남성" || app.gender === "남") ? "남성" : "여성"})</span>
+                            {app.name || '내담자'} <span className="text-zinc-400 font-bold text-sm ml-1">({app.age}세, {(() => {
+                              const g = (app.gender || app.Gender || "").toString().toLowerCase().trim();
+                              if (g === "male" || g === "남성" || g === "남") return "남성";
+                              if (g === "female" || g === "여성" || g === "여") return "여성";
+                              return g || "성별미정";
+                            })()})</span>
                           </h3>
                         </div>
                         <div className={`px-4 py-1.5 rounded-full text-[11px] font-black ${

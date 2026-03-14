@@ -739,7 +739,12 @@ export default function ConsultationPage() {
                   <div>
                     <p className="text-[10px] font-bold text-zinc-400 mb-0.5">인적 사항</p>
                     <p className="font-bold text-zinc-900">
-                      {data?.name} ({data?.age}세, {(data?.gender?.toLowerCase() === "male" || data?.gender === "남성" || data?.gender === "남") ? "남" : (data?.gender?.toLowerCase() === "female" || data?.gender === "여성" || data?.gender === "여") ? "여" : data?.gender})
+                      {data?.name} ({data?.age}세, {(() => {
+                        const g = (data?.gender || data?.Gender || "").toString().toLowerCase().trim();
+                        if (g === "male" || g === "남성" || g === "남") return "남";
+                        if (g === "female" || g === "여성" || g === "여") return "여";
+                        return g || "성별미정";
+                      })()})
                     </p>
                   </div>
                 </div>
