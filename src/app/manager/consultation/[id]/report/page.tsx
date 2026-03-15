@@ -182,10 +182,18 @@ export default function ReportPage() {
     }
   }, [isAnalyzing]);
 
+  // 텍스트 내의 1. 2. 3. 패턴을 감지하여 줄바꿈을 삽입하는 헬퍼
+  const formatNumberedText = (text: string) => {
+    if (!text) return text;
+    // 숫자 뒤에 마침표가 오고 공백이 있는 패턴 (예: "1. ")
+    // 이미 줄바꿈이 있는 경우는 제외하고, 문장 중간에 있는 번호 앞에 줄바꿈 삽입
+    return text.replace(/(?<!\n)\s*(\d+\.)\s+/g, '\n$1 ');
+  };
+
   const processReportData = (data: any) => {
     return {
       summary: {
-        main_issue: data.main_issue || "주요 이슈 분석 중",
+        main_issue: formatNumberedText(data.main_issue) || "주요 이슈 분석 중",
         risk_score: typeof data.risk_grade === 'string' 
           ? (data.risk_grade.match(/\d+/) ? parseInt(data.risk_grade.match(/\d+/)[0]) : 0) 
           : (data.risk_score || 0),
@@ -193,9 +201,9 @@ export default function ReportPage() {
         keywords: data.keywords ? (typeof data.keywords === 'string' ? data.keywords.split(',').map((k: string) => k.trim()) : data.keywords) : []
       },
       analysis: {
-        dialog_summary: data.dialog_summary || "요약 내용이 없습니다.",
-        engagement_change: data.engagement_change || "참여도 변화 데이터 없음",
-        counselor_note: data.counselor_note || "추가 메모 없음"
+        dialog_summary: formatNumberedText(data.dialog_summary) || "요약 내용이 없습니다.",
+        engagement_change: formatNumberedText(data.engagement_change) || "참여도 변화 데이터 없음",
+        counselor_note: formatNumberedText(data.counselor_note) || "추가 메모 없음"
       },
       action_plan: {
         policy_match: data.policy_match ? (typeof data.policy_match === 'string' ? data.policy_match.split('\n').filter((s: string) => s.trim() !== "") : data.policy_match) : [],
@@ -206,7 +214,7 @@ export default function ReportPage() {
           : []
       },
       feedback: {
-        user_message: data.user_message || "내담자에게 전달할 메시지가 생성되지 않았습니다.",
+        user_message: formatNumberedText(data.user_message) || "내담자에게 전달할 메시지가 생성되지 않았습니다.",
         completed_at: data.completed_at || new Date().toLocaleString()
       }
     };
