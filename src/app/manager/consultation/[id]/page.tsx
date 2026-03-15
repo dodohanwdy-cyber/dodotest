@@ -586,6 +586,21 @@ export default function ConsultationPage() {
     );
   };
 
+  // 텍스트 내의 **굵게** 및 [대괄호]를 스타일링하여 렌더링하는 헬퍼
+  const renderPolicyText = (text: string) => {
+    if (!text) return null;
+    const parts = text.split(/(\*\*.*?\*\*|\[.*?\])/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={i} className="font-black text-zinc-900">{part.slice(2, -2)}</strong>;
+      }
+      if (part.startsWith('[') && part.endsWith(']')) {
+        return <strong key={i} className="font-black text-primary">{part}</strong>;
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
@@ -950,9 +965,9 @@ export default function ConsultationPage() {
                       }
 
                       return (
-                        <p className="text-[13px] text-zinc-700 leading-relaxed font-medium whitespace-pre-wrap">
-                          {contentStr}
-                        </p>
+                        <div className="text-[13px] text-zinc-700 leading-relaxed font-medium whitespace-pre-wrap">
+                          {renderPolicyText(contentStr)}
+                        </div>
                       );
                     })()}
                   </div>

@@ -259,6 +259,21 @@ export default function ConsultationDetailPopup({
     return { title: title || '(항목)', desc };
   };
 
+  // 텍스트 내의 **굵게** 및 [대괄호]를 스타일링하여 렌더링하는 헬퍼
+  const renderPolicyText = (text: string) => {
+    if (!text) return null;
+    const parts = text.split(/(\*\*.*?\*\*|\[.*?\])/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={i} className="font-black text-zinc-900">{part.slice(2, -2)}</strong>;
+      }
+      if (part.startsWith('[') && part.endsWith(']')) {
+        return <strong key={i} className="font-black text-indigo-600">{part}</strong>;
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
   // 정책 배열/JSON문자열을 카드 형태로 렌더링
   const renderPolicyList = (rawData: any, sectionTitle: string) => {
     if (rawData === null || rawData === undefined) return null;
@@ -330,9 +345,13 @@ export default function ConsultationDetailPopup({
                   {r.idx + 1}
                 </div>
                 <div className="space-y-1.5 flex-1 min-w-0">
-                  <h4 className="font-bold text-zinc-900 text-sm leading-snug">{r.title}</h4>
+                  <h4 className="font-bold text-zinc-900 text-sm leading-snug">
+                    {renderPolicyText(r.title)}
+                  </h4>
                   {r.desc && (
-                    <p className="text-zinc-600 text-sm leading-relaxed whitespace-pre-wrap">{r.desc}</p>
+                    <div className="text-zinc-600 text-sm leading-relaxed whitespace-pre-wrap">
+                      {renderPolicyText(r.desc)}
+                    </div>
                   )}
                 </div>
               </div>
