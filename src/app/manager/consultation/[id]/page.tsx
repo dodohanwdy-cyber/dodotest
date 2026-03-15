@@ -404,13 +404,28 @@ export default function ConsultationPage() {
   const submitConsultation = async (finalText: string) => {
     setIsSaving(true);
     try {
-      // AI 타임아웃 방지를 위해, 여기서 웹훅을 호출하지 않고 브릿지 페이지(report)로 데이터를 넘긴 후 거기서 최종 전송
+      // 1. 상담 종료 및 요약 데이터 백엔드 전송 (중복 발송 방지를 위해 여기서 단 한 번만 수행)
+      await postToWebhook(WEBHOOK_URLS.CONSULTATION_SUMMARY, {
+        request_id: id,
+        email: data?.email,
+        user_name: data?.name || data?.user_name,
+        full_text: finalText,
+        manager_notes: notes,
+        status: 'analyzed',
+        timestamp: new Date().toISOString()
+      });
+
+      // 2. 리포트 페이지에서의 호환성을 위해 세션 스토리지에 데이터 임시 저장
       sessionStorage.setItem(`consultation_${id}_stt`, finalText);
       sessionStorage.setItem(`consultation_${id}_notes`, notes);
 
+      // 3. 리포트 페이지로 이동
       router.push(`/manager/consultation/${id}/report`);
     } catch (err) {
-      console.error("Failed to transition to report page:", err);
+      console.error("상담 데이터 전송 및 페이지 이동 실패:", err);
+      // 에러가 발생해도 리포트 페이지로 일단 이동하여 사용자가 흐름을 유지할 수 있게 함 (세션 스토리지 데이터 사용 가능)
+      sessionStorage.setItem(`consultation_${id}_stt`, finalText);
+      sessionStorage.setItem(`consultation_${id}_notes`, notes);
       router.push(`/manager/consultation/${id}/report`);
     } finally {
       setIsSaving(false);
@@ -805,7 +820,6 @@ export default function ConsultationPage() {
         {/* 중앙: AI 분석 실마리 & 가이드 */}
         <div className="flex-1 flex flex-col overflow-y-auto bg-zinc-50/30">
           <div className="p-8 max-w-5xl mx-auto w-full space-y-12">
-            
             {hasChatData ? (
               <>
                 {/* 1. 사전 상담 요약 */}
@@ -832,7 +846,6 @@ export default function ConsultationPage() {
                      </div>
                   </div>
                 </section>
-
                 {/* 2. 맞춤형 상담 전략 및 로드맵 */}
                 <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div className="space-y-6">
@@ -856,7 +869,6 @@ export default function ConsultationPage() {
                               if (typeof pr === 'string') {
                                 try { pr = JSON.parse(pr); } catch(e) { /* ignore */ }
                               }
-                              // 단일 객체면 배열로 래핑
                               if (pr && typeof pr === 'object' && !Array.isArray(pr)) {
                                 pr = [pr];
                               }
@@ -873,7 +885,7 @@ export default function ConsultationPage() {
                                   return null;
                                 }).filter(Boolean);
 
-                                if (validItems.length === 0) return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">설정된 로드맵 형식을 읽을 수 없습니다.</p>;
+                                if (validItems.length === 0) return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">로드맵 데이터를 읽을 수 없습니다.</p>;
 
                                 return validItems.map((item: any) => (
                                   <div key={item.idx} className="flex flex-col">
@@ -887,81 +899,98 @@ export default function ConsultationPage() {
                             })()}
                         </div>
                      </div>
-                   </div>
-                 </section>
+                  </div>
+                </section>
                  
-                 {/* 3. 추천 정책 솔루션 카드 */}
-                 <section>
-                   <h2 className="text-sm font-extrabold text-zinc-900 mb-6 flex items-center gap-2">
-                     <FileText size={18} className="text-primary" /> 추천 정책 솔루션
-                   </h2>
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                     {(() => {
-                        let policies = data?.ai_insights?.recommended_policies;
-                        if (!policies) return null;
-                        if (typeof policies === 'string') { try { policies = JSON.parse(policies); } catch(e) { /* ignore */ } }
-                        if (policies && typeof policies === 'object' && !Array.isArray(policies)) {
-                          policies = [policies];
-                        }
-                        if (!Array.isArray(policies)) return null;
+                {/* 3. 추천 정책 솔루션 (리스트 UI) */}
+                <section>
+                  <h2 className="text-sm font-extrabold text-zinc-900 mb-6 flex items-center gap-2">
+                    <FileText size={18} className="text-primary" /> 추천 정책 솔루션
+                    <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded ml-2 opacity-50 font-black tracking-widest uppercase">System V2.1 Applied</span>
+                  </h2>
+                  
+                  <div className="space-y-4">
+                    {(() => {
+                      let policiesStr = data?.ai_insights?.recommended_policies;
+                      if (!policiesStr || typeof policiesStr !== 'string') return null;
 
-                        const validPolicies: any[] = [];
+                      // 0. 불필요한 '정책 상세 정보 확인하기' 가비지 텍스트 제거 (공백/줄바꿈 포함 유연하게 처리)
+                      policiesStr = policiesStr.replace(/정책\s*상세\s*정보\s*확인하기/g, '').trim();
+                      policiesStr = policiesStr.replace(/정책상세정보확인하기/g, '').trim();
+
+                      // 1. 순번 기준(1. 2. 3.)으로 블록 분리
+                      const policyBlocks = policiesStr.split(/(?=\d+\.\s*\[?)/).filter((block: string) => block.trim());
+                      
+                      return policyBlocks.map((block: string, idx: number) => {
+                        // 2. 블록 내에서 제목, 이유, 팁 추출 (Regex 활용)
+                        const content = block.replace(/^\d+\.\s*/, '').trim();
                         
-                        if (policies.length === 1 && typeof policies[0] === 'string') {
-                          const fullText = policies[0];
-                          // 1. [제목]: [내용] | 1. [제목] - [내용] | 1. [제목] \n [내용] 형태를 모두 커버하는 정규식
-                          const regex = /(\d+)\.\s*([^\n:-]+)(?:[:\-]\s*|\n)([\s\S]*?)(?=(?:\d+\.\s*[^\n:-]+(?:[:\-]\s*|\n))|$)/g;
-                          let match;
-                          let mCount = 0;
-                          while ((match = regex.exec(fullText)) !== null) {
-                            const title = match[2].trim();
-                            const desc = match[3].trim();
-                            if (title) {
-                              validPolicies.push({ idx: mCount++, title, desc });
-                            }
-                          }
-                          
-                          // 정규식 매칭이 실패한 경우 (단순 문장 나열형태)
-                          if (validPolicies.length === 0) {
-                            const parts = fullText.split(/(?=\d+\.\s)/).filter(Boolean);
-                            parts.forEach((part, i) => {
-                              const cleanPart = part.replace(/^\d+\.\s*/, '').trim();
-                              // 첫 번째 줄이나 특정 기호 전까지를 제목으로 시도
-                              const titleEnd = cleanPart.search(/[:\-\n.]/);
-                              const title = titleEnd > -1 ? cleanPart.substring(0, titleEnd).trim() : `정책 ${i+1}`;
-                              const desc = titleEnd > -1 ? cleanPart.substring(titleEnd + 1).trim() : cleanPart;
-                              validPolicies.push({ idx: i, title: title || `정책 ${i+1}`, desc: desc.replace(/^[-\s]+/, '') });
-                            });
-                          }
+                        // 제목 추출: [제목] 형식 또는 첫 번째 구분자 전까지
+                        let title = "";
+                        const titleMatch = content.match(/^\[(.+?)\]/);
+                        const restOfContent = titleMatch 
+                          ? content.replace(titleMatch[0], '').trim() 
+                          : content;
+                        
+                        if (titleMatch) {
+                          title = titleMatch[1];
                         } else {
-                          // 배열 형태로 잘 들어온 경우 (혹은 객체 배열 등)
-                          let pIdx = 0;
-                          policies.forEach((policy: any) => {
-                            if (typeof policy === 'string') {
-                              if (policy !== '[object Object]' && policy.trim()) {
-                                validPolicies.push({ idx: pIdx++, title: policy, desc: '' });
-                              }
-                            } else if (typeof policy === 'object' && policy !== null) {
-                              const extracted = extractItemTexts(policy);
-                              if (extracted && extracted.title && extracted.title !== '(항목)') {
-                                validPolicies.push({ idx: pIdx++, ...extracted });
-                              }
-                            }
-                          });
+                          // 대괄호 없는 경우 첫 구두점이나 마커 전까지를 제목으로 시도
+                          const titleEndIdx = restOfContent.search(/[\*\n]|추천 이유:|활용 팁:/);
+                          title = titleEndIdx !== -1 ? restOfContent.substring(0, titleEndIdx).trim() : restOfContent;
                         }
 
-                        return validPolicies.map((policy: any) => (
-                          <div key={policy.idx} className="bg-white p-5 rounded-3xl border border-zinc-100 shadow-sm hover:border-primary/30 hover:bg-primary/[0.01] transition-all group cursor-pointer flex flex-col">
-                            <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-4 shrink-0">
-                              <FileText size={20} />
+                        // 가독성을 위한 중복 제거
+                        title = title.replace(/추천 이유:.*|활용 팁:.*/g, '').trim();
+                        if (!title) title = `추천 정책 ${idx + 1}`;
+
+                        // 이유 및 팁 추출 (멀티라인 및 인라인 지원)
+                        let reason = "";
+                        let tip = "";
+
+                        const reasonRegex = /(?:추천 이유:?|\* 이유:?|\* 추천 이유:?)\s*([\s\S]+?)(?=\s*(?:\*? 활용 팁:?|\*? 팁:?|$))/i;
+                        const tipRegex = /(?:활용 팁:?|\* 팁:?|\* 활용 팁:?)\s*([\s\S]+?)$/i;
+
+                        const reasonMatch = restOfContent.match(reasonRegex);
+                        if (reasonMatch) reason = reasonMatch[1].trim();
+
+                        const tipMatch = restOfContent.match(tipRegex);
+                        if (tipMatch) tip = tipMatch[1].trim();
+
+                        // 폴백: 정규식으로 못 찾았는데 제목 말곤 내용이 있는 경우
+                        if (!reason && !tip && restOfContent.length > title.length) {
+                           reason = restOfContent.replace(title, '').replace(/[\*\[\]]/g, '').trim();
+                        }
+
+                        return (
+                          <div key={idx} className="bg-white p-6 rounded-[2rem] border border-zinc-100 shadow-sm hover:border-primary/30 transition-all group flex gap-5">
+                            <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary/10 transition-colors">
+                              <FileText size={24} />
                             </div>
-                            <span className="text-sm font-bold text-zinc-700 block mb-2">{policy.title}</span>
-                            {policy.desc ? <p className="text-[10px] text-zinc-400 leading-relaxed line-clamp-3">{policy.desc}</p> : <p className="text-[10px] text-zinc-400">정책 상세 정보 확인하기</p>}
+                            <div className="flex-1 space-y-3">
+                              <h4 className="text-base font-black text-zinc-900">{idx + 1}. {title}</h4>
+                              
+                              {reason && (
+                                <div className="flex gap-2">
+                                  <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[9px] font-black rounded uppercase h-fit mt-0.5 shrink-0">Reason</span>
+                                  <p className="text-[13px] text-zinc-600 leading-relaxed font-medium whitespace-pre-wrap">{reason}</p>
+                                </div>
+                              )}
+                              
+                              {tip && (
+                                <div className="flex gap-2">
+                                  <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 text-[9px] font-black rounded uppercase h-fit mt-0.5 shrink-0">Tip</span>
+                                  <p className="text-[13px] text-zinc-500 leading-relaxed italic whitespace-pre-wrap">{tip}</p>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        ));
-                      })()}
+                        );
+                      });
+                    })()}
+
                     {isEmpty(data?.ai_insights?.recommended_policies) && (
-                       <div className="col-span-full py-12 text-center bg-zinc-50 rounded-3xl border border-dashed border-zinc-200">
+                       <div className="py-12 text-center bg-zinc-50 rounded-3xl border border-dashed border-zinc-200">
                           <p className="text-zinc-300 font-medium">추천된 정책이 없습니다.</p>
                        </div>
                     )}

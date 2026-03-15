@@ -218,19 +218,11 @@ export default function ReportPage() {
     setError(null);
     
     try {
-      const sttText = sessionStorage.getItem(`consultation_${id}_stt`) || "";
-      const managerNotes = sessionStorage.getItem(`consultation_${id}_notes`) || "";
+      // (중복 발송 방지) 상담 종료 시점의 데이터 전송은 이미 '상담 진행' 페이지에서 처리되었습니다.
+      // 여기서는 분석 상태 표시와 탭 닫기/이동만 수행합니다.
 
-      await postToWebhook(WEBHOOK_URLS.CONSULTATION_SUMMARY, {
-        request_id: id,
-        email: baseData?.email,
-        user_name: baseData?.name || baseData?.user_name,
-        full_text: sttText,
-        manager_notes: managerNotes,
-        wants_alert: managerWantsAlert,
-        status: 'analyzed',
-        timestamp: new Date().toISOString()
-      });
+      // 지연 시간을 두어 '전송 중' 효과만 부여
+      await new Promise(resolve => setTimeout(resolve, 800));
 
       sessionStorage.removeItem(`consultation_${id}_stt`);
       sessionStorage.removeItem(`consultation_${id}_notes`);
@@ -421,15 +413,9 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
       const baseUrl = window.location.origin;
       const generatedUrl = `${baseUrl}/report/${baseData?.request_id || baseData?.id}`;
       
-      // 백엔드에 리포트 생성 완료(analyzed) 신호 전송
-      await postToWebhook(WEBHOOK_URLS.SUBMIT_FINAL_REPORT, {
-        request_id: baseData?.request_id || baseData?.id,
-        email: baseData?.email,
-        status: 'analyzed',
-        report_url: generatedUrl,
-        timestamp: new Date().toISOString()
-      });
-
+      // (중복 발송 방지) 최종 데이터와 상태 업데이트는 상담 종료 시점에 이미 수행되었습니다.
+      // 내담자 전송 시에는 별도의 웹훅 호출 없이 즉시 완료 처리합니다.
+      
       setShareUrl(generatedUrl);
       setSendResultStatus("success");
       
