@@ -46,12 +46,6 @@ export default function ReportPage() {
   const [baseData, setBaseData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // 인증 가드
-  useEffect(() => {
-    if (!isLoadingAuth && !user) {
-      router.push("/login");
-    }
-  }, [user, isLoadingAuth, router]);
 
   // --- 추가된 매니저 알림톡 옵션 State ---
   const [managerWantsAlert, setManagerWantsAlert] = useState(true);
@@ -219,6 +213,7 @@ export default function ReportPage() {
   };
 
   const handleFinishAndReturn = async () => {
+    if (isAnalyzing) return;
     setIsAnalyzing(true);
     setError(null);
     
@@ -340,10 +335,17 @@ export default function ReportPage() {
                 </button>
                 <button 
                   onClick={handleFinishAndReturn}
-                  className="flex-1 px-8 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
+                  disabled={isAnalyzing}
+                  className="flex-1 px-8 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 disabled:scale-100 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
                 >
-                  완료하고 상담 내역으로 돌아가기 
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  {isAnalyzing ? (
+                    <Loader2 size={18} className="animate-spin" />
+                  ) : (
+                    <>
+                      완료하고 상담 내역으로 돌아가기 
+                      <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
                 </button>
              </div>
           </>
@@ -413,6 +415,7 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
   const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   const handleSendResultAction = async () => {
+    if (sendResultStatus === "loading") return;
     setSendResultStatus("loading");
     try {
       const baseUrl = window.location.origin;

@@ -37,9 +37,9 @@ git -C "g:\재택근무\바이브코딩" commit -m "fix: [수정 내용 한 줄 
 git -C "g:\재택근무\바이브코딩" push origin main
 ```
 
-### 4단계: 배포 상태 자동 확인 (내부 프로세스)
-Vercel 배포 성공 여부를 브라우저 서브에이전트를 통해 내부적으로 확인합니다. 사용자가 별도로 브라우저를 열어 확인하지 않아도 됩니다.
+### 4단계: 배포 상태 자동 확인 (백그라운드)
+사용자가 직접 확인하지 않아도 되도록 백그라운드에서 배포 상태를 확인합니다.
 
-1. `browser_subagent`가 https://github.com/dodohanwdy-cyber/dodotest/commits/main 에 접속하여 빌드 상태를 확인합니다.
-2. 배포가 완료되면 사용자에게 성공 메시지만을 보고합니다.
-3. 배포 실패 시 상세 에러 원인을 파악하여 별도 보고합니다.
+1. `read_url_content`를 사용하여 GitHub 커밋 페이지(`https://github.com/dodohanwdy-cyber/dodotest/commits/main`)의 HTML을 읽어와 빌드 상태 아이콘(체크 표시 등)을 분석합니다.
+2. `browser_subagent`를 사용할 경우 사용자의 화면을 방해하지 않도록 최소한의 동작으로만 수행합니다.
+3. 배포가 완료되면 성공 메시지를 보고하고, 실패 시에만 상세 원인을 파악하여 별도 보고합니다.
