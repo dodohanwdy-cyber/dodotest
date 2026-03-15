@@ -364,7 +364,7 @@ export default function ConsultationDetailPopup({
         timestamp: new Date().toISOString()
       });
       const consultationUrl = `/manager/consultation/${data.request_id}`;
-      window.open(consultationUrl, '_blank', 'noopener,noreferrer');
+      window.open(consultationUrl, '_blank');
       onClose();
     } catch (error) {
       console.error("상담 시작 실패:", error);

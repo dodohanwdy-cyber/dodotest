@@ -229,6 +229,11 @@ export default function ReportPage() {
       
       // 탭 닫기 (새 탭에서 열린 경우)
       if (window.opener) {
+        try {
+          window.opener.location.reload();
+        } catch (e) {
+          console.error("부모 창 새로고침 실패:", e);
+        }
         window.close();
       } else {
         router.push('/manager/completed');
@@ -423,6 +428,11 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
       setTimeout(() => {
         setShowResultModal(false);
         if (window.opener) {
+          try {
+            window.opener.location.reload();
+          } catch (e) {
+            console.error("부모 창 새로고침 실패:", e);
+          }
           window.close();
         } else {
           router.push('/manager/completed');
