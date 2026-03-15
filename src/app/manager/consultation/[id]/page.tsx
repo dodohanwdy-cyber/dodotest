@@ -902,131 +902,83 @@ export default function ConsultationPage() {
                   </div>
                 </section>
                  
-                {/* 3. 추천 정책 솔루션 (리스트 UI) */}
                 <section>
                   <h2 className="text-sm font-extrabold text-zinc-900 mb-6 flex items-center gap-2">
                     <FileText size={18} className="text-primary" /> 추천 정책 솔루션
-                    <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded ml-2 opacity-50 font-black tracking-widest uppercase">System V2.2 Applied</span>
                   </h2>
                   
                   <div className="space-y-4">
                     {(() => {
                       // 0. 다양한 경로와 데이터 형식 지원 (Root 및 ai_insights 탐색)
-                      let rawPolicies = data?.ai_insights?.recommended_policies || data?.recommended_policies || data?.policy_match || data?.ai_insights?.policy_match;
+                      let rawData = data?.ai_insights?.recommended_policies || data?.recommended_policies || data?.policy_match || data?.ai_insights?.policy_match;
                       
-                      if (!rawPolicies) return null;
+                      if (rawData === null || rawData === undefined) return <p className="text-sm text-zinc-400 italic">추천 정책 정보가 없습니다.</p>;
 
-                      let policiesStr = "";
-                      if (typeof rawPolicies === 'string') {
-                        policiesStr = rawPolicies;
-                      } else if (Array.isArray(rawPolicies)) {
-                        // 배열인 경우 (문자열 배열 또는 객체 배열)
-                        return rawPolicies.map((item: any, idx: number) => {
-                          const info = typeof item === 'string' ? { title: item, desc: '' } : extractItemTexts(item);
-                          if (!info) return null;
-                          return (
-                            <div key={idx} className="bg-white p-6 rounded-[2rem] border border-zinc-100 shadow-sm hover:border-primary/30 transition-all group flex gap-5">
-                              <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary/10 transition-colors">
-                                <FileText size={24} />
+                      let items: any[] = [];
+                      try {
+                        if (Array.isArray(rawData)) {
+                          items = rawData;
+                        } else if (typeof rawData === 'string') {
+                          const trimmed = rawData.trim();
+                          if (!trimmed || trimmed === '[object Object]') {
+                            // ignore
+                          } else if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+                            const parsed = JSON.parse(trimmed);
+                            items = Array.isArray(parsed) ? parsed : [parsed];
+                          } else {
+                            // 일반 텍스트 문자열인 경우 "정책상세정보확인하기" 등 가비지 제거 후 출력
+                            const cleaned = trimmed.replace(/정책\s*상세\s*정보\s*확인하기/g, '').trim();
+                            return (
+                              <div className="bg-indigo-50/40 rounded-[2rem] p-8 border border-indigo-100/60 transition-colors">
+                                <p className="text-zinc-700 leading-relaxed whitespace-pre-wrap text-sm font-medium">{cleaned}</p>
                               </div>
-                              <div className="flex-1 space-y-3">
-                                <h4 className="text-base font-black text-zinc-900">{idx + 1}. {info.title}</h4>
-                                {info.desc && (
-                                  <div className="flex gap-2">
-                                    <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[9px] font-black rounded uppercase h-fit mt-0.5 shrink-0">Info</span>
-                                    <p className="text-[13px] text-zinc-600 leading-relaxed font-medium whitespace-pre-wrap">{info.desc}</p>
-                                  </div>
+                            );
+                          }
+                        } else if (typeof rawData === 'object') {
+                          items = [rawData];
+                        }
+                      } catch (e) {
+                        return <p className="text-sm text-zinc-400 italic">데이터 로드 중 오류가 발생했습니다.</p>;
+                      }
+
+                      const renderableItems = items
+                        .map((item, idx) => {
+                          if (typeof item === 'string') {
+                            const v = item.trim().replace(/정책\s*상세\s*정보\s*확인하기/g, '');
+                            if (!v || v === '[object Object]') return null;
+                            return { idx, title: v, desc: '' };
+                          }
+                          if (typeof item === 'object' && item !== null) {
+                            const texts = extractItemTexts(item);
+                            if (!texts) return null;
+                            return { idx, title: texts.title, desc: texts.desc };
+                          }
+                          return null;
+                        })
+                        .filter((r): r is { idx: number; title: string; desc: string } => r !== null);
+
+                      if (renderableItems.length === 0) return <p className="text-sm text-zinc-400 italic">표시할 정책 정보가 없습니다.</p>;
+
+                      return (
+                        <div className="space-y-4">
+                          {renderableItems.map((r) => (
+                            <div
+                              key={r.idx}
+                              className="bg-indigo-50/40 rounded-[2rem] p-6 border border-indigo-100/60 hover:border-indigo-200 transition-all group flex gap-5"
+                            >
+                              <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold transition-colors group-hover:bg-indigo-200">
+                                {r.idx + 1}
+                              </div>
+                              <div className="space-y-1.5 flex-1 min-w-0">
+                                <h4 className="font-extrabold text-zinc-900 text-base leading-snug">{r.title}</h4>
+                                {r.desc && (
+                                  <p className="text-zinc-600 text-[13px] leading-relaxed whitespace-pre-wrap font-medium">{r.desc.replace(/정책\s*상세\s*정보\s*확인하기/g, '')}</p>
                                 )}
                               </div>
                             </div>
-                          );
-                        });
-                      } else if (typeof rawPolicies === 'object') {
-                        // 객체인 경우 (단일 항목일 가능성)
-                        const info = extractItemTexts(rawPolicies);
-                        if (!info) return null;
-                        policiesStr = `1. [${info.title}] 추천 이유: ${info.desc}`;
-                      } else {
-                        return null;
-                      }
-
-                      // 1. 불필요한 가비지 텍스트 제거 및 블록 분리 (문자열인 경우)
-                      policiesStr = policiesStr.replace(/정책\s*상세\s*정보\s*확인하기/g, '').trim();
-                      policiesStr = policiesStr.replace(/정책상세정보확인하기/g, '').trim();
-
-                      const policyBlocks = policiesStr.split(/(?=\d+\.\s*\[?)/).filter((block: string) => block.trim());
-                      
-                      if (policyBlocks.length === 0 && policiesStr) {
-                         // 숫자로 시작하지 않는 경우 전체를 하나의 블록으로 처리
-                         policyBlocks.push(policiesStr);
-                      }
-
-                      return policyBlocks.map((block: string, idx: number) => {
-                        // 2. 블록 내에서 제목, 이유, 팁 추출 (Regex 활용)
-                        const content = block.replace(/^\d+\.\s*/, '').trim();
-                        
-                        // 제목 추출: [제목] 형식 또는 첫 번째 구분자 전까지
-                        let title = "";
-                        const titleMatch = content.match(/^\[(.+?)\]/);
-                        const restOfContent = titleMatch 
-                          ? content.replace(titleMatch[0], '').trim() 
-                          : content;
-                        
-                        if (titleMatch) {
-                          title = titleMatch[1];
-                        } else {
-                          // 대괄호 없는 경우 첫 구두점이나 마커 전까지를 제목으로 시도
-                          const titleEndIdx = restOfContent.search(/[\*\n]|추천 이유:|활용 팁:/);
-                          title = titleEndIdx !== -1 ? restOfContent.substring(0, titleEndIdx).trim() : restOfContent;
-                        }
-
-                        // 가독성을 위한 중복 제거
-                        title = title.replace(/추천 이유:.*|활용 팁:.*/g, '').trim();
-                        if (!title) title = `추천 정책 ${idx + 1}`;
-
-                        // 이유 및 팁 추출 (멀티라인 및 인라인 지원)
-                        let reason = "";
-                        let tip = "";
-
-                        const reasonRegex = /(?:추천 이유:?|\* 이유:?|\* 추천 이유:?)\s*([\s\S]+?)(?=\s*(?:\*? 활용 팁:?|\*? 팁:?|$))/i;
-                        const tipRegex = /(?:활용 팁:?|\* 팁:?|\* 활용 팁:?)\s*([\s\S]+?)$/i;
-
-                        const reasonMatch = restOfContent.match(reasonRegex);
-                        if (reasonMatch) reason = reasonMatch[1].trim();
-
-                        const tipMatch = restOfContent.match(tipRegex);
-                        if (tipMatch) tip = tipMatch[1].trim();
-
-                        // 폴백: 정규식으로 못 찾았는데 제목 말곤 내용이 있는 경우
-                        if (!reason && !tip && restOfContent.length > title.length) {
-                           reason = restOfContent.replace(title, '').replace(/[\*\[\]]/g, '').trim();
-                        }
-
-                        return (
-                          <div key={idx} className="bg-white p-6 rounded-[2rem] border border-zinc-100 shadow-sm hover:border-primary/30 transition-all group flex gap-5">
-                            <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary/10 transition-colors">
-                              <FileText size={24} />
-                            </div>
-                            <div className="flex-1 space-y-3">
-                              <h4 className="text-base font-black text-zinc-900">{idx + 1}. {title}</h4>
-                              
-                              {reason && (
-                                <div className="flex gap-2">
-                                  <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[9px] font-black rounded uppercase h-fit mt-0.5 shrink-0">Reason</span>
-                                  <p className="text-[13px] text-zinc-600 leading-relaxed font-medium whitespace-pre-wrap">{reason}</p>
-                                </div>
-                              )}
-                              
-                              {tip && (
-                                <div className="flex gap-2">
-                                  <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 text-[9px] font-black rounded uppercase h-fit mt-0.5 shrink-0">Tip</span>
-                                  <p className="text-[13px] text-zinc-500 leading-relaxed italic whitespace-pre-wrap">{tip}</p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      });
+                          ))}
+                        </div>
+                      );
                     })()}
 
                     {isEmpty(data?.ai_insights?.recommended_policies) && (
