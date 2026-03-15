@@ -906,7 +906,7 @@ export default function ConsultationPage() {
                 <section>
                   <h2 className="text-sm font-extrabold text-zinc-900 mb-6 flex items-center gap-2">
                     <FileText size={18} className="text-primary" /> 추천 정책 솔루션
-                    <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded ml-2 opacity-50 font-black tracking-widest uppercase">System V2.1 Applied</span>
+                    <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded ml-2 opacity-50 font-black tracking-widest uppercase">System V2.2 Applied</span>
                   </h2>
                   
                   <div className="space-y-4">
