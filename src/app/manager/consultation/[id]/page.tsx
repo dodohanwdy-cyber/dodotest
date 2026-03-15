@@ -920,7 +920,6 @@ export default function ConsultationPage() {
                       if (typeof rawData === 'string') {
                         contentStr = rawData;
                       } else if (Array.isArray(rawData)) {
-                        // AI가 문장을 파편화해서 배열로 보낸 경우, 공백으로 이어붙여서 하나의 흐름으로 만듭니다.
                         contentStr = rawData.map(item => {
                           if (typeof item === 'string') return item.trim();
                           if (item && typeof item === 'object') {
@@ -929,7 +928,7 @@ export default function ConsultationPage() {
                              return JSON.stringify(item);
                           }
                           return "";
-                        }).join("\n\n");
+                        }).join(" "); // Join with space to prevent early breaks
                       } else if (typeof rawData === 'object') {
                         const t = extractItemTexts(rawData);
                         contentStr = t ? `[${t.title}] ${t.desc}` : JSON.stringify(rawData, null, 2);
@@ -937,8 +936,14 @@ export default function ConsultationPage() {
                         contentStr = String(rawData);
                       }
 
-                      // 가비지 필터링
+                      // 가비지 필터링 및 공백 정규화
                       contentStr = contentStr.replace(/정책\s*상세\s*정보\s*확인하기/g, '').trim();
+                      contentStr = contentStr.replace(/\s{2,}/g, ' ');
+
+                      // 줄바꿈 규칙 강제 적용 (가독성 향상)
+                      contentStr = contentStr.replace(/(\d+\.)\s*(\[?)/g, '\n\n$1 $2');
+                      contentStr = contentStr.replace(/\s*(\*)\s*/g, '\n   $1 ');
+                      contentStr = contentStr.trim();
 
                       if (!contentStr || contentStr === '[object Object]') {
                          return <p className="text-[13px] text-zinc-400 font-medium italic">표시할 정책 정보가 없습니다.</p>;
