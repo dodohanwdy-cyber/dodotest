@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import { 
   Calendar, 
   Clock, 
@@ -53,9 +54,17 @@ const parseConfirmedList = (confirmedRes: any): any[] => {
 };
 
 export default function ManagerDashboard() {
-  const { user } = useAuth();
+  const { user, isLoading: isLoadingAuth } = useAuth();
+  const router = useRouter(); // router가 이미 import되어 있는지 확인 필요
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // 인증 가드
+  useEffect(() => {
+    if (!isLoadingAuth && !user) {
+      router.push("/login");
+    }
+  }, [user, isLoadingAuth, router]);
   const [showAdjustPopup, setShowAdjustPopup] = useState(false);
   const [confirmedAppointments, setConfirmedAppointments] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());

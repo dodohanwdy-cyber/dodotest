@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import {
   FileText,
   ArrowRight,
@@ -37,12 +38,20 @@ export default function ReportPage() {
   const searchParams = useSearchParams();
   const isCompletedMode = searchParams.get('status') === 'completed';
 
+  const { user, isLoading: isLoadingAuth } = useAuth();
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [reportData, setReportData] = useState<any>(null);
   const [baseData, setBaseData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // 인증 가드
+  useEffect(() => {
+    if (!isLoadingAuth && !user) {
+      router.push("/login");
+    }
+  }, [user, isLoadingAuth, router]);
 
   // --- 추가된 매니저 알림톡 옵션 State ---
   const [managerWantsAlert, setManagerWantsAlert] = useState(true);
@@ -230,7 +239,13 @@ export default function ReportPage() {
 
       sessionStorage.removeItem(`consultation_${id}_stt`);
       sessionStorage.removeItem(`consultation_${id}_notes`);
-      router.push('/manager/completed');
+      
+      // 탭 닫기 (새 탭에서 열린 경우)
+      if (window.opener) {
+        window.close();
+      } else {
+        router.push('/manager/completed');
+      }
 
     } catch (err) {
       console.error("최종 전송 중 오류:", err);
@@ -415,10 +430,14 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
       setShareUrl(generatedUrl);
       setSendResultStatus("success");
       
-      // 2초 뒤에 모달 닫기
+      // 2초 뒤에 탭 닫기
       setTimeout(() => {
         setShowResultModal(false);
-        router.push('/manager/completed');
+        if (window.opener) {
+          window.close();
+        } else {
+          router.push('/manager/completed');
+        }
       }, 2500);
     } catch (err) {
       console.error("리포트 전송 및 상태 업데이트 실패:", err);

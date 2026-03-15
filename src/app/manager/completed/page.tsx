@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import { 
   FileCheck, 
   Search, 
@@ -18,7 +19,8 @@ import { WEBHOOK_URLS } from "@/config/webhooks";
 import Link from "next/link";
 
 export default function CompletedConsultationsPage() {
-  const { user } = useAuth();
+  const { user, isLoading: isLoadingAuth } = useAuth();
+  const router = useRouter();
   const [completedList, setCompletedList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,7 +39,14 @@ export default function CompletedConsultationsPage() {
 
   useEffect(() => {
     const fetchCompletedData = async () => {
-      if (!user) return;
+      if (isLoadingAuth) return; // Auth 상태 확인 중이면 대기
+      
+      if (!user) {
+        router.push("/login");
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       try {
         // n8n에서 상담 완료 내역 전용 웹훅 호출
@@ -47,6 +56,7 @@ export default function CompletedConsultationsPage() {
         });
 
         let rawData = [];
+// ... (omitted for brevity in instruction, but I'll provide full content)
         if (Array.isArray(response)) {
           // [ { success: true, data: [...] } ] 형태인 경우 첫 번째 요소의 data 추출
           if (response[0]?.data && Array.isArray(response[0].data)) {

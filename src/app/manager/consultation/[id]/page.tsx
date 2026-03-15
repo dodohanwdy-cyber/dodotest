@@ -38,7 +38,14 @@ export default function ConsultationPage() {
   const [notes, setNotes] = useState("");
   const [showSTT, setShowSTT] = useState(true); // 실시간 STT 화면 표시 여부
   const [isSaving, setIsSaving] = useState(false);
-  const { user } = useAuth();
+  const { user, isLoading: isLoadingAuth } = useAuth();
+  
+  // 인증 가드
+  useEffect(() => {
+    if (!isLoadingAuth && !user) {
+      router.push("/login");
+    }
+  }, [user, isLoadingAuth, router]);
   
   // --- 마이크 볼륨 체크 & 오늘의 명언 Logic ---
   const [audioLevel, setAudioLevel] = useState(0);
