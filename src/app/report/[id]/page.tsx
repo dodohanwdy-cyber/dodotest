@@ -15,16 +15,46 @@ import {
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
 
-// **텍스트** 마크다운을 <strong>으로 변환
-function renderBold(text: string): React.ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+// 텍스트 내의 **굵게**, [대괄호], (소괄호) 및 주요 키워드를 스타일링하여 렌더링하는 헬퍼
+function renderFormattedText(text: string): React.ReactNode {
+  if (!text) return null;
+  const parts = text.split(/(\*\*.*?\*\*|\[.*?\]|\(.*?\)|추천\s*이유\s*:|활용\s*팁\s*:)/g);
   return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} className="font-semibold text-slate-700">{part.slice(2, -2)}</strong>;
+    const trimmed = part.trim();
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-black text-slate-800">{part.slice(2, -2)}</strong>;
     }
-    return part;
+    if ((part.startsWith('[') && part.endsWith(']')) || (part.startsWith('(') && part.endsWith(')'))) {
+      return <strong key={i} className="font-black text-primary">{part}</strong>;
+    }
+    if (/^(추천\s*이유\s*:|활용\s*팁\s*:)$/.test(trimmed)) {
+      return <strong key={i} className="font-black text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded-md mr-1">{trimmed}</strong>;
+    }
+    return <span key={i}>{part}</span>;
   });
 }
+
+// 텍스트 내의 1. 2. 3. 패턴을 감지하여 줄바꿈을 삽입하는 헬퍼
+const formatNumberedText = (text: string) => {
+  if (!text) return text;
+  return text.replace(/(?<!\n)\s*(\d+\.)\s*/g, '\n$1 ');
+};
+
+// 배열 내의 각 항목을 다시 한 번 번호 기준으로 쪼개어 평탄화(Flatten)하는 함수
+const flattenNumberedList = (list: any[]) => {
+  if (!Array.isArray(list)) return [];
+  return list.reduce((acc: string[], item) => {
+    const str = String(item);
+    if (str.includes('.') && /\d+\./.test(str)) {
+      const splitItems = formatNumberedText(str)
+        .split('\n')
+        .map(s => s.trim())
+        .filter(s => s !== "");
+      return [...acc, ...splitItems];
+    }
+    return [...acc, str];
+  }, []);
+};
 
 export default function ClientReportPage() {
   const { id } = useParams();
@@ -46,17 +76,14 @@ export default function ClientReportPage() {
         if (data && typeof data === "object" && Object.keys(data).length > 0) {
           setReportData({
             user_name: data.name || data.user_name || "내담자",
-            main_issue: data.main_issue || "주요 고민 내용이 정리되지 않았습니다.",
-            user_message: data.user_message || "상담사가 전하는 메시지가 생성되지 않았습니다.",
+            main_issue: formatNumberedText(data.main_issue) || "주요 고민 내용이 정리되지 않았습니다.",
+            user_message: formatNumberedText(data.user_message) || "상담사가 전하는 메시지가 생성되지 않았습니다.",
             policy_match: data.policy_match
-              ? typeof data.policy_match === "string"
-                ? data.policy_match.split("\n").filter((s: string) => s.trim() !== "")
-                : data.policy_match
+              ? flattenNumberedList(typeof data.policy_match === "string" ? [data.policy_match] : data.policy_match)
               : [],
             next_steps: data.next_step
-              ? typeof data.next_step === "string"
-                ? data.next_step.split("\n").map((s: string) => s.replace(/^\d+\.\s*/, "").trim()).filter((s: string) => s !== "")
-                : data.next_step
+              ? flattenNumberedList(typeof data.next_step === "string" ? [data.next_step] : data.next_step)
+                  .map((s: string) => s.replace(/^\d+\.\s*/, "").trim()).filter((s: string) => s !== "")
               : [],
           });
         } else {
@@ -134,7 +161,7 @@ export default function ClientReportPage() {
                 <span className="text-[11px] font-semibold text-primary/50 uppercase tracking-widest">핵심 요약</span>
               </div>
               <p className="text-base md:text-lg text-slate-600 leading-[1.85] font-normal">
-                {renderBold(reportData.main_issue)}
+                {renderFormattedText(reportData.main_issue)}
               </p>
             </section>
 
@@ -145,7 +172,7 @@ export default function ClientReportPage() {
                 <span className="text-[11px] font-semibold text-amber-500/80 uppercase tracking-widest">상담사 메시지</span>
               </div>
               <blockquote className="text-base md:text-lg text-slate-600 leading-[1.85] font-normal pl-4 border-l-2 border-amber-200 italic">
-                &ldquo;{renderBold(reportData.user_message)}&rdquo;
+                &ldquo;{renderFormattedText(reportData.user_message)}&rdquo;
               </blockquote>
             </section>
 
@@ -166,7 +193,7 @@ export default function ClientReportPage() {
                       className="flex items-start gap-3 p-3.5 rounded-2xl bg-blue-50/60 border border-blue-100/50 hover:bg-blue-50 hover:border-blue-200/60 transition-colors"
                     >
                       <CheckCircle2 size={14} className="text-primary/40 mt-0.5 shrink-0" />
-                      <span className="text-sm text-slate-600 leading-snug font-normal">{renderBold(policy)}</span>
+                      <span className="text-sm text-slate-600 leading-snug font-normal">{renderFormattedText(policy)}</span>
                     </div>
                   ))
                 ) : (
@@ -194,7 +221,7 @@ export default function ClientReportPage() {
                   <span className="text-xs font-semibold text-amber-400/80 mt-0.5 shrink-0 w-5 text-center tabular-nums">
                     {idx + 1}
                   </span>
-                  <p className="text-sm text-slate-600 leading-relaxed font-normal">{renderBold(step)}</p>
+                  <p className="text-sm text-slate-600 leading-relaxed font-normal">{renderFormattedText(step)}</p>
                 </div>
               ))}
             </div>
