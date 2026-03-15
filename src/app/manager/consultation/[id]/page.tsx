@@ -911,16 +911,56 @@ export default function ConsultationPage() {
                   
                   <div className="space-y-4">
                     {(() => {
-                      let policiesStr = data?.ai_insights?.recommended_policies;
-                      if (!policiesStr || typeof policiesStr !== 'string') return null;
+                      // 0. 다양한 경로와 데이터 형식 지원 (Root 및 ai_insights 탐색)
+                      let rawPolicies = data?.ai_insights?.recommended_policies || data?.recommended_policies || data?.policy_match || data?.ai_insights?.policy_match;
+                      
+                      if (!rawPolicies) return null;
 
-                      // 0. 불필요한 '정책 상세 정보 확인하기' 가비지 텍스트 제거 (공백/줄바꿈 포함 유연하게 처리)
+                      let policiesStr = "";
+                      if (typeof rawPolicies === 'string') {
+                        policiesStr = rawPolicies;
+                      } else if (Array.isArray(rawPolicies)) {
+                        // 배열인 경우 (문자열 배열 또는 객체 배열)
+                        return rawPolicies.map((item: any, idx: number) => {
+                          const info = typeof item === 'string' ? { title: item, desc: '' } : extractItemTexts(item);
+                          if (!info) return null;
+                          return (
+                            <div key={idx} className="bg-white p-6 rounded-[2rem] border border-zinc-100 shadow-sm hover:border-primary/30 transition-all group flex gap-5">
+                              <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary/10 transition-colors">
+                                <FileText size={24} />
+                              </div>
+                              <div className="flex-1 space-y-3">
+                                <h4 className="text-base font-black text-zinc-900">{idx + 1}. {info.title}</h4>
+                                {info.desc && (
+                                  <div className="flex gap-2">
+                                    <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[9px] font-black rounded uppercase h-fit mt-0.5 shrink-0">Info</span>
+                                    <p className="text-[13px] text-zinc-600 leading-relaxed font-medium whitespace-pre-wrap">{info.desc}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        });
+                      } else if (typeof rawPolicies === 'object') {
+                        // 객체인 경우 (단일 항목일 가능성)
+                        const info = extractItemTexts(rawPolicies);
+                        if (!info) return null;
+                        policiesStr = `1. [${info.title}] 추천 이유: ${info.desc}`;
+                      } else {
+                        return null;
+                      }
+
+                      // 1. 불필요한 가비지 텍스트 제거 및 블록 분리 (문자열인 경우)
                       policiesStr = policiesStr.replace(/정책\s*상세\s*정보\s*확인하기/g, '').trim();
                       policiesStr = policiesStr.replace(/정책상세정보확인하기/g, '').trim();
 
-                      // 1. 순번 기준(1. 2. 3.)으로 블록 분리
                       const policyBlocks = policiesStr.split(/(?=\d+\.\s*\[?)/).filter((block: string) => block.trim());
                       
+                      if (policyBlocks.length === 0 && policiesStr) {
+                         // 숫자로 시작하지 않는 경우 전체를 하나의 블록으로 처리
+                         policyBlocks.push(policiesStr);
+                      }
+
                       return policyBlocks.map((block: string, idx: number) => {
                         // 2. 블록 내에서 제목, 이유, 팁 추출 (Regex 활용)
                         const content = block.replace(/^\d+\.\s*/, '').trim();
