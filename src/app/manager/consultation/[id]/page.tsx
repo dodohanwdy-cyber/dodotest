@@ -902,90 +902,54 @@ export default function ConsultationPage() {
                   </div>
                 </section>
                  
-                <section>
-                  <h2 className="text-sm font-extrabold text-zinc-900 mb-6 flex items-center gap-2">
+                <section className="space-y-6">
+                  <h2 className="text-sm font-extrabold text-zinc-900 flex items-center gap-2">
                     <FileText size={18} className="text-primary" /> 추천 정책 솔루션
                   </h2>
                   
-                  <div className="space-y-4">
+                  <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-zinc-200/60 shadow-sm min-h-[150px]">
                     {(() => {
-                      // 0. 다양한 경로와 데이터 형식 지원 (Root 및 ai_insights 탐색)
                       let rawData = data?.ai_insights?.recommended_policies || data?.recommended_policies || data?.policy_match || data?.ai_insights?.policy_match;
                       
-                      if (rawData === null || rawData === undefined) return <p className="text-sm text-zinc-400 italic">추천 정책 정보가 없습니다.</p>;
-
-                      let items: any[] = [];
-                      try {
-                        if (Array.isArray(rawData)) {
-                          items = rawData;
-                        } else if (typeof rawData === 'string') {
-                          const trimmed = rawData.trim();
-                          if (!trimmed || trimmed === '[object Object]') {
-                            // ignore
-                          } else if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
-                            const parsed = JSON.parse(trimmed);
-                            items = Array.isArray(parsed) ? parsed : [parsed];
-                          } else {
-                            // 일반 텍스트 문자열인 경우 "정책상세정보확인하기" 등 가비지 제거 후 출력
-                            const cleaned = trimmed.replace(/정책\s*상세\s*정보\s*확인하기/g, '').trim();
-                            return (
-                              <div className="bg-indigo-50/40 rounded-[2rem] p-8 border border-indigo-100/60 transition-colors">
-                                <p className="text-zinc-700 leading-relaxed whitespace-pre-wrap text-sm font-medium">{cleaned}</p>
-                              </div>
-                            );
-                          }
-                        } else if (typeof rawData === 'object') {
-                          items = [rawData];
-                        }
-                      } catch (e) {
-                        return <p className="text-sm text-zinc-400 italic">데이터 로드 중 오류가 발생했습니다.</p>;
+                      if (rawData === null || rawData === undefined) {
+                        return <p className="text-[13px] text-zinc-400 font-medium italic">추천 정책 정보가 없습니다.</p>;
                       }
 
-                      const renderableItems = items
-                        .map((item, idx) => {
-                          if (typeof item === 'string') {
-                            const v = item.trim().replace(/정책\s*상세\s*정보\s*확인하기/g, '');
-                            if (!v || v === '[object Object]') return null;
-                            return { idx, title: v, desc: '' };
-                          }
-                          if (typeof item === 'object' && item !== null) {
-                            const texts = extractItemTexts(item);
-                            if (!texts) return null;
-                            return { idx, title: texts.title, desc: texts.desc };
-                          }
-                          return null;
-                        })
-                        .filter((r): r is { idx: number; title: string; desc: string } => r !== null);
+                      let contentStr = "";
 
-                      if (renderableItems.length === 0) return <p className="text-sm text-zinc-400 italic">표시할 정책 정보가 없습니다.</p>;
+                      if (typeof rawData === 'string') {
+                        contentStr = rawData;
+                      } else if (Array.isArray(rawData)) {
+                        // AI가 문장을 파편화해서 배열로 보낸 경우, 공백으로 이어붙여서 하나의 흐름으로 만듭니다.
+                        contentStr = rawData.map(item => {
+                          if (typeof item === 'string') return item.trim();
+                          if (item && typeof item === 'object') {
+                             const t = extractItemTexts(item);
+                             if (t) return `[${t.title}] ${t.desc}`;
+                             return JSON.stringify(item);
+                          }
+                          return "";
+                        }).join("\n\n");
+                      } else if (typeof rawData === 'object') {
+                        const t = extractItemTexts(rawData);
+                        contentStr = t ? `[${t.title}] ${t.desc}` : JSON.stringify(rawData, null, 2);
+                      } else {
+                        contentStr = String(rawData);
+                      }
+
+                      // 가비지 필터링
+                      contentStr = contentStr.replace(/정책\s*상세\s*정보\s*확인하기/g, '').trim();
+
+                      if (!contentStr || contentStr === '[object Object]') {
+                         return <p className="text-[13px] text-zinc-400 font-medium italic">표시할 정책 정보가 없습니다.</p>;
+                      }
 
                       return (
-                        <div className="space-y-4">
-                          {renderableItems.map((r) => (
-                            <div
-                              key={r.idx}
-                              className="bg-indigo-50/40 rounded-[2rem] p-6 border border-indigo-100/60 hover:border-indigo-200 transition-all group flex gap-5"
-                            >
-                              <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold transition-colors group-hover:bg-indigo-200">
-                                {r.idx + 1}
-                              </div>
-                              <div className="space-y-1.5 flex-1 min-w-0">
-                                <h4 className="font-extrabold text-zinc-900 text-base leading-snug">{r.title}</h4>
-                                {r.desc && (
-                                  <p className="text-zinc-600 text-[13px] leading-relaxed whitespace-pre-wrap font-medium">{r.desc.replace(/정책\s*상세\s*정보\s*확인하기/g, '')}</p>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                        <p className="text-[13px] text-zinc-700 leading-relaxed font-medium whitespace-pre-wrap">
+                          {contentStr}
+                        </p>
                       );
                     })()}
-
-                    {isEmpty(data?.ai_insights?.recommended_policies) && (
-                       <div className="py-12 text-center bg-zinc-50 rounded-3xl border border-dashed border-zinc-200">
-                          <p className="text-zinc-300 font-medium">추천된 정책이 없습니다.</p>
-                       </div>
-                    )}
                   </div>
                 </section>
               </>
