@@ -206,10 +206,14 @@ export default function ReportPage() {
         counselor_note: formatNumberedText(data.counselor_note) || "추가 메모 없음"
       },
       action_plan: {
-        policy_match: data.policy_match ? (typeof data.policy_match === 'string' ? data.policy_match.split('\n').filter((s: string) => s.trim() !== "") : data.policy_match) : [],
+        policy_match: data.policy_match 
+          ? (typeof data.policy_match === 'string' 
+              ? formatNumberedText(data.policy_match).split('\n').filter((s: string) => s.trim() !== "") 
+              : data.policy_match) 
+          : [],
         next_steps: data.next_step 
           ? (typeof data.next_step === 'string' 
-              ? data.next_step.split('\n').map((s: string) => s.replace(/^\d+\.\s*/, '').trim()).filter((s: string) => s !== "")
+              ? formatNumberedText(data.next_step).split('\n').map((s: string) => s.replace(/^\d+\.\s*/, '').trim()).filter((s: string) => s !== "")
               : data.next_step)
           : []
       },
