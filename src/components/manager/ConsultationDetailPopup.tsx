@@ -259,16 +259,21 @@ export default function ConsultationDetailPopup({
     return { title: title || '(항목)', desc };
   };
 
-  // 텍스트 내의 **굵게** 및 [대괄호]를 스타일링하여 렌더링하는 헬퍼
+  // 텍스트 내의 **굵게**, [대괄호], (소괄호) 및 주요 키워드를 스타일링하여 렌더링하는 헬퍼
   const renderPolicyText = (text: string) => {
     if (!text) return null;
-    const parts = text.split(/(\*\*.*?\*\*|\[.*?\])/g);
+    // 괄호, 키워드(추천이유, 활용팁 등), 볼드체 패턴 인식
+    const parts = text.split(/(\*\*.*?\*\*|\[.*?\]|\(.*?\)|추천\s*이유\s*:|활용\s*팁\s*:)/g);
     return parts.map((part, i) => {
+      const trimmed = part.trim();
       if (part.startsWith('**') && part.endsWith('**')) {
         return <strong key={i} className="font-black text-zinc-900">{part.slice(2, -2)}</strong>;
       }
-      if (part.startsWith('[') && part.endsWith(']')) {
+      if ((part.startsWith('[') && part.endsWith(']')) || (part.startsWith('(') && part.endsWith(')'))) {
         return <strong key={i} className="font-black text-indigo-600">{part}</strong>;
+      }
+      if (/^(추천\s*이유\s*:|활용\s*팁\s*:)$/.test(trimmed)) {
+        return <strong key={i} className="font-black text-zinc-900 bg-zinc-100 px-1.5 py-0.5 rounded-md mr-1">{trimmed}</strong>;
       }
       return <span key={i}>{part}</span>;
     });
@@ -312,22 +317,40 @@ export default function ConsultationDetailPopup({
 
     const renderableItems = items
       .map((item, idx) => {
+        let title = '';
+        let desc = '';
+
         if (typeof item === 'string') {
-          const v = item.trim();
-          if (!v || v === '[object Object]') return null;
-          return { idx, title: v, desc: '' };
-        }
-        if (typeof item === 'number' || typeof item === 'boolean') {
-          return { idx, title: String(item), desc: '' };
-        }
-        if (typeof item === 'object' && item !== null) {
+          title = item.trim();
+        } else if (typeof item === 'number' || typeof item === 'boolean') {
+          title = String(item);
+        } else if (typeof item === 'object' && item !== null) {
           const texts = extractItemTexts(item);
-          if (!texts) return null;
-          return { idx, title: texts.title, desc: texts.desc };
+          if (texts) {
+            title = texts.title;
+            desc = texts.desc;
+          }
         }
-        return null;
+
+        if (!title && !desc) return null;
+
+        // 텍스트 정제 (불필요한 불렛 및 공백 제거)
+        const cleanText = (t: string) => {
+          return t.split('\n')
+            .map(line => line.trim())
+            .filter(line => line && line !== '*' && line !== '-' && line !== '•')
+            .join(' ')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+        };
+
+        return { 
+          idx, 
+          title: cleanText(title), 
+          desc: cleanText(desc) 
+        };
       })
-      .filter((r): r is { idx: number; title: string; desc: string } => r !== null);
+      .filter((r): r is { idx: number; title: string; desc: string } => r !== null && (r.title !== '' || r.desc !== ''));
 
     if (renderableItems.length === 0) return null;
 

@@ -586,16 +586,21 @@ export default function ConsultationPage() {
     );
   };
 
-  // 텍스트 내의 **굵게** 및 [대괄호]를 스타일링하여 렌더링하는 헬퍼
+  // 텍스트 내의 **굵게**, [대괄호], (소괄호) 및 주요 키워드를 스타일링하여 렌더링하는 헬퍼
   const renderPolicyText = (text: string) => {
     if (!text) return null;
-    const parts = text.split(/(\*\*.*?\*\*|\[.*?\])/g);
+    // 괄호, 키워드(추천이유, 활용팁 등), 볼드체 패턴 인식
+    const parts = text.split(/(\*\*.*?\*\*|\[.*?\]|\(.*?\)|추천\s*이유\s*:|활용\s*팁\s*:)/g);
     return parts.map((part, i) => {
+      const trimmed = part.trim();
       if (part.startsWith('**') && part.endsWith('**')) {
         return <strong key={i} className="font-black text-zinc-900">{part.slice(2, -2)}</strong>;
       }
-      if (part.startsWith('[') && part.endsWith(']')) {
+      if ((part.startsWith('[') && part.endsWith(']')) || (part.startsWith('(') && part.endsWith(')'))) {
         return <strong key={i} className="font-black text-primary">{part}</strong>;
+      }
+      if (/^(추천\s*이유\s*:|활용\s*팁\s*:)$/.test(trimmed)) {
+        return <strong key={i} className="font-black text-zinc-900 bg-zinc-100 px-1.5 py-0.5 rounded-md mr-1">{trimmed}</strong>;
       }
       return <span key={i}>{part}</span>;
     });
@@ -953,11 +958,19 @@ export default function ConsultationPage() {
 
                       // 가비지 필터링 및 공백 정규화
                       contentStr = contentStr.replace(/정책\s*상세\s*정보\s*확인하기/g, '').trim();
+                      
+                      // 불필요한 불렛 및 공백 라인 제거 (스파스한 출력 방지)
+                      contentStr = contentStr.split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line && line !== '*' && line !== '-' && line !== '•')
+                        .join(' ');
+
+                      // 중복 공백 제거
                       contentStr = contentStr.replace(/\s{2,}/g, ' ');
 
-                      // 줄바꿈 규칙 강제 적용 (가독성 향상)
-                      contentStr = contentStr.replace(/(\d+\.)\s*(\[?)/g, '\n\n$1 $2');
-                      contentStr = contentStr.replace(/\s*(\*)\s*/g, '\n   $1 ');
+                      // 줄바꿈 규칙 강제 적용 (정책 번호 및 핵심 키워드 앞)
+                      contentStr = contentStr.replace(/(\d+\.)\s*/g, '\n\n$1 ');
+                      contentStr = contentStr.replace(/(추천\s*이유\s*:|활용\s*팁\s*:)/g, '\n   $1 ');
                       contentStr = contentStr.trim();
 
                       if (!contentStr || contentStr === '[object Object]') {
