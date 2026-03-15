@@ -185,12 +185,29 @@ export default function ReportPage() {
   // 텍스트 내의 1. 2. 3. 패턴을 감지하여 줄바꿈을 삽입하는 헬퍼
   const formatNumberedText = (text: string) => {
     if (!text) return text;
-    // 숫자 뒤에 마침표가 오고 공백이 있는 패턴 (예: "1. ")
+    // 숫자 뒤에 마침표가 오고 공백이 있거나 바로 문장이 시작되는 패턴 (예: "1. ", "1.내용")
     // 이미 줄바꿈이 있는 경우는 제외하고, 문장 중간에 있는 번호 앞에 줄바꿈 삽입
-    return text.replace(/(?<!\n)\s*(\d+\.)\s+/g, '\n$1 ');
+    return text.replace(/(?<!\n)\s*(\d+\.)\s*/g, '\n$1 ');
   };
 
   const processReportData = (data: any) => {
+    // 배열 내의 각 항목을 다시 한 번 번호 기준으로 쪼개어 평탄화(Flatten)하는 함수
+    const flattenNumberedList = (list: any[]) => {
+      if (!Array.isArray(list)) return [];
+      return list.reduce((acc: string[], item) => {
+        const str = String(item);
+        if (str.includes('.') && /\d+\./.test(str)) {
+          // 번호 패턴이 포함된 경우 쪼개어서 추가
+          const splitItems = formatNumberedText(str)
+            .split('\n')
+            .map(s => s.trim())
+            .filter(s => s !== "");
+          return [...acc, ...splitItems];
+        }
+        return [...acc, str];
+      }, []);
+    };
+
     return {
       summary: {
         main_issue: formatNumberedText(data.main_issue) || "주요 이슈 분석 중",
@@ -207,14 +224,12 @@ export default function ReportPage() {
       },
       action_plan: {
         policy_match: data.policy_match 
-          ? (typeof data.policy_match === 'string' 
-              ? formatNumberedText(data.policy_match).split('\n').filter((s: string) => s.trim() !== "") 
-              : data.policy_match) 
+          ? flattenNumberedList(typeof data.policy_match === 'string' ? [data.policy_match] : data.policy_match)
           : [],
         next_steps: data.next_step 
-          ? (typeof data.next_step === 'string' 
-              ? formatNumberedText(data.next_step).split('\n').map((s: string) => s.replace(/^\d+\.\s*/, '').trim()).filter((s: string) => s !== "")
-              : data.next_step)
+          ? flattenNumberedList(typeof data.next_step === 'string' ? [data.next_step] : data.next_step)
+            .map((s: string) => s.replace(/^\d+\.\s*/, '').trim())
+            .filter((s: string) => s !== "")
           : []
       },
       feedback: {
