@@ -7,7 +7,7 @@ export default function Footer() {
           href="https://www.opcl.kr" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="group block p-4 bg-white border border-zinc-200 rounded-2xl hover:border-primary/30 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300"
+          className="group block p-4 bg-white border border-zinc-200 rounded-2xl hover:border-primary/40 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300"
         >
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -22,10 +22,10 @@ export default function Footer() {
           </div>
         </a>
         <a 
-          href="https://www.opcl.kr" 
+          href="https://www.dodohancollabo.com" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="group block p-4 bg-white border border-zinc-200 rounded-2xl hover:border-primary/30 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300"
+          className="group block p-4 bg-white border border-zinc-200 rounded-2xl hover:border-primary/40 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300"
         >
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
