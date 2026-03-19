@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="w-full bg-zinc-50 border-t border-zinc-200 py-16 px-6">
+    <footer className="w-full bg-zinc-50 border-t border-zinc-200 py-10 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
         <div className="space-y-6 col-span-1 md:col-span-2">
           <div className="flex items-center gap-3">
@@ -44,8 +44,48 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
+      {/* 홍보 섹션 추가 */}
+      <div className="max-w-7xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a 
+          href="https://www.opcl.kr" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="group block p-5 bg-white border border-zinc-200 rounded-2xl hover:border-primary/30 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300"
+        >
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-primary uppercase tracking-wider">Information Platform</p>
+              <h5 className="text-sm font-bold text-zinc-900 group-hover:text-primary transition-colors">
+                2030을 위한 정보공유 플랫폼, <span className="text-primary">열고닫기</span>
+              </h5>
+            </div>
+            <div className="p-2 bg-zinc-50 group-hover:bg-primary/5 rounded-full text-zinc-400 group-hover:text-primary transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+            </div>
+          </div>
+        </a>
+        <a 
+          href="https://www.opcl.kr" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="group block p-5 bg-white border border-zinc-200 rounded-2xl hover:border-primary/30 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300"
+        >
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-primary uppercase tracking-wider">Insight & Research</p>
+              <h5 className="text-sm font-bold text-zinc-900 group-hover:text-primary transition-colors">
+                청년세대를 바라보는 인사이트, <span className="text-primary">열고닫기 리서치</span>
+              </h5>
+            </div>
+            <div className="p-2 bg-zinc-50 group-hover:bg-primary/5 rounded-full text-zinc-400 group-hover:text-primary transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+            </div>
+          </div>
+        </a>
+      </div>
       
-      <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-zinc-200 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="max-w-7xl mx-auto mt-10 pt-6 border-t border-zinc-200 flex flex-col md:flex-row justify-between items-center gap-4">
         <p className="text-[11px] text-zinc-400 font-bold tracking-widest uppercase">
           © 2026 OPCL. All rights reserved.
         </p>
