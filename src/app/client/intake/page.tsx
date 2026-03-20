@@ -119,14 +119,32 @@ function IntakeContent() {
           request_time_3: data.request_time_3 || "",
           preferred_location: data.preferred_location || "",
           preferred_method: data.preferred_method || "",
+          status: data.status || "",
         });
         
-        // 모든 섹션을 완료 상태로 설정
-        setCompletedSteps(['section-1', 'section-2', 'section-3']);
-        setIsChatFinished(true);
+        const currentStatus = data.status || '';
         
-        // Step 5 (리뷰)로 바로 이동 (모든 이전 단계 패스됨)
-        setValue('section-5');
+        if (currentStatus === 'sec1') {
+          // 1단계 완료: 예약(2단계)으로 이동
+          setCompletedSteps(['section-1']);
+          setIsChatFinished(false);
+          setValue('section-2');
+        } else if (currentStatus === 'sec2') {
+          // 2단계 완료: AI인터뷰(3단계)로 이동
+          setCompletedSteps(['section-1', 'section-2']);
+          setIsChatFinished(false);
+          setValue('section-3');
+        } else if (currentStatus === 'pending' || currentStatus === 'confirmed') {
+          // 완료 상태: 1~4단계 접근 차단 후 5단계로
+          setCompletedSteps(['section-1', 'section-2', 'section-3', 'section-4', 'section-5']);
+          setIsChatFinished(true);
+          setValue('section-5');
+        } else {
+          // 기존 흐름 유지: 모두 완료된 상태로 취급하여 5단계로
+          setCompletedSteps(['section-1', 'section-2', 'section-3']);
+          setIsChatFinished(true);
+          setValue('section-5');
+        }
       } else {
         console.error('Failed to load application detail:', data.error);
       }
@@ -338,6 +356,8 @@ function IntakeContent() {
     );
   }
 
+  const isReadOnly = intakeData.status === 'pending' || intakeData.status === 'confirmed';
+
   return (
     <main className="min-h-screen bg-[#F8FAFC]">
       {/* 장식용 배경 요소 */}
@@ -395,7 +415,7 @@ function IntakeContent() {
           onValueChange={setValue}
           className="space-y-8"
         >
-          <Accordion.Item value="section-1" className="bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 data-[state=open]:ring-4 data-[state=open]:ring-primary/5 data-[state=open]:-translate-y-1">
+          <Accordion.Item value="section-1" className={`bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 data-[state=open]:ring-4 data-[state=open]:ring-primary/5 data-[state=open]:-translate-y-1 ${isReadOnly ? "opacity-40 grayscale pointer-events-none" : ""}`}>
             <Accordion.Header className="flex">
               <Accordion.Trigger className="flex-1 flex items-center justify-between p-10 text-left group">
                 <div className="flex items-center gap-8">
@@ -419,7 +439,7 @@ function IntakeContent() {
             </Accordion.Content>
           </Accordion.Item>
 
-          <Accordion.Item value="section-2" className={`bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 data-[state=open]:ring-4 data-[state=open]:ring-primary/5 data-[state=open]:-translate-y-1 ${!completedSteps.includes("section-1") ? "opacity-40 grayscale pointer-events-none" : ""}`}>
+          <Accordion.Item value="section-2" className={`bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 data-[state=open]:ring-4 data-[state=open]:ring-primary/5 data-[state=open]:-translate-y-1 ${(!completedSteps.includes("section-1") || isReadOnly) ? "opacity-40 grayscale pointer-events-none" : ""}`}>
             <Accordion.Header className="flex">
               <Accordion.Trigger className="flex-1 flex items-center justify-between p-10 text-left group">
                 <div className="flex items-center gap-8">
@@ -446,7 +466,7 @@ function IntakeContent() {
           <Accordion.Item 
             value="section-3" 
             className={`bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 data-[state=open]:ring-4 data-[state=open]:ring-primary/5 data-[state=open]:-translate-y-1 ${
-              !completedSteps.includes("section-2") ? "opacity-40 grayscale pointer-events-none" : ""
+              (!completedSteps.includes("section-2") || isReadOnly) ? "opacity-40 grayscale pointer-events-none" : ""
             }`}
           >
             <Accordion.Header className="flex">
@@ -494,7 +514,7 @@ function IntakeContent() {
             </Accordion.Content>
           </Accordion.Item>
 
-          <Accordion.Item value="section-4" className={`bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 data-[state=open]:ring-4 data-[state=open]:ring-primary/5 data-[state=open]:-translate-y-1 ${!isChatFinished ? "opacity-40 grayscale pointer-events-none" : ""}`}>
+          <Accordion.Item value="section-4" className={`bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 data-[state=open]:ring-4 data-[state=open]:ring-primary/5 data-[state=open]:-translate-y-1 ${(!isChatFinished || isReadOnly) ? "opacity-40 grayscale pointer-events-none" : ""}`}>
             <Accordion.Header className="flex">
               <Accordion.Trigger className="flex-1 flex items-center justify-between p-10 text-left group">
                 <div className="flex items-center gap-8">
@@ -548,6 +568,7 @@ function IntakeContent() {
                   data={intakeData} 
                   onEdit={(step) => setValue(step)} 
                   onSubmit={handleFinalSubmit} 
+                  isReadOnly={isReadOnly}
                 />
               </div>
             </Accordion.Content>

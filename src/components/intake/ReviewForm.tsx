@@ -6,9 +6,10 @@ interface ReviewFormProps {
   data: any;
   onEdit: (step: string) => void;
   onSubmit: () => void;
+  isReadOnly?: boolean;
 }
 
-export default function ReviewForm({ data, onEdit, onSubmit }: ReviewFormProps) {
+export default function ReviewForm({ data, onEdit, onSubmit, isReadOnly }: ReviewFormProps) {
   const [isSubmitting, setIsSubmitting] = (typeof window !== 'undefined') ? require('react').useState(false) : [false, () => {}];
 
   const handleSubmit = async () => {
@@ -22,13 +23,15 @@ export default function ReviewForm({ data, onEdit, onSubmit }: ReviewFormProps) 
       <div className="grid md:grid-cols-2 gap-6">
         {/* 기본 정보 확인 (관심 정책 통합) */}
         <div className="md:col-span-2 card-premium p-6 relative group">
-          <button 
-            onClick={() => onEdit("section-1")}
-            className="absolute top-4 right-4 px-3 py-2 bg-zinc-100 text-zinc-600 rounded-lg hover:bg-primary hover:text-white transition-all flex items-center gap-1.5 text-xs font-bold"
-          >
-            <Edit2 size={14} />
-            수정하기
-          </button>
+          {!isReadOnly && (
+            <button 
+              onClick={() => onEdit("section-1")}
+              className="absolute top-4 right-4 px-3 py-2 bg-zinc-100 text-zinc-600 rounded-lg hover:bg-primary hover:text-white transition-all flex items-center gap-1.5 text-xs font-bold"
+            >
+              <Edit2 size={14} />
+              수정하기
+            </button>
+          )}
           
           <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-2 mb-4">
             <User size={16} className="text-primary" /> 기본 정보
@@ -72,13 +75,15 @@ export default function ReviewForm({ data, onEdit, onSubmit }: ReviewFormProps) 
 
         {/* 예약 일정 확인 (1/2/3순위 모두 표시) */}
         <div className="md:col-span-2 card-premium p-6 relative group">
-          <button 
-            onClick={() => onEdit("section-2")}
-            className="absolute top-4 right-4 px-3 py-2 bg-zinc-100 text-zinc-600 rounded-lg hover:bg-primary hover:text-white transition-all flex items-center gap-1.5 text-xs font-bold"
-          >
-            <Edit2 size={14} />
-            수정하기
-          </button>
+          {!isReadOnly && (
+            <button 
+              onClick={() => onEdit("section-2")}
+              className="absolute top-4 right-4 px-3 py-2 bg-zinc-100 text-zinc-600 rounded-lg hover:bg-primary hover:text-white transition-all flex items-center gap-1.5 text-xs font-bold"
+            >
+              <Edit2 size={14} />
+              수정하기
+            </button>
+          )}
 
           <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-2 mb-4">
             <Calendar size={16} className="text-primary" /> 선택한 상담 일정
@@ -105,23 +110,34 @@ export default function ReviewForm({ data, onEdit, onSubmit }: ReviewFormProps) 
         </div>
       </div>
 
-      <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex gap-3">
-        <div className="text-amber-500 mt-0.5"><CheckCircle2 size={18} /></div>
-        <p className="text-xs text-amber-700 leading-relaxed">
-          <strong>안내:</strong> AI 상담 채팅 내용은 보안 및 리소스 관리 정책에 따라 수정이 불가능합니다. 
-          위의 정보가 모두 정확하다면 아래 버튼을 눌러 최종 신청을 완료해 주세요.
-        </p>
-      </div>
+      {!isReadOnly ? (
+        <>
+          <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex gap-3">
+            <div className="text-amber-500 mt-0.5"><CheckCircle2 size={18} /></div>
+            <p className="text-xs text-amber-700 leading-relaxed">
+              <strong>안내:</strong> AI 상담 채팅 내용은 보안 및 리소스 관리 정책에 따라 수정이 불가능합니다. 
+              위의 정보가 모두 정확하다면 아래 버튼을 눌러 최종 신청을 완료해 주세요.
+            </p>
+          </div>
 
-      <div className="pt-6">
-        <button 
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="w-full bg-zinc-900 text-white py-5 rounded-[2rem] font-bold flex items-center justify-center gap-2 btn-interactive shadow-xl shadow-zinc-200"
-        >
-          {isSubmitting ? <Loader2 className="animate-spin" size={24} /> : "입력 내용 확인 및 최종 신청 제출"}
-        </button>
-      </div>
+          <div className="pt-6">
+            <button 
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="w-full bg-zinc-900 text-white py-5 rounded-[2rem] font-bold flex items-center justify-center gap-2 btn-interactive shadow-xl shadow-zinc-200"
+            >
+              {isSubmitting ? <Loader2 className="animate-spin" size={24} /> : "입력 내용 확인 및 최종 신청 제출"}
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex gap-3 mt-6">
+          <div className="text-blue-500 mt-0.5"><CheckCircle2 size={18} /></div>
+          <p className="text-xs text-blue-700 leading-relaxed">
+            <strong>안내:</strong> 이미 제출된 신청서입니다. 정보 수정 및 재제출이 불가능합니다.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
