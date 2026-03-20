@@ -166,6 +166,34 @@ export default function ClientDashboard() {
         </div>
       </div>
 
+      {/* 일정 확정 알림 배너 */}
+      {!loading && applications.some(app => app.status === 'confirmed') && (
+        <div className="mb-10 animate-in slide-in-from-top duration-500">
+          <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-indigo-700 rounded-[2.5rem] p-8 shadow-xl shadow-blue-100/50 group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-white/20 transition-colors" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-5">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner">
+                  <Calendar size={32} />
+                </div>
+                <div className="text-white text-center md:text-left">
+                  <h2 className="text-xl font-black tracking-tight mb-1">상담 일정이 확정되었습니다! 📅</h2>
+                  <p className="text-blue-50/80 font-bold text-sm">배정된 전문 상담사와의 상담 시간이 확정되었으니 안내를 확인해 주세요.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  window.scrollTo({ top: document.getElementById('my-applications')?.offsetTop, behavior: 'smooth' });
+                }}
+                className="bg-white text-indigo-700 px-8 py-4 rounded-2xl font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+              >
+                일정 확인하기 <ArrowRight size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 상담 완료 알림 배너 */}
       {!loading && applications.some(app => app.status === 'analyzed') && (
         <div className="mb-10 animate-in slide-in-from-top duration-500">
@@ -197,7 +225,7 @@ export default function ClientDashboard() {
         </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-10">
+      <div className="grid lg:grid-cols-3 gap-10" id="my-applications">
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2 mb-4">
             <FileText size={20} className="text-primary" /> 나의 상담 리스트
