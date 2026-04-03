@@ -110,9 +110,11 @@ export default function ScheduleAdjustPopup({
 
         if (targetTime) {
           // 시간 형식 정규화: "2026-02-25 9:00" -> "2026-02-25 09:00"
-          const [datePart, timePart] = targetTime.split(' ');
+          const targetTimeParts = targetTime.split(/[ T]/);
+          const datePart = targetTimeParts[0] || '';
+          const timePart = targetTimeParts[1] || '00:00';
           const [hour, minute] = timePart.split(':');
-          const normalizedTime = `${datePart} ${hour.padStart(2, '0')}:${minute}`;
+          const normalizedTime = `${datePart} ${(hour || '00').padStart(2, '0')}:${minute || '00'}`;
           
           // 기존 일정과 충돌 체크
           const suggestedDate = new Date(datePart);
@@ -696,7 +698,7 @@ export default function ScheduleAdjustPopup({
                 
                 <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-1 min-h-0">
                   {unassignedRequests.map((request) => {
-                    const sortedOptions = [...request.options].sort((a, b) => a.p - b.p);
+                    const sortedOptions = [...(request.options || [])].sort((a, b) => a.p - b.p);
                     
                     return (
                       <div

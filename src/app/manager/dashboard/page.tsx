@@ -66,6 +66,7 @@ export default function ManagerDashboard() {
     }
   }, [user, isLoadingAuth, router]);
   const [showAdjustPopup, setShowAdjustPopup] = useState(false);
+  const [showNoSchedulePopup, setShowNoSchedulePopup] = useState(false);
   const [confirmedAppointments, setConfirmedAppointments] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
@@ -261,6 +262,14 @@ export default function ManagerDashboard() {
     }));
   }, [confirmedAppointments]);
 
+  const handleOpenAdjustPopup = () => {
+    if (combinedList.length === 0) {
+      setShowNoSchedulePopup(true);
+    } else {
+      setShowAdjustPopup(true);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
       {/* 대시보드 헤더 */}
@@ -278,9 +287,8 @@ export default function ManagerDashboard() {
             알람 보내기 <Bell size={16} />
           </button>
           <button
-            onClick={() => setShowAdjustPopup(true)}
-            disabled={(!data?.analyzed_list || data.analyzed_list.length === 0) && confirmedAppointments.length === 0}
-            className="px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm flex items-center gap-2 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleOpenAdjustPopup}
+            className="px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm flex items-center gap-2 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all shadow-md"
           >
             일정 조율하기 <ExternalLink size={16} />
           </button>
@@ -539,6 +547,26 @@ export default function ManagerDashboard() {
               ) : (
                 <><Send size={18} /> {selectedAlarmUsers.length}명에게 발송하기</>
               )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 조율할 일정이 없을 때 안내 모달 */}
+      {showNoSchedulePopup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setShowNoSchedulePopup(false)}></div>
+          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full relative z-10 shadow-2xl animate-in zoom-in-95 duration-200 text-center">
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mx-auto mb-5 shadow-inner">
+              <AlertCircle size={24} />
+            </div>
+            <h2 className="text-xl font-bold text-zinc-900 mb-2">조율할 일정이 없습니다</h2>
+            <p className="text-[13px] text-zinc-500 mb-6 font-medium">현재 새롭게 조율하거나 취소할 수 있는<br/>상담 일정이 없습니다.</p>
+            <button
+              onClick={() => setShowNoSchedulePopup(false)}
+              className="w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md bg-primary text-white hover:bg-blue-600 hover:translate-y-[-1px] active:translate-y-[1px]"
+            >
+              확인
             </button>
           </div>
         </div>

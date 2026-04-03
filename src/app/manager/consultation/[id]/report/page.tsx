@@ -546,9 +546,6 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
       <nav className="sticky top-0 z-[60] bg-white/80 backdrop-blur-md border-b border-zinc-100 px-8 py-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <button onClick={onBack} className="p-2 hover:bg-zinc-50 rounded-xl transition-colors">
-              <ChevronLeft size={20} className="text-zinc-400" />
-            </button>
             <div>
               <h1 className="text-lg font-black text-zinc-900 flex items-center gap-2">
                 최종 상담 리포트 <span className="text-primary text-sm font-bold">#{baseData?.request_id?.slice(-6) || "REPORT"}</span>
@@ -558,7 +555,7 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
               </p>
             </div>
           </div>
-          <div className="flex gap-3 print:hidden">
+          <div className="flex gap-3 print:hidden items-center">
             <button 
               onClick={() => window.print()} 
               className="px-5 py-2.5 bg-zinc-100 text-zinc-600 font-bold rounded-xl hover:bg-zinc-200 transition-all text-sm flex items-center gap-2"
@@ -577,6 +574,14 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
               className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center gap-2"
             >
               내담자에게 리포트 전송 <Send size={16} />
+            </button>
+            <div className="w-px h-6 bg-zinc-200 mx-1"></div>
+            <button 
+              onClick={() => window.close()}
+              className="p-2.5 bg-zinc-50 hover:bg-rose-50 hover:text-rose-500 text-zinc-400 font-bold rounded-xl transition-all flex items-center shadow-sm border border-zinc-100"
+              title="창 닫기"
+            >
+              <X size={20} />
             </button>
           </div>
         </div>
