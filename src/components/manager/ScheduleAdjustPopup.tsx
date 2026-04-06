@@ -732,11 +732,17 @@ export default function ScheduleAdjustPopup({
                             </div>
                           ) : (
                             sortedOptions.map((option) => {
+                              if (!option.time) return null;
+                              
                               const [datePart, timePart] = option.time.split(' ');
+                              if (!datePart || !timePart) return null;
+
                               const [year, month, day] = datePart.split('-');
-                              const formattedDate = `${parseInt(month)}월 ${parseInt(day)}일`;
+                              const formattedDate = month && day ? `${parseInt(month)}월 ${parseInt(day)}일` : datePart;
                               
                               const [hour, minute] = timePart.split(':');
+                              if (!hour || !minute) return null;
+                              
                               const timeSlot = `${hour.padStart(2, '0')}:${minute}`;
                               const normalizedOptionTime = `${datePart} ${timeSlot}`;
                               const optionDateTime = new Date(`${datePart}T${timeSlot}:00`);
