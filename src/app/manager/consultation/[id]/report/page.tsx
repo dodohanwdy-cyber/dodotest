@@ -423,6 +423,44 @@ export default function ReportPage() {
   );
 }
 
+function SmartListBlock({ text }: { text: string }) {
+  if (!text) return <p className="text-zinc-600">내용이 없습니다.</p>;
+  
+  // 번호 기호를 기준으로 문단 분리
+  const lines = text.split(/(?=\b\d+\.\s)/).filter(line => line.trim() !== '');
+  
+  if (lines.length <= 1 && !/^\d+\.\s/.test(text.trim())) {
+    return <p className="whitespace-pre-wrap text-zinc-700 leading-relaxed">{text}</p>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {lines.map((line, idx) => {
+        const cleanLine = line.trim();
+        const match = cleanLine.match(/^(\d+)\.\s+(.*)/s);
+        
+        if (match) {
+          const number = match[1];
+          const content = match[2];
+          
+          return (
+            <div key={idx} className="flex gap-4 p-5 bg-zinc-50 rounded-2xl border border-zinc-100 items-start shadow-sm transition-all hover:-translate-y-0.5">
+               <div className="w-8 h-8 shrink-0 rounded-full bg-white font-black text-primary flex items-center justify-center shadow-sm border border-zinc-50 text-sm">
+                 {number}
+               </div>
+               <div className="pt-1.5 text-[15px] text-zinc-700 leading-relaxed font-medium whitespace-pre-wrap flex-1 break-keep">
+                 {content}
+               </div>
+            </div>
+          );
+        }
+        
+        return <p key={idx} className="whitespace-pre-wrap text-zinc-700 text-[15px] bg-zinc-50 p-4 rounded-xl">{cleanLine}</p>;
+      })}
+    </div>
+  );
+}
+
 function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, reportData: any, onBack: () => void }) {
   const router = useRouter();
 
@@ -657,8 +695,8 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
                 <span className="text-[10px] font-bold">{copiedId === 'summary' ? '복사됨' : '복사'}</span>
               </button>
             </div>
-            <div className="bg-white rounded-[32px] p-10 shadow-sm border border-zinc-100 leading-relaxed text-zinc-700 font-medium print:shadow-none print:border-zinc-300 h-full">
-               <p className="whitespace-pre-wrap">{reportData.analysis.dialog_summary}</p>
+            <div className="bg-white rounded-[32px] p-10 shadow-sm border border-zinc-100 h-full print:shadow-none print:border-zinc-300">
+               <SmartListBlock text={reportData.analysis.dialog_summary} />
             </div>
           </section>
 

@@ -125,119 +125,160 @@ export default function ClientReportPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-blue-50/30 pb-20">
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [checkedSteps, setCheckedSteps] = useState<number[]>([]);
 
-      {/* 헤더 */}
-      <div className="bg-primary px-6 py-12">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-2 mb-5 opacity-60">
-            <FileText size={14} />
-            <span className="text-xs font-medium uppercase tracking-widest text-white">
-              Consultation Report
-            </span>
-          </div>
-          <p className="text-blue-200 text-sm mb-1">안녕하세요, {reportData.user_name}님 👋</p>
-          <h1 className="text-2xl md:text-3xl font-semibold text-white leading-snug">
-            상담 분석 리포트가 준비되었어요.
+  const toggleCheck = (idx: number) => {
+    if (checkedSteps.includes(idx)) {
+      setCheckedSteps(checkedSteps.filter(i => i !== idx));
+    } else {
+      setCheckedSteps([...checkedSteps, idx]);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans">
+      {/* 상단 헤더 & 네비게이션 */}
+      <div className="bg-white px-6 pt-10 pb-4 sticky top-0 z-50 border-b border-zinc-100 shadow-sm">
+        <div className="max-w-md mx-auto">
+          <p className="text-zinc-500 text-sm font-bold mb-1">안녕하세요, {reportData.user_name}님 👋</p>
+          <h1 className="text-2xl font-black text-zinc-900 leading-snug tracking-tight mb-6">
+            상담 분석 리포트가<br/>준비되었어요
           </h1>
-          <p className="text-blue-200/70 text-sm mt-2 leading-relaxed">
-            전문 상담사가 정성껏 분석한 결과입니다. 천천히 읽어봐 주세요.
-          </p>
+          
+          {/* 슬라이드 탭 네비게이션 */}
+          <div className="flex gap-2 p-1 bg-zinc-100 rounded-2xl">
+            {["진단 결과", "추천 정책", "실천 계획"].map((tab, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${
+                  currentSlide === idx 
+                    ? "bg-white text-primary shadow-sm" 
+                    : "text-zinc-500 hover:text-zinc-700"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* 본문 */}
-      <main className="max-w-5xl mx-auto px-4 md:px-8 -mt-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-          {/* 왼쪽 2칸: 핵심 요약 + 상담사 메시지 */}
-          <div className="lg:col-span-2 space-y-5">
-
-            {/* 핵심 요약 — white 카드 */}
-            <section className="bg-white rounded-3xl p-7 md:p-9 shadow-sm border border-blue-100/60">
-              <div className="flex items-center gap-2 mb-4">
-                <MessageCircle size={14} className="text-primary/50" />
-                <span className="text-[11px] font-semibold text-primary/50 uppercase tracking-widest">핵심 요약</span>
-              </div>
-              <p className="text-base md:text-lg text-slate-600 leading-[1.85] font-normal">
-                {renderFormattedText(reportData.main_issue)}
-              </p>
-            </section>
-
-            {/* 상담사 메시지 — 앰버 서브 컬러 카드 */}
-            <section className="bg-amber-50 rounded-3xl p-7 md:p-9 border border-amber-100/70">
-              <div className="flex items-center gap-2 mb-5">
-                <Heart size={14} className="text-amber-400" />
-                <span className="text-[11px] font-semibold text-amber-500/80 uppercase tracking-widest">상담사 메시지</span>
-              </div>
-              <blockquote className="text-base md:text-lg text-slate-600 leading-[1.85] font-normal pl-4 border-l-2 border-amber-200 italic">
-                &ldquo;{renderFormattedText(reportData.user_message)}&rdquo;
-              </blockquote>
-            </section>
-
-          </div>
-
-          {/* 오른쪽 1칸: 추천 정책 — white 카드 */}
-          <div className="lg:col-span-1">
-            <section className="bg-white rounded-3xl p-7 shadow-sm border border-blue-100/60 h-full">
-              <div className="flex items-center gap-2 mb-5">
-                <Target size={14} className="text-primary/50" />
-                <span className="text-[11px] font-semibold text-primary/50 uppercase tracking-widest">추천 정책</span>
-              </div>
-              <div className="space-y-2.5">
-                {reportData.policy_match.length > 0 ? (
-                  reportData.policy_match.map((policy: string, idx: number) => (
-                    <div
-                      key={idx}
-                      className="flex items-start gap-3 p-3.5 rounded-2xl bg-blue-50/60 border border-blue-100/50 hover:bg-blue-50 hover:border-blue-200/60 transition-colors"
-                    >
-                      <CheckCircle2 size={14} className="text-primary/40 mt-0.5 shrink-0" />
-                      <span className="text-sm text-slate-600 leading-snug font-normal">{renderFormattedText(policy)}</span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-slate-400 py-4 text-center">준비 중입니다.</p>
-                )}
+      <main className="max-w-md mx-auto px-6 py-8">
+        {/* 슬라이드 1: 진단 결과 & 상담사 메시지 (채팅 버블 UI) */}
+        {currentSlide === 0 && (
+          <div className="space-y-8 animate-in slide-in-from-right-4 fade-in duration-300">
+            {/* 핵심 요약 */}
+            <section>
+              <h2 className="text-sm font-black text-zinc-400 mb-3 flex items-center gap-1.5 uppercase tracking-widest pl-1">
+                <MessageCircle size={14} /> AI 분석 요약
+              </h2>
+              <div className="bg-white rounded-3xl p-6 shadow-sm border border-zinc-100">
+                <p className="text-[15px] text-zinc-700 leading-relaxed font-medium">
+                  {renderFormattedText(reportData.main_issue)}
+                </p>
               </div>
             </section>
-          </div>
 
-        </div>
-
-        {/* 향후 실천 계획 — 앰버 서브 컬러 라이트 카드 */}
-        <section className="mt-5 bg-white rounded-3xl p-7 md:p-9 shadow-sm border border-blue-100/60">
-          <div className="flex items-center gap-2 mb-6">
-            <Sparkles size={14} className="text-amber-400" />
-            <span className="text-[11px] font-semibold text-amber-500/80 uppercase tracking-widest">향후 실천 계획</span>
-          </div>
-          {reportData.next_steps.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {reportData.next_steps.map((step: string, idx: number) => (
-                <div
-                  key={idx}
-                  className="flex items-start gap-4 p-4 rounded-2xl bg-amber-50/60 border border-amber-100/50 hover:bg-amber-50 hover:border-amber-200/60 transition-colors"
-                >
-                  <span className="text-xs font-semibold text-amber-400/80 mt-0.5 shrink-0 w-5 text-center tabular-nums">
-                    {idx + 1}
-                  </span>
-                  <p className="text-sm text-slate-600 leading-relaxed font-normal">{renderFormattedText(step)}</p>
+            {/* 상담사 메시지 (채팅 UI) */}
+            <section className="pt-2">
+              <h2 className="text-sm font-black text-zinc-400 mb-4 flex items-center gap-1.5 uppercase tracking-widest pl-1">
+                <Heart size={14} className="text-rose-400" /> 상담사의 메시지
+              </h2>
+              <div className="flex gap-3">
+                {/* 프로필 이미지 아이콘 */}
+                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 border-2 border-white shadow-sm shadow-indigo-100 mt-1">
+                  <span className="text-lg">👩‍💼</span>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-slate-400 italic text-center py-4">다음 단계를 준비 중입니다.</p>
-          )}
-        </section>
-
-        {/* 푸터 */}
-        <footer className="mt-10 pb-2 text-center">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <Heart size={12} className="text-slate-200" />
-            <p className="text-[11px] text-slate-300 uppercase tracking-widest">OPCL Care Team</p>
+                {/* 말풍선 */}
+                <div className="flex-1">
+                   <p className="text-xs font-bold text-zinc-500 mb-1.5 pl-1">열고닫기 담당자</p>
+                   <div className="bg-white text-[15px] text-zinc-800 leading-relaxed p-5 rounded-2xl rounded-tl-none shadow-sm border border-zinc-100 inline-block font-medium">
+                     {renderFormattedText(reportData.user_message)}
+                   </div>
+                </div>
+              </div>
+            </section>
           </div>
-          <p className="text-[10px] text-slate-300">© 2024 열고닫기. 모든 데이터는 보안으로 보호됩니다.</p>
-        </footer>
+        )}
+
+        {/* 슬라이드 2: 추천 정책 */}
+        {currentSlide === 1 && (
+          <div className="space-y-6 animate-in slide-in-from-right-4 fade-in duration-300">
+            <h2 className="text-sm font-black text-zinc-400 mb-2 flex items-center gap-1.5 uppercase tracking-widest pl-1">
+              <Target size={14} className="text-blue-500" /> 맞춤 추천 정책
+            </h2>
+            <div className="space-y-3">
+              {reportData.policy_match.length > 0 ? (
+                reportData.policy_match.map((policy: string, idx: number) => (
+                  <div
+                    key={idx}
+                    className="flex items-start gap-4 p-5 rounded-3xl bg-white border border-blue-100/50 shadow-sm"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 size={16} className="text-blue-500" />
+                    </div>
+                    <span className="text-[15px] text-zinc-700 leading-snug font-medium pt-1.5">{renderFormattedText(policy)}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-white p-8 rounded-3xl text-center border border-zinc-100">
+                  <p className="text-sm text-zinc-400 font-bold">추천 정책을 찾지 못했습니다.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 슬라이드 3: 실천 계획 (체크리스트 UI) */}
+        {currentSlide === 2 && (
+          <div className="space-y-6 animate-in slide-in-from-right-4 fade-in duration-300">
+             <h2 className="text-sm font-black text-zinc-400 mb-2 flex items-center gap-1.5 uppercase tracking-widest pl-1">
+               <Sparkles size={14} className="text-amber-500" /> 향후 실천 계획 (To-Do)
+             </h2>
+             <div className="bg-white p-2 rounded-3xl border border-amber-100/50 shadow-sm">
+              {reportData.next_steps.length > 0 ? (
+                <div className="divide-y divide-zinc-50">
+                  {reportData.next_steps.map((step: string, idx: number) => {
+                    const isChecked = checkedSteps.includes(idx);
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => toggleCheck(idx)}
+                        className={`flex items-start gap-4 p-5 transition-all cursor-pointer select-none group ${isChecked ? 'opacity-50' : 'hover:bg-zinc-50/50 rounded-3xl'}`}
+                      >
+                        <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${isChecked ? 'bg-amber-400 border-amber-400 text-white' : 'border-zinc-200 bg-white group-hover:border-amber-400 text-transparent'}`}>
+                          <CheckCircle2 size={14} color="currentColor" strokeWidth={3} />
+                        </div>
+                        <p className={`text-[15px] leading-relaxed transition-all ${isChecked ? 'text-zinc-400 line-through' : 'text-zinc-700 font-medium'}`}>
+                          {renderFormattedText(step)}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-zinc-400 italic text-center py-8 font-bold">준비된 다음 단계가 없습니다.</p>
+              )}
+             </div>
+          </div>
+        )}
+
+        {/* 하단 네비게이션 버튼 */}
+        <div className="mt-10 flex justify-between gap-3">
+          {currentSlide > 0 && (
+             <button onClick={() => setCurrentSlide(prev => prev - 1)} className="px-6 py-4 rounded-2xl font-bold text-zinc-500 bg-zinc-200/50 hover:bg-zinc-200 transition-colors">
+               이전
+             </button>
+          )}
+          <button 
+             onClick={() => currentSlide < 2 ? setCurrentSlide(prev => prev + 1) : window.close()} 
+             className="px-6 py-4 rounded-2xl font-bold text-white bg-primary hover:bg-blue-600 transition-colors flex-1 shadow-lg shadow-blue-100"
+          >
+             {currentSlide < 2 ? "다음 보기" : "리포트 닫기"}
+          </button>
+        </div>
       </main>
     </div>
   );
