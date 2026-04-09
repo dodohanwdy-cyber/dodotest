@@ -567,7 +567,7 @@ export default function ConsultationDetailPopup({
                 </div>
               </div>
 
-              <div className="bg-[#fff9eb] rounded-[32px] p-8 border border-amber-100/50 relative overflow-hidden min-h-[500px]">
+              <div className="bg-[#fff9eb] rounded-[32px] p-8 border border-amber-100/50 relative min-h-[500px]">
                 {/* 섹션 헤더 + 예시/준비 버튼 */}
                 <div className={`flex items-start justify-between mb-8 flex-wrap gap-3 transition-all duration-500 ${isPreparing ? 'blur-sm opacity-30 scale-95' : ''}`}>
                   <div className="flex items-center gap-3.5">
