@@ -80,6 +80,12 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
     // [수정] 사용자가 다음 동작을 할 때까지 유지되도록 자동 삭제 타이머 제거
   };
 
+  // [신규] 입력값 변경 시 경고 상태 초기화
+  useEffect(() => {
+    setToast("");
+    setHasWarnedRank(false);
+  }, [selectedDate, rank1, rank2, rank3, preferredMethod, preferredLocation, customLocation]);
+
   // 한국 공휴일 설정 (정적 데이터 사용)
   useEffect(() => {
     // 기본 공휴일 데이터 (2026년)
@@ -622,8 +628,11 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
         <div className="relative group">
           {/* 버튼 바로 위 전용 토스트 */}
           {toast && (
-            <div className="absolute bottom-full right-0 mb-4 z-[100] animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300 w-[360px] md:w-[400px]">
-              <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-5 rounded-3xl shadow-2xl border-2 border-white flex items-center gap-4">
+            <div 
+              onClick={() => { setToast(""); setHasWarnedRank(false); }}
+              className="absolute bottom-full right-0 mb-4 z-[100] animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300 w-[360px] md:w-[400px] cursor-pointer"
+            >
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-5 rounded-3xl shadow-2xl border-2 border-white flex items-center gap-4 hover:brightness-105 active:scale-95 transition-all">
                 <AlertCircle size={22} className="flex-shrink-0 animate-bounce" />
                 <span className="font-black text-[14px] leading-relaxed whitespace-pre-line break-keep">{toast}</span>
               </div>
