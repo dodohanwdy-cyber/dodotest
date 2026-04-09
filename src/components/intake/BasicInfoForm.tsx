@@ -203,11 +203,15 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
             value={formData.income_level}
             onChange={(e) => setFormData({...formData, income_level: e.target.value})}
           >
-            <option value="없음">💰 소득 없음 (개인 소득 및 납부 건보료 없음)</option>
-            <option value="50% 이하">📉 가구 소득 50% 이하</option>
-            <option value="100% 이하">📊 가구 소득 100% 이하</option>
-            <option value="150% 이하">📈 가구 소득 150% 이하</option>
-            <option value="150% 초과">💎 가구 소득 150% 초과</option>
+            <option value="없음">💰 소득 없음 (0%)</option>
+            <option value="30% 이하">📉 가구 소득 30% 이하 (생계급여 기준)</option>
+            <option value="50% 이하">📊 가구 소득 50% 이하 (중위소득 절반)</option>
+            <option value="80% 이하">💡 가구 소득 80% 이하 (청년수당/주거지원 등)</option>
+            <option value="100% 이하">✅ 가구 소득 100% 이하 (기준 중위소득)</option>
+            <option value="120% 이하">📈 가구 소득 120% 이하 (청년진입/우량 기준)</option>
+            <option value="150% 이하">💎 가구 소득 150% 이하 (대부분 정책 마지노선)</option>
+            <option value="180% 이하">🏦 가구 소득 180% 이하 (금융지원/도약계좌 등)</option>
+            <option value="180% 초과">✨ 가구 소득 180% 초과</option>
           </select>
         </div>
       </div>
@@ -340,7 +344,7 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
                 <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
                   <span className="text-xs font-black text-slate-800 block mb-1">🏥 건강보험 납부액 (건보료)</span>
                   <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
-                    매달 월급이나 소득에서 나가는 건강보험 요금입니다. 건보료는 내 소득에 비례해서 나오기 때문에, <b>내 소득을 정확히 모를 땐 납부하는 건보료 금액으로 소득 구간을 유추</b>할 수 있습니다.
+                    매달 월급이나 소득에서 나가는 건강보험 요금입니다. 건보료는 내 소득에 비례해서 나오기 때문에, <b>내 소득을 정확히 모를 땐 납부하는 건보료 금액으로 소득 구간을 유추</b>할 수 있습니다. 80%, 120% 등 정책별로 요구하는 기준이 다를 수 있으니 아래 표를 확인해 보세요.
                   </p>
                 </div>
               </div>
@@ -384,19 +388,46 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
                 <h4 className="text-[13px] font-black text-slate-800 mb-3 flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary" /> 가구별 월소득 기준표 (세전)
                 </h4>
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
-                  <table className="w-full text-xs text-center border-collapse">
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden shadow-sm overflow-x-auto">
+                  <table className="w-full text-[10px] text-center border-collapse min-w-[400px]">
                     <thead>
                       <tr className="bg-slate-100 text-slate-500 font-bold border-b border-slate-200">
                         <th className="p-3">가구원 수</th>
-                        <th className="p-3">기준 중위소득 100%</th>
+                        <th className="p-3 border-l border-slate-200">80%</th>
+                        <th className="p-3 border-l border-slate-200 bg-blue-50/50 text-primary">100% (기준)</th>
+                        <th className="p-3 border-l border-slate-200">120%</th>
+                        <th className="p-3 border-l border-slate-200">150%</th>
                       </tr>
                     </thead>
                     <tbody className="font-bold text-slate-700">
-                      <tr className="border-b border-slate-100"><td className="p-3 bg-white">1인 가구</td><td className="p-3 bg-white">2,564,000원</td></tr>
-                      <tr className="border-b border-slate-100"><td className="p-3 bg-white">2인 가구</td><td className="p-3 bg-white">4,199,000원</td></tr>
-                      <tr className="border-b border-slate-100"><td className="p-3 bg-white">3인 가구</td><td className="p-3 bg-white">5,359,000원</td></tr>
-                      <tr><td className="p-3 bg-white">4인 가구</td><td className="p-3 bg-white">6,495,000원</td></tr>
+                      <tr className="border-b border-slate-100">
+                        <td className="p-3 bg-white">1인 가구</td>
+                        <td className="p-3 bg-white border-l border-slate-50">2,051,390원</td>
+                        <td className="p-3 bg-blue-50/20 border-l border-slate-50">2,564,238원</td>
+                        <td className="p-3 bg-white border-l border-slate-50">3,077,085원</td>
+                        <td className="p-3 bg-white border-l border-slate-50">3,846,357원</td>
+                      </tr>
+                      <tr className="border-b border-slate-100">
+                        <td className="p-3 bg-white">2인 가구</td>
+                        <td className="p-3 bg-white border-l border-slate-50">3,357,248원</td>
+                        <td className="p-3 bg-blue-50/20 border-l border-slate-50">4,196,560원</td>
+                        <td className="p-3 bg-white border-l border-slate-50">5,035,872원</td>
+                        <td className="p-3 bg-white border-l border-slate-50">6,294,840원</td>
+                      </tr>
+                      <tr className="border-b border-slate-100">
+                        <td className="p-3 bg-white">3인 가구</td>
+                        <td className="p-3 bg-white border-l border-slate-50">4,307,356원</td>
+                        <td className="p-3 bg-blue-50/20 border-l border-slate-50">5,384,195원</td>
+                        <td className="p-3 bg-white border-l border-slate-50">6,461,034원</td>
+                        <td className="p-3 bg-white border-l border-slate-50">8,076,292원</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 bg-white">4인 가구</td>
+                        <td className="p-3 bg-white border-l border-slate-50">5,195,790원</td>
+                        <td className="p-3 bg-blue-50/20 border-l border-slate-50">6,494,738원</td>
+                        <td className="p-3 bg-white border-l border-slate-50">7,793,685원</td>
+                        <td className="p-3 bg-white border-l border-slate-50">9,742,107원</td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
