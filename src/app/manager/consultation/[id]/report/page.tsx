@@ -437,7 +437,7 @@ function SmartListBlock({ text }: { text: string }) {
     <div className="space-y-4">
       {lines.map((line, idx) => {
         const cleanLine = line.trim();
-        const match = cleanLine.match(/^(\d+)\.\s+(.*)/s);
+        const match = cleanLine.match(/^(\d+)\.\s+([\s\S]*)/);
         
         if (match) {
           const number = match[1];
