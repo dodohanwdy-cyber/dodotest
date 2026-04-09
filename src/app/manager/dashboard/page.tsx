@@ -145,14 +145,36 @@ export default function ManagerDashboard() {
 
   const handleConfirmAssignments = async (webhookResponse: any) => {
     const responseData = Array.isArray(webhookResponse) ? webhookResponse[0] : webhookResponse;
-    const confirmedList = responseData?.confirmed_list ?? [];
-
+    
+    // 1. 확정 목록 업데이트
+    const confirmedList = responseData?.confirmed_list ?? responseData?.data?.confirmed_list ?? [];
     if (confirmedList.length > 0) {
       const firstDate = confirmedList[0].confirmed_datetime?.split(" ")[0];
       if (firstDate) setSelectedDate(new Date(firstDate));
     }
     setConfirmedAppointments(confirmedList);
+
+    // 2. 전체 대시보드 데이터 즉시 반영 (analyzed_list, calendar_events 등)
+    if (responseData?.summary || responseData?.analyzed_list || responseData?.calendar_events) {
+      const parsedEvents = (responseData.calendar_events ?? []).map((evt: any, idx: number) => {
+        const title = typeof evt.title === "string" ? evt.title.trim() : "";
+        const isCounseling = /^.+\s+상담\s*(\((online|phone)\)$|\(offline\))/i.test(title);
+        const id = evt.id || `evt-${idx}-${evt.start || Date.now()}`;
+        return { ...evt, id, color: isCounseling ? "blue" : "gray" };
+      });
+
+      setData((prev: any) => ({
+        ...prev,
+        pending_count: responseData.summary?.total_pending ?? prev?.pending_count ?? 0,
+        auto_assigned_count: responseData.summary?.auto_assigned_count ?? prev?.auto_assigned_count ?? 0,
+        calendar_events: parsedEvents.length > 0 ? parsedEvents : prev?.calendar_events,
+        analyzed_list: responseData.analyzed_list ?? prev?.analyzed_list ?? [],
+      }));
+    }
+
     setShowAdjustPopup(false);
+    
+    // 3. 백그라운드에서 최종 데이터 동기화
     await fetchDashboard();
   };
 
@@ -579,6 +601,7 @@ export default function ManagerDashboard() {
         analyzedList={combinedList}
         calendarEvents={data?.calendar_events ?? []}
         onConfirm={handleConfirmAssignments}
+        managerEmail={user?.email}
       />
 
       {/* 상담자 상세 정보 팝업 */}

@@ -35,7 +35,8 @@ interface ScheduleAdjustPopupProps {
   onClose: () => void;
   analyzedList: AnalyzedRequest[];
   calendarEvents: CalendarEvent[];
-  onConfirm: (assignments: { request_id: string; assigned_time: string }[], canceledIds: string[]) => void;
+  onConfirm: (webhookResponse: any, canceledIds: string[]) => void;
+  managerEmail?: string;
 }
 
 export default function ScheduleAdjustPopup({ 
@@ -43,7 +44,8 @@ export default function ScheduleAdjustPopup({
   onClose, 
   analyzedList, 
   calendarEvents,
-  onConfirm 
+  onConfirm,
+  managerEmail = 'manager@opcl.kr'
 }: ScheduleAdjustPopupProps) {
   const [assignments, setAssignments] = useState<{ [key: string]: string }>({});
   const [canceledList, setCanceledList] = useState<string[]>([]); // 취소 대기 중인 request_id 목록
@@ -340,7 +342,7 @@ export default function ScheduleAdjustPopup({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            manager_email: 'manager_dodo@dodo.com',
+            manager_email: managerEmail,
             assignments: assignmentsData,
             timestamp: new Date().toISOString()
           })
@@ -355,7 +357,7 @@ export default function ScheduleAdjustPopup({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            manager_email: 'manager_dodo@dodo.com',
+            manager_email: managerEmail,
             canceled_requests: canceledList,
             timestamp: new Date().toISOString()
           })
@@ -375,7 +377,7 @@ export default function ScheduleAdjustPopup({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            manager_email: 'manager_dodo@dodo.com',
+            manager_email: managerEmail,
             readjust_requests: readjustmentIds,
             timestamp: new Date().toISOString()
           })
@@ -424,7 +426,10 @@ export default function ScheduleAdjustPopup({
       const resetResponse = await fetch("https://primary-production-1f39e.up.railway.app/webhook/reset-schedule", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          ...payload,
+          manager_email: managerEmail
+        })
       });
       
       if (!resetResponse.ok) {
