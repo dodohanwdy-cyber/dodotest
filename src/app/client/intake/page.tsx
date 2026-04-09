@@ -113,18 +113,38 @@ function IntakeContent() {
         const currentStatus = (rawCrmData.status || '').toString().toLowerCase().trim();
         console.log(`[Intake/Resume] 현재 상태: "${currentStatus}"`);
 
+        // [중요] 상담 완료 여부 체크 (상태값과 별개로 데이터 존재 여부 우선)
+        // chat_summary가 있거나, 대화 내역(chat_history/conversation_scrips)이 의미 있게 존재하면 완료로 간주
+        const hasChatData = !!(
+          rawCrmData.chat_summary || 
+          (rawCrmData.chat_history && Array.isArray(rawCrmData.chat_history) && rawCrmData.chat_history.length > 1) ||
+          (rawCrmData.conversation_scrips && Array.isArray(rawCrmData.conversation_scrips) && rawCrmData.conversation_scrips.length > 0)
+        );
+
+        if (hasChatData) {
+          setIsChatFinished(true);
+          console.log("[Intake/Resume] 기존 상담 데이터가 확인되어 Step 3를 완료 상태로 유지합니다.");
+        } else {
+          setIsChatFinished(false);
+        }
+
         // 상태별 단계 매핑 (Robust Mapping)
         if (currentStatus === 'sec1' || currentStatus === 'basic_complete') {
           setCompletedSteps(['section-1']);
-          setIsChatFinished(false);
           setValue('section-2');
         } else if (currentStatus === 'sec2' || currentStatus === 'schedule_complete') {
-          setCompletedSteps(['section-1', 'section-2']);
-          setIsChatFinished(false);
-          setValue('section-3');
-        } else if (currentStatus === 'sec3' || currentStatus === 'chat_complete') {
+          // 2단계 완료 상태인데 이미 상담 데이터가 있다면 4단계로 점프
+          if (hasChatData) {
+            setCompletedSteps(['section-1', 'section-2', 'section-3']);
+            setValue('section-4');
+          } else {
+            setCompletedSteps(['section-1', 'section-2']);
+            setValue('section-3');
+          }
+        } else if (currentStatus === 'sec3' || currentStatus === 'chat_complete' || hasChatData) {
           setCompletedSteps(['section-1', 'section-2', 'section-3']);
-          setIsChatFinished(true); // 채팅 완료 문구 표시
+          setIsChatFinished(true);
+          // 3단계 완료 후에는 약관동의(4단계)가 기본
           setValue('section-4');
         } else if (['pending', 'confirmed', 'final_submitted', 'submitted'].includes(currentStatus)) {
           setCompletedSteps(['section-1', 'section-2', 'section-3', 'section-4', 'section-5']);
