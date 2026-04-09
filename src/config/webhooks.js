@@ -18,6 +18,7 @@ export const WEBHOOK_URLS = {
   CHOOSE_SCHEDULE: "https://primary-production-1f39e.up.railway.app/webhook/time-request", // [Section 2] 선택한 일정 확정
   AI_CHAT_INPUT: "https://primary-production-1f39e.up.railway.app/webhook/chat-input", // [Section 3] 채팅 실시간 반응
   AI_CHAT_ANALYZE: "https://primary-production-1f39e.up.railway.app/webhook/request-data", // [Section 3] 채팅 분석 및 최종 저장
+  CONSENT_COMPLETE: "https://primary-production-1f39e.up.railway.app/webhook/consent-complete", // [Section 4] 약관 동의 확인 (상태 pending 전환)
 
   // 3단계: 매니저 대시보드 및 결과 처리
   GET_MANAGER_DASHBOARD: "https://primary-production-1f39e.up.railway.app/webhook/schedule-start", // 전체 상담 현황 조회

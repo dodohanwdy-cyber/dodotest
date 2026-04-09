@@ -284,6 +284,18 @@ function IntakeContent() {
       setIsChatFinished(true);
       setValue("section-4");
     } else if (step === "section-4") {
+      try {
+        await postToWebhook(WEBHOOK_URLS.CONSENT_COMPLETE, {
+          request_id: intakeData.request_id,
+          user_id: storedUser?.id || "",
+          email: storedUser?.email || "",
+          time: kstTime,
+          status: "pending"
+        });
+        console.log("✅ [약관 동의 완료 웹훅 전송 성공]");
+      } catch (err) {
+        console.error("🚨 [약관 동의 웹훅 전송 실패]", err);
+      }
       setValue("section-5");
     }
   };
