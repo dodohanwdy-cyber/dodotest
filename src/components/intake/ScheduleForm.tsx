@@ -22,14 +22,20 @@ interface Holiday {
   name: string;
 }
 
-export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNext: (data: any) => void, onPrev: () => void }) {
+interface ScheduleFormProps {
+  data: any;
+  onNext: (data: any) => void;
+  onPrev: () => void;
+  onShowToast?: (message: string) => void;
+}
+
+export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: ScheduleFormProps) {
   const [calendar, setCalendar] = useState<DaySlot[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [workInfo, setWorkInfo] = useState({ start: 9, end: 18, lunch: 12 });
-  const [toast, setToast] = useState<string>("");
   const [holidays, setHolidays] = useState<{ [key: string]: string }>({});
   
   // 순위 선택
@@ -69,10 +75,6 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
     }
   }, [data]);
 
-  const showToast = (message: string) => {
-    setToast(message);
-    setTimeout(() => setToast(""), 3000);
-  };
 
   // 한국 공휴일 설정 (정적 데이터 사용)
   useEffect(() => {
@@ -313,7 +315,9 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
 
     // 2, 3순위가 비어있는 경우 경고 토스트 (1회 한정)
     if ((!rank2 || !rank3) && !hasWarnedRank) {
-      showToast("더 원활한 배정을 위해 2, 3순위까지 모두 입력하시는 것을 추천드려요! 한 번 더 누르면 그대로 진행됩니다.");
+      if (onShowToast) {
+        onShowToast("더 원활한 배정을 위해 2, 3순위까지 모두 입력하시는 것을 추천드려요! 한 번 더 누르면 그대로 진행됩니다.");
+      }
       setHasWarnedRank(true);
       return;
     }
@@ -457,16 +461,6 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
               <label className="text-sm font-black text-slate-800 flex items-center gap-2">
                 <Clock size={18} className="text-primary" /> 시간 선택
               </label>
-              
-              {/* 토스트 메시지 - 화면 전체 중앙 상단 고정으로 변경 */}
-              {toast && (
-                <div className="fixed top-12 left-1/2 -translate-x-1/2 z-[99999] animate-in slide-in-from-top-4 duration-500 w-full max-w-md px-6">
-                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-4 rounded-3xl shadow-2xl border-2 border-white flex items-center gap-3">
-                    <AlertCircle size={20} className="flex-shrink-0" />
-                    <span className="font-bold text-sm leading-tight">{toast}</span>
-                  </div>
-                </div>
-              )}
               
               {/* 고정 높이 컨테이너 */}
               <div className="flex-1 min-h-[600px]">

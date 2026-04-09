@@ -474,7 +474,15 @@ function IntakeContent() {
             </Accordion.Header>
             <Accordion.Content className="px-12 pb-12 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
                <div className="pt-8">
-                 <ScheduleForm data={intakeData} onNext={(data) => handleStepComplete("section-2", data)} onPrev={() => setValue("section-1")} />
+                 <ScheduleForm 
+                    data={intakeData} 
+                    onNext={(data) => handleStepComplete("section-2", data)} 
+                    onPrev={() => setValue("section-1")}
+                    onShowToast={(msg) => {
+                      setToast(msg);
+                      setTimeout(() => setToast(""), 3000);
+                    }}
+                  />
                </div>
             </Accordion.Content>
           </Accordion.Item>
