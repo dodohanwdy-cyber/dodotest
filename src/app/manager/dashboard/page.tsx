@@ -276,7 +276,7 @@ export default function ManagerDashboard() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-black text-zinc-900 mb-2">상담 접수 및 배정 관리</h1>
-          <p className="text-zinc-500">상담 일정을 관리하고 신청 현황을 확인하세요</p>
+          <p className="text-zinc-500">상담 일정을 관리하고<br />신청 현황을 확인하세요</p>
         </div>
         <div className="flex gap-3">
           <button
@@ -467,7 +467,7 @@ export default function ManagerDashboard() {
         <div className="bg-white rounded-3xl p-12 shadow-sm border border-dashed border-zinc-200 text-center">
           <AlertCircle className="mx-auto text-zinc-300 mb-3" size={48} />
           <p className="text-zinc-400 font-medium">확정된 상담 일정이 없습니다.</p>
-          <p className="text-zinc-300 text-sm mt-1">일정 조율을 통해 상담을 확정해 주세요.</p>
+          <p className="text-zinc-300 text-sm mt-1">일정 조율을 통해<br />상담을 확정해 주세요.</p>
         </div>
       )}
 
@@ -488,7 +488,7 @@ export default function ManagerDashboard() {
             </div>
 
             <h2 className="text-xl font-bold text-zinc-900 mb-2">알람 보내기</h2>
-            <p className="text-[13px] text-zinc-500 mb-6 font-bold">상담이 확정된 아래 분들께 문자 및 알람을 보내드릴게요.</p>
+            <p className="text-[13px] text-zinc-500 mb-6 font-bold">상담이 확정된 아래 분들께<br />문자 및 알람을 보내드릴게요.</p>
 
             {/* 수신자 체크박스 리스트 */}
             <div className="space-y-3 max-h-[300px] overflow-y-auto mb-6 pr-2 custom-scrollbar">
