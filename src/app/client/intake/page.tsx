@@ -99,58 +99,47 @@ function IntakeContent() {
             ? data.special_notes.split(',').map((s: string) => s.trim()).filter(Boolean)
             : [];
         
-        // 인테이크 데이터 채우기
-        setIntakeData({
-          request_id: data.request_id || id,
-          user_id: user?.id || "",
-          email: data.email || user?.email || "",
-          role: user?.role || "client",
-          password_hash: user?.password_hash || "",
-          name: data.name || "",
-          age: data.age || "",
-          gender: data.gender || "",
-          regional_local_government: data.regional_local_government || "",
-          basic_local_government: data.basic_local_government || "",
-          job_status: data.job_status || "",
-          income_level: data.income_level || "",
+        // [보강] 전체 데이터를 그대로 보존하면서 특정 필드만 가공
+        const rawCrmData = data.data || data;
+        
+        setIntakeData((prev: any) => ({
+          ...prev,
+          ...rawCrmData,
           interest_areas: interestAreas,
           special_notes: specialNotes,
-          benefited_policy: data.benefited_policy || "",
-          request_time_1: data.request_time_1 || "",
-          request_time_2: data.request_time_2 || "",
-          request_time_3: data.request_time_3 || "",
-          preferred_location: data.preferred_location || "",
-          preferred_method: data.preferred_method || "",
-          status: data.status || "",
-        });
+          request_id: rawCrmData.request_id || id, // ID 불일치 방지
+        }));
         
-        const currentStatus = (data.status || '').toString().toLowerCase().trim();
-        
-        if (currentStatus === 'sec1') {
-          // 1단계 완료: 예약(2단계)으로 이동
+        const currentStatus = (rawCrmData.status || '').toString().toLowerCase().trim();
+        console.log(`[Intake/Resume] 현재 상태: "${currentStatus}"`);
+
+        // 상태별 단계 매핑 (Robust Mapping)
+        if (currentStatus === 'sec1' || currentStatus === 'basic_complete') {
           setCompletedSteps(['section-1']);
           setIsChatFinished(false);
           setValue('section-2');
-        } else if (currentStatus === 'sec2') {
-          // 2단계 완료: AI인터뷰(3단계)로 이동
+        } else if (currentStatus === 'sec2' || currentStatus === 'schedule_complete') {
           setCompletedSteps(['section-1', 'section-2']);
           setIsChatFinished(false);
           setValue('section-3');
-        } else if (currentStatus === 'sec3') {
-          // 3단계 완료: 약관동의(4단계)로 이동
+        } else if (currentStatus === 'sec3' || currentStatus === 'chat_complete') {
           setCompletedSteps(['section-1', 'section-2', 'section-3']);
-          setIsChatFinished(true);
+          setIsChatFinished(true); // 채팅 완료 문구 표시
           setValue('section-4');
-        } else if (currentStatus === 'pending' || currentStatus === 'confirmed' || currentStatus === 'final_submitted') {
-          // 최종 제출 또는 완료 상태: 5단계로 이동
+        } else if (['pending', 'confirmed', 'final_submitted', 'submitted'].includes(currentStatus)) {
           setCompletedSteps(['section-1', 'section-2', 'section-3', 'section-4', 'section-5']);
           setIsChatFinished(true);
           setValue('section-5');
         } else {
-          // 초기 상태 혹은 알 수 없는 상태: 1단계부터 시작
-          setCompletedSteps([]);
+          // 상태가 명확하지 않지만 데이터는 있을 수 있음 -> 데이터가 있으면 Step 1 완료 처리 시도
+          if (rawCrmData.name && rawCrmData.regional_local_government) {
+             setCompletedSteps(['section-1']);
+             setValue('section-2');
+          } else {
+             setCompletedSteps([]);
+             setValue('section-1');
+          }
           setIsChatFinished(false);
-          setValue('section-1');
         }
       } else {
         console.error('Failed to load application detail:', data.error);
