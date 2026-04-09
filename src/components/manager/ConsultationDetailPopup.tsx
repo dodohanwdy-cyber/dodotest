@@ -581,6 +581,17 @@ export default function ConsultationDetailPopup({
                   </div>
 
                   <div className="flex items-center gap-2">
+                    {/* [보강] 직접 찾아보기 버튼 (현재 개발 중 기능, opcl.kr 연결) */}
+                    <a
+                      href="https://opcl.kr"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 bg-white text-zinc-600 border border-zinc-200 rounded-2xl text-sm font-bold hover:bg-zinc-50 hover:text-primary transition-all shadow-sm group"
+                    >
+                      <span className="group-hover:scale-110 transition-transform">🔍</span>
+                      직접 찾아보기
+                    </a>
+
                     {/* 바로 준비하기 버튼 */}
                     <button
                       onClick={handlePrepare}
