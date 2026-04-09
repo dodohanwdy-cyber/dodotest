@@ -419,9 +419,8 @@ function IntakeContent() {
             <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
               나에게 꼭 맞는 <span className="text-primary underline decoration-accent decoration-8 underline-offset-4">청년정책</span> 찾기
             </h1>
-            <p className="text-lg text-slate-500 font-bold max-w-2xl break-keep">
-              복잡한 정책들 사이에서 헤매지 마세요.<br />
-              열고닫기의 AI가 당신의 상황을 분석하여 정확한 솔루션을 제안해 드립니다.
+            <p className="text-lg text-slate-500 font-bold max-w-2xl break-keep whitespace-pre-line">
+              {"복잡한 정책들 사이에서 헤매지 마세요.\n열고닫기의 AI가 당신의 상황을 분석하여 정확한 솔루션을 제안해 드립니다."}
             </p>
           </div>
           
@@ -575,12 +574,16 @@ function IntakeContent() {
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-black text-slate-900 text-2xl tracking-tight">Step 04. 서비스 이용 동의</h3>
+                    <p className="text-[13px] text-slate-400 font-bold">안전한 맞춤 상담을 위해<br />약관에 동의해 주세요.</p>
+                  </div>
+                </div>
+                <div className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center group-hover:bg-slate-50 transition-colors">
+                   <ChevronDown className="text-slate-400 group-data-[state=open]:rotate-180 transition-transform duration-500" size={20} />
+                </div>
+              </Accordion.Trigger>
+            </Accordion.Header>
             <Accordion.Content className="px-12 pb-12 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
                <div className="pt-8">
-                {/* 
-                  TODO(Backend Integration): 추후 DB 저장이 필요해지면, ConsentForm 내부의 onNext 콜백 인자로 동의 현황 데이터를 넘겨받게 구성한 뒤
-                  이를 handleStepComplete("section-4", data)처럼 넘겨 intakeData에 병합해야 합니다.
-                */}
                 <ConsentForm 
                   onPrev={() => setValue("section-3")}
                   onNext={() => handleStepComplete("section-4", {})} 
