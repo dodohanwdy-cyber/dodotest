@@ -13,6 +13,7 @@ export async function postToWebhook(url: string, data: any) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
+      cache: "no-store",
     });
 
     const isJson = response.headers.get("content-type")?.includes("application/json");

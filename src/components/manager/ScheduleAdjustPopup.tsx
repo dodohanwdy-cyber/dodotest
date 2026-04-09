@@ -116,20 +116,23 @@ export default function ScheduleAdjustPopup({
           const [hour, minute] = timePart.split(':');
           const normalizedTime = `${datePart} ${(hour || '00').padStart(2, '0')}:${minute || '00'}`;
           
-          // 기존 일정과 충돌 체크
+          // 기존 일정과 충돌 체크 (단, 이미 확정된 건은 체크 생략하여 무조건 배정 상태 유지)
           const suggestedDate = new Date(datePart);
           const timeSlot = `${hour.padStart(2, '0')}:${minute}`;
           
-          // 기존 일정과 겹치지 않으면 자동 배정
-          const hasConflict = calendarEvents.some(event => {
-            const eventStart = new Date(event.start);
-            const eventEnd = new Date(event.end);
-            const suggestedDateTime = new Date(`${datePart}T${timeSlot}:00`);
-            
-            return suggestedDateTime >= eventStart && suggestedDateTime < eventEnd;
-          });
+          let collisionFree = true;
+          if (!isConfirmed) {
+            const hasConflict = calendarEvents.some(event => {
+              const eventStart = new Date(event.start);
+              const eventEnd = new Date(event.end);
+              const suggestedDateTime = new Date(`${datePart}T${timeSlot}:00`);
+              
+              return suggestedDateTime >= eventStart && suggestedDateTime < eventEnd;
+            });
+            collisionFree = !hasConflict;
+          }
           
-          if (!hasConflict) {
+          if (collisionFree) {
             initial[req.request_id] = normalizedTime;
           } else {
             console.log(`[ScheduleAdjustPopup] 충돌 감지 - ${req.name}: ${normalizedTime}`);
@@ -633,8 +636,8 @@ export default function ScheduleAdjustPopup({
                                 </div>
                               )}
                               
-                              {/* 기존 일정 (캘린더 점유) */}
-                              {existingEvent && !isLunch && !isWeekendDay && (
+                              {/* 기존 일정 (캘린더 점유 - 배정된 신청이 없을 때만 보임) */}
+                              {existingEvent && !assignedRequest && !isLunch && !isWeekendDay && (
                                 <div className="absolute inset-1 p-2 bg-zinc-100 rounded-xl border border-zinc-200/50 flex flex-col justify-center">
                                   <p className="text-[9px] font-bold text-zinc-400 truncate opacity-80">
                                     {existingEvent.title}
@@ -643,7 +646,7 @@ export default function ScheduleAdjustPopup({
                               )}
                               
                               {/* 배정된 신청 (우리가 배정한 것) */}
-                              {assignedRequest && !existingEvent && !isLunch && !isWeekendDay && (
+                              {assignedRequest && !isLunch && !isWeekendDay && (
                                 <div 
                                   draggable
                                   onDragStart={(e) => {
