@@ -458,12 +458,12 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
                 <Clock size={18} className="text-primary" /> 시간 선택
               </label>
               
-              {/* 토스트 메시지 */}
+              {/* 토스트 메시지 - 화면 전체 중앙 상단 고정으로 변경 */}
               {toast && (
-                <div className="absolute top-14 left-0 right-0 z-50 animate-in slide-in-from-top-2 duration-300">
-                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-4 rounded-2xl shadow-2xl border-2 border-white flex items-center gap-3">
+                <div className="fixed top-12 left-1/2 -translate-x-1/2 z-[99999] animate-in slide-in-from-top-4 duration-500 w-full max-w-md px-6">
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-4 rounded-3xl shadow-2xl border-2 border-white flex items-center gap-3">
                     <AlertCircle size={20} className="flex-shrink-0" />
-                    <span className="font-bold text-sm">{toast}</span>
+                    <span className="font-bold text-sm leading-tight">{toast}</span>
                   </div>
                 </div>
               )}
