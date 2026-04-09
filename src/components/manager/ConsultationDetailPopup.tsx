@@ -580,17 +580,28 @@ export default function ConsultationDetailPopup({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    {/* [보강] 직접 찾아보기 버튼 (현재 개발 중 기능, opcl.kr 연결) */}
-                    <a
-                      href="https://opcl.kr"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 bg-white text-zinc-600 border border-zinc-200 rounded-2xl text-sm font-bold hover:bg-zinc-50 hover:text-primary transition-all shadow-sm group"
-                    >
-                      <span className="group-hover:scale-110 transition-transform">🔍</span>
-                      직접 찾아보기
-                    </a>
+                   <div className="flex items-center gap-2">
+                    {/* [보강] 직접 찾아보기 버튼 (현재 개발 중 기능, opcl.kr 연결 + 툴팁 추가) */}
+                    <div className="relative group/tooltip">
+                      <a
+                        href="https://opcl.kr"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-zinc-600 border border-zinc-200 rounded-2xl text-sm font-bold hover:bg-zinc-50 hover:text-primary transition-all shadow-sm group"
+                      >
+                        <span className="group-hover:scale-110 transition-transform">🔍</span>
+                        직접 찾아보기
+                      </a>
+                      {/* 프리미엄 툴팁 UI */}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-zinc-900 text-white text-[10px] font-black rounded-xl opacity-0 scale-95 group-hover/tooltip:opacity-100 group-hover/tooltip:scale-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-[100] shadow-2xl border border-white/10 ring-4 ring-black/5">
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-1 h-1 bg-amber-400 rounded-full animate-pulse" />
+                          열고닫기 AI가 개발 중이에요
+                        </span>
+                        {/* 툴팁 화살표 */}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-x-[5px] border-x-transparent border-t-[5px] border-t-zinc-900" />
+                      </div>
+                    </div>
 
                     {/* 바로 준비하기 버튼 */}
                     <button
