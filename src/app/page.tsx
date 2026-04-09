@@ -43,7 +43,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 pt-6 w-full sm:w-auto">
             {user ? (
               <Link 
-                href={user.role === "manager" ? "/manager/dashboard" : "/client/intake"}
+                href={user.role === "manager" ? "/manager/dashboard" : "/client/intake?mode=new"}
                 className="group bg-primary text-white ml-0 sm:ml-4 px-10 py-4 rounded-[2rem] font-bold text-lg flex items-center justify-center gap-2 transition-all hover:bg-primary/90 shadow-2xl shadow-blue-100 hover:scale-105 active:scale-95"
               >
                 {user.role === "manager" ? "관리자 대시보드" : "바로 상담 신청하기"} 

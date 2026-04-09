@@ -38,6 +38,17 @@ function IntakeContent() {
 
   // 1. 수정 모드: URL 파라미터로 데이터 로드
   React.useEffect(() => {
+    const mode = searchParams.get('mode');
+    
+    // 강제 신규 모드일 경우 기존 데이터 삭제
+    if (mode === 'new') {
+      console.log("신규 신청 모드: 기존 데이터를 초기화합니다.");
+      sessionStorage.removeItem("intake_persistence");
+      if (user?.email) localStorage.removeItem(`intake_backup_${user.email}`);
+      setIsHydrated(true);
+      return; // 신규 데이터로 시작 (useState 기본값 사용)
+    }
+
     if (applicationId && user?.email) {
       fetchApplicationDetail(applicationId);
     } else {
