@@ -77,7 +77,7 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
   }, [data]);
   const showToast = (message: string) => {
     setToast(message);
-    setTimeout(() => setToast(""), 3000);
+    // [수정] 사용자가 다음 동작을 할 때까지 유지되도록 자동 삭제 타이머 제거
   };
 
   // 한국 공휴일 설정 (정적 데이터 사용)
@@ -319,11 +319,12 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
 
     // 2, 3순위가 비어있는 경우 경고 토스트 (1회 한정)
     if ((!rank2 || !rank3) && !hasWarnedRank) {
-      showToast("더 원활한 배정을 위해 2, 3순위까지 모두 입력하시는 것을 추천드려요! 한 번 더 누르면 그대로 진행됩니다.");
+      showToast("더 원활한 상담 배정을 위해\n2, 3순위까지 모두 입력하시는 것을 추천드려요!\n(한 번 더 누르면 그대로 진행됩니다)");
       setHasWarnedRank(true);
       return;
     }
     
+    setToast(""); // 진행 시 토스트 제거
     setIsSubmitting(true);
     const finalLocation = preferredMethod === "offline" 
       ? (preferredLocation === "center" ? "center" : customLocation)
@@ -621,13 +622,13 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
         <div className="relative group">
           {/* 버튼 바로 위 전용 토스트 */}
           {toast && (
-            <div className="absolute bottom-full right-0 mb-4 z-[100] animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300 w-[320px]">
-              <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-5 py-3.5 rounded-2xl shadow-xl border-2 border-white flex items-center gap-3">
-                <AlertCircle size={18} className="flex-shrink-0 animate-bounce" />
-                <span className="font-black text-[13px] leading-tight break-keep">{toast}</span>
+            <div className="absolute bottom-full right-0 mb-4 z-[100] animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300 w-[360px] md:w-[400px]">
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-5 rounded-3xl shadow-2xl border-2 border-white flex items-center gap-4">
+                <AlertCircle size={22} className="flex-shrink-0 animate-bounce" />
+                <span className="font-black text-[14px] leading-relaxed whitespace-pre-line break-keep">{toast}</span>
               </div>
               {/* 말풍선 꼬리 */}
-              <div className="absolute top-full right-16 -translate-x-1/2 -mt-1 border-8 border-transparent border-t-amber-500" />
+              <div className="absolute top-full right-16 -translate-x-1/2 -mt-1 border-[10px] border-transparent border-t-amber-500" />
             </div>
           )}
           
