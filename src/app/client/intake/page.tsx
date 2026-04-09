@@ -421,7 +421,7 @@ function IntakeContent() {
             </h1>
             <p className="text-lg text-slate-500 font-bold max-w-2xl break-keep">
               복잡한 정책들 사이에서 헤매지 마세요.<br />
-              열고닫기의 AI가 당신의 상황을 분석하여<br />정확한 솔루션을 제안해 드립니다.
+              열고닫기의 AI가 당신의 상황을 분석하여 정확한 솔루션을 제안해 드립니다.
             </p>
           </div>
           
