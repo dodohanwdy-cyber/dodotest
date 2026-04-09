@@ -124,7 +124,7 @@ function IntakeContent() {
           status: data.status || "",
         });
         
-        const currentStatus = data.status || '';
+        const currentStatus = (data.status || '').toString().toLowerCase().trim();
         
         if (currentStatus === 'sec1') {
           // 1단계 완료: 예약(2단계)으로 이동
@@ -136,16 +136,21 @@ function IntakeContent() {
           setCompletedSteps(['section-1', 'section-2']);
           setIsChatFinished(false);
           setValue('section-3');
-        } else if (currentStatus === 'pending' || currentStatus === 'confirmed') {
-          // 완료 상태: 1~4단계 접근 차단 후 5단계로
+        } else if (currentStatus === 'sec3') {
+          // 3단계 완료: 약관동의(4단계)로 이동
+          setCompletedSteps(['section-1', 'section-2', 'section-3']);
+          setIsChatFinished(true);
+          setValue('section-4');
+        } else if (currentStatus === 'pending' || currentStatus === 'confirmed' || currentStatus === 'final_submitted') {
+          // 최종 제출 또는 완료 상태: 5단계로 이동
           setCompletedSteps(['section-1', 'section-2', 'section-3', 'section-4', 'section-5']);
           setIsChatFinished(true);
           setValue('section-5');
         } else {
-          // 기존 흐름 유지: 모두 완료된 상태로 취급하여 5단계로
-          setCompletedSteps(['section-1', 'section-2', 'section-3']);
-          setIsChatFinished(true);
-          setValue('section-5');
+          // 초기 상태 혹은 알 수 없는 상태: 1단계부터 시작
+          setCompletedSteps([]);
+          setIsChatFinished(false);
+          setValue('section-1');
         }
       } else {
         console.error('Failed to load application detail:', data.error);
