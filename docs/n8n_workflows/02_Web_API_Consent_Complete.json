@@ -1,0 +1,103 @@
+{
+  "name": "Step 4 약관 동의 (status -> pending)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "consent-complete",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "1e51b329-873b-4fa8-a400-34d31e9c2c2f",
+      "name": "Webhook (약관동의)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ],
+      "webhookId": "consent-complete"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.body.status }}"
+          }
+        },
+        "options": {
+          "dataMode": "auto"
+        }
+      },
+      "id": "ba5b8cf0-24fc-4f05-89db-43282bda3e50",
+      "name": "구글시트 상태 변경 (pending)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        420,
+        300
+      ],
+      "notesInFlow": true,
+      "notes": "request_id 를 통해 해당 행 검색 후 status 필드를 pending 으로 업데이트"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"message\": \"동의 완료 (pending 처리됨)\"\n}",
+        "options": {}
+      },
+      "id": "18f99e4c-1122-44df-91bf-a3d54ef0dd72",
+      "name": "성공응답 전송",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        640,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook (약관동의)": {
+      "main": [
+        [
+          {
+            "node": "구글시트 상태 변경 (pending)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "구글시트 상태 변경 (pending)": {
+      "main": [
+        [
+          {
+            "node": "성공응답 전송",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "02. Web API (청년 사용자용)"
+    }
+  ]
+}

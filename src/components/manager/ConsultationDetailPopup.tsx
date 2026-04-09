@@ -592,14 +592,14 @@ export default function ConsultationDetailPopup({
                         <span className="group-hover:scale-110 transition-transform">🔍</span>
                         직접 찾아보기
                       </a>
-                      {/* 프리미엄 툴팁 UI */}
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-zinc-900 text-white text-[10px] font-black rounded-xl opacity-0 scale-95 group-hover/tooltip:opacity-100 group-hover/tooltip:scale-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-[100] shadow-2xl border border-white/10 ring-4 ring-black/5">
+                      {/* 프리미엄 툴팁 UI (위쪽 잘림 방지를 위해 아래쪽으로 배치) */}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 px-3 py-1.5 bg-zinc-900 text-white text-[10px] font-black rounded-xl opacity-0 scale-95 group-hover/tooltip:opacity-100 group-hover/tooltip:scale-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-[100] shadow-2xl border border-white/10 ring-4 ring-black/5">
                         <span className="flex items-center gap-1.5">
                           <span className="w-1 h-1 bg-amber-400 rounded-full animate-pulse" />
                           열고닫기 AI가 개발 중이에요
                         </span>
-                        {/* 툴팁 화살표 */}
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-x-[5px] border-x-transparent border-t-[5px] border-t-zinc-900" />
+                        {/* 툴팁 화살표 (위쪽을 향함) */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-x-[5px] border-x-transparent border-b-[5px] border-b-zinc-900" />
                       </div>
                     </div>
 
