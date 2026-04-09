@@ -221,14 +221,20 @@ export default function CompletedConsultationsPage() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setSelectedMonth("all")}
+              onClick={() => {
+                if (selectedMonth === "all") {
+                  setSelectedMonth(availableMonths[0] || "");
+                } else {
+                  setSelectedMonth("all");
+                }
+              }}
               className={`px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border ${
                 selectedMonth === "all"
                   ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200"
                   : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
               }`}
             >
-              전체 내역 보기
+              {selectedMonth === "all" ? "전체 보기 해제" : "전체 내역 보기"}
             </button>
           </div>
         </div>
