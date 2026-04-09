@@ -452,7 +452,7 @@ export default function ClientDashboard() {
           )}
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 lg:sticky lg:top-8 self-start transition-all duration-300">
           <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2 mb-4">
             <AlertCircle size={20} className="text-primary" /> 현재 진행 단계
           </h2>
