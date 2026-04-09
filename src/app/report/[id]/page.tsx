@@ -61,6 +61,8 @@ export default function ClientReportPage() {
   const [reportData, setReportData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [checkedSteps, setCheckedSteps] = useState<number[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -125,8 +127,7 @@ export default function ClientReportPage() {
     );
   }
 
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [checkedSteps, setCheckedSteps] = useState<number[]>([]);
+
 
   const toggleCheck = (idx: number) => {
     if (checkedSteps.includes(idx)) {
