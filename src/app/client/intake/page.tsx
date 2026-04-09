@@ -33,6 +33,8 @@ function IntakeContent() {
   const [isFinished, setIsFinished] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [toast, setToast] = useState<string>("");
+  const [hasWarnedRankFinal, setHasWarnedRankFinal] = useState(false);
 
   // 1. 수정 모드: URL 파라미터로 데이터 로드
   React.useEffect(() => {
@@ -282,6 +284,14 @@ function IntakeContent() {
   };
 
   const handleFinalSubmit = async () => {
+    // 2, 3순위 예약이 비어있는 경우 최종 제출 전 경고 (1회 한정)
+    if ((!intakeData.request_time_2 || !intakeData.request_time_3) && !hasWarnedRankFinal) {
+      setToast("더 원활한 배정을 위해 2, 3순위 예약까지 모두 채워주시는 것을 추천드려요! 한 번 더 누르면 그대로 제출됩니다.");
+      setHasWarnedRankFinal(true);
+      setTimeout(() => setToast(""), 3000);
+      return;
+    }
+
     const kstTime = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).substring(0, 19);
     
     // user 객체가 있더라도 password_hash가 비어있다면 sessionStorage를 다시 확인
@@ -575,6 +585,16 @@ function IntakeContent() {
           </Accordion.Item>
         </Accordion.Root>
       </div>
+
+      {/* 토스트 메시지 */}
+      {toast && (
+        <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-[9999] animate-in slide-in-from-top-4 duration-300">
+          <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-5 rounded-[2rem] shadow-2xl border-2 border-white flex items-center gap-4 min-w-[320px]">
+            <AlertCircle size={24} className="flex-shrink-0" />
+            <span className="font-black text-sm whitespace-pre-line">{toast}</span>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

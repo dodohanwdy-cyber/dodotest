@@ -45,6 +45,7 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
   // 웹훅 전송 및 수신 데이터 저장
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [rawCalendarData, setRawCalendarData] = useState<{work_info: any, booked_data: any} | null>(null);
+  const [hasWarnedRank, setHasWarnedRank] = useState(false);
 
   // 기존 데이터 복원
   useEffect(() => {
@@ -309,6 +310,13 @@ export default function ScheduleForm({ data, onNext, onPrev }: { data: any, onNe
 
   const handleNext = async () => {
     if (isSubmitting) return;
+
+    // 2, 3순위가 비어있는 경우 경고 토스트 (1회 한정)
+    if ((!rank2 || !rank3) && !hasWarnedRank) {
+      showToast("더 원활한 배정을 위해 2, 3순위까지 모두 입력하시는 것을 추천드려요! 한 번 더 누르면 그대로 진행됩니다.");
+      setHasWarnedRank(true);
+      return;
+    }
     
     setIsSubmitting(true);
     const finalLocation = preferredMethod === "offline" 
