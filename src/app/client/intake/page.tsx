@@ -86,22 +86,22 @@ function IntakeContent() {
       if (res.ok && data) {
         console.log('[Intake] 상세 데이터 로드 성공:', data);
         
-        // interest_areas와 special_notes를 안전하게 배열로 변환
-        const interestAreas = Array.isArray(data.interest_areas) 
-          ? data.interest_areas 
-          : typeof data.interest_areas === 'string' 
-            ? data.interest_areas.split(',').map((s: string) => s.trim()).filter(Boolean)
-            : [];
-            
-        const specialNotes = Array.isArray(data.special_notes) 
-          ? data.special_notes 
-          : typeof data.special_notes === 'string' 
-            ? data.special_notes.split(',').map((s: string) => s.trim()).filter(Boolean)
-            : [];
-        
         // [보강] 전체 데이터를 그대로 보존하면서 특정 필드만 가공
         const rawCrmData = data.data || data;
         
+        // interest_areas와 special_notes를 안전하게 배열로 변환 (rawCrmData 기준)
+        const interestAreas = Array.isArray(rawCrmData.interest_areas) 
+          ? rawCrmData.interest_areas 
+          : typeof rawCrmData.interest_areas === 'string' 
+            ? rawCrmData.interest_areas.split(',').map((s: string) => s.trim()).filter(Boolean)
+            : [];
+            
+        const specialNotes = Array.isArray(rawCrmData.special_notes) 
+          ? rawCrmData.special_notes 
+          : typeof rawCrmData.special_notes === 'string' 
+            ? rawCrmData.special_notes.split(',').map((s: string) => s.trim()).filter(Boolean)
+            : [];
+
         setIntakeData((prev: any) => ({
           ...prev,
           ...rawCrmData,
@@ -113,17 +113,12 @@ function IntakeContent() {
         const currentStatus = (rawCrmData.status || '').toString().toLowerCase().trim();
         console.log(`[Intake/Resume] 현재 상태: "${currentStatus}"`);
 
-        // [중요] 상담 완료 여부 체크 (상태값과 별개로 데이터 존재 여부 우선)
-        // chat_summary가 있거나, 대화 내역(chat_history/conversation_scrips)이 의미 있게 존재하면 완료로 간주
-        const hasChatData = !!(
-          rawCrmData.chat_summary || 
-          (rawCrmData.chat_history && Array.isArray(rawCrmData.chat_history) && rawCrmData.chat_history.length > 1) ||
-          (rawCrmData.conversation_scrips && Array.isArray(rawCrmData.conversation_scrips) && rawCrmData.conversation_scrips.length > 0)
-        );
+        // [수정] 상담 완료 여부 체크: 오직 chat_summary 필드 존재 여부만 확인
+        const hasChatData = !!rawCrmData.chat_summary;
 
         if (hasChatData) {
           setIsChatFinished(true);
-          console.log("[Intake/Resume] 기존 상담 데이터가 확인되어 Step 3를 완료 상태로 유지합니다.");
+          console.log("[Intake/Resume] chat_summary가 확인되어 Step 3를 완료 상태로 유지합니다.");
         } else {
           setIsChatFinished(false);
         }
