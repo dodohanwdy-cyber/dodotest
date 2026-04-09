@@ -420,7 +420,8 @@ function IntakeContent() {
               나에게 꼭 맞는 <span className="text-primary underline decoration-accent decoration-8 underline-offset-4">청년정책</span> 찾기
             </h1>
             <p className="text-lg text-slate-500 font-bold max-w-2xl break-keep">
-              복잡한 정책들 사이에서 헤매지 마세요. 열고닫기의 AI가 당신의 상황을 분석하여 정확한 솔루션을 제안해 드립니다.
+              복잡한 정책들 사이에서 헤매지 마세요.<br />
+              열고닫기의 AI가 당신의 상황을 분석하여<br />정확한 솔루션을 제안해 드립니다.
             </p>
           </div>
           
@@ -466,7 +467,7 @@ function IntakeContent() {
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-black text-slate-900 text-2xl tracking-tight">Step 01. 맞춤 데이터 입력</h3>
-                    <p className="text-[13px] text-slate-400 font-bold">당신을 더 잘 이해하기 위한 기초 정보를 수집합니다.</p>
+                    <p className="text-[13px] text-slate-400 font-bold">당신을 더 잘 이해하기 위한<br />기초 정보를 수집합니다.</p>
                   </div>
                 </div>
                 <div className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center group-hover:bg-slate-50 transition-colors">
@@ -490,7 +491,7 @@ function IntakeContent() {
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-black text-slate-900 text-2xl tracking-tight">Step 02. 상담 일정 예약</h3>
-                    <p className="text-[13px] text-slate-400 font-bold">전문 상담사와 깊이 있는 대화를 나눌 시간을 조율합니다.</p>
+                    <p className="text-[13px] text-slate-400 font-bold">전문 상담사와 깊이 있는 대화를<br />나눌 시간을 조율합니다.</p>
                   </div>
                 </div>
                 <div className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center group-hover:bg-slate-50 transition-colors">
@@ -530,7 +531,7 @@ function IntakeContent() {
                     <p className="text-[13px] text-slate-400 font-bold">
                       {isChatFinished 
                         ? '✅ AI 상담이 완료되었습니다' 
-                        : '채팅을 통해 당신의 구체적인 상황을 AI에게 들려주세요.'}
+                        : '채팅을 통해 당신의 구체적인 상황을<br />AI에게 들려주세요.'}
                     </p>
                   </div>
                 </div>
@@ -549,7 +550,8 @@ function IntakeContent() {
                         AI 상담 내용이 안전하게 저장되었습니다
                       </p>
                       <p className="text-sm text-amber-700 font-bold leading-relaxed">
-                        상담 결과가 분석되어 전문가에게 전달되었습니다. 세부 요청 사항은 'Step 5'에서 최종 확인 및 수정이 가능합니다.
+                        상담 결과가 분석되어 전문가에게 전달되었습니다.<br />
+                        세부 요청 사항은 'Step 5'에서 최종 확인 및 수정이 가능합니다.
                       </p>
                     </div>
                   </div>
@@ -573,14 +575,6 @@ function IntakeContent() {
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-black text-slate-900 text-2xl tracking-tight">Step 04. 서비스 이용 동의</h3>
-                    <p className="text-[13px] text-slate-400 font-bold">안전한 맞춤 상담을 위해 약관에 동의해 주세요.</p>
-                  </div>
-                </div>
-                <div className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center group-hover:bg-slate-50 transition-colors">
-                   <ChevronDown className="text-slate-400 group-data-[state=open]:rotate-180 transition-transform duration-500" size={20} />
-                </div>
-              </Accordion.Trigger>
-            </Accordion.Header>
             <Accordion.Content className="px-12 pb-12 border-t border-slate-50 animate-in slide-in-from-top-4 duration-500">
                <div className="pt-8">
                 {/* 

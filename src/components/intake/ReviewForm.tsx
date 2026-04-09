@@ -114,8 +114,8 @@ export default function ReviewForm({ data, onEdit, onSubmit, isReadOnly }: Revie
         <>
           <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex gap-3">
             <div className="text-amber-500 mt-0.5"><CheckCircle2 size={18} /></div>
-            <p className="text-xs text-amber-700 leading-relaxed">
-              <strong>안내:</strong> AI 상담 채팅 내용은 보안 및 리소스 관리 정책에 따라 수정이 불가능합니다. 
+          <p className="text-xs text-amber-700 leading-relaxed">
+              <strong>안내:</strong> AI 상담 채팅 내용은<br />보안 및 리소스 관리 정책에 따라 수정이 불가능합니다.<br />
               위의 정보가 모두 정확하다면 아래 버튼을 눌러 최종 신청을 완료해 주세요.
             </p>
           </div>
@@ -134,7 +134,7 @@ export default function ReviewForm({ data, onEdit, onSubmit, isReadOnly }: Revie
         <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex gap-3 mt-6">
           <div className="text-blue-500 mt-0.5"><CheckCircle2 size={18} /></div>
           <p className="text-xs text-blue-700 leading-relaxed">
-            <strong>안내:</strong> 이미 제출된 신청서입니다. 정보 수정 및 재제출이 불가능합니다.
+            <strong>안내:</strong> 이미 제출된 신청서입니다.<br />정보 수정 및 재제출이 불가능합니다.
           </p>
         </div>
       )}

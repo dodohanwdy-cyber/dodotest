@@ -52,7 +52,7 @@ const renderFormattedText = (text: string) => {
 export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFinished }: { intakeData: any, onComplete: () => void, onUpdate?: (data: any) => void, isChatFinished?: boolean }) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>(intakeData.chat_history || [
-    { role: "ai", content: `안녕하세요, ${intakeData.name}님! 원활한 맞춤 상담을 위해 제가 3가지 정도 간단한 질문을 드릴 예정입니다. 😊\n\n현재 가장 마음이 쓰이는 부분이나, 해결하고 싶은 구체적인 상황을 먼저 편하게 말씀해 주시겠어요?` }
+    { role: "ai", content: `안녕하세요, ${intakeData.name}님!\n원활한 맞춤 상담을 위해 제가 3가지 정도 간단한 질문을 드릴 예정입니다. 😊\n\n현재 가장 마음이 쓰이는 부분이나,\n해결하고 싶은 구체적인 상황을 먼저 편하게 말씀해 주시겠어요?` }
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);

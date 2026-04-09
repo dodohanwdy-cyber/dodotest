@@ -38,7 +38,7 @@ export default function ConsentForm({ onNext, onPrev }: ConsentFormProps) {
         </div>
         <div>
           <h4 className="font-bold text-slate-800 text-lg">서비스 이용 동의</h4>
-          <p className="text-sm text-slate-500">안전한 맞춤 상담을 위해 약관에 동의해 주세요.</p>
+          <p className="text-sm text-slate-500">안전한 맞춤 상담을 위해<br />약관에 동의해 주세요.</p>
         </div>
       </div>
 
@@ -58,7 +58,7 @@ export default function ConsentForm({ onNext, onPrev }: ConsentFormProps) {
              <CheckCircle size={16} className={allAgreed ? "opacity-100" : "opacity-0"} />
           </div>
           <span className={`font-black text-lg ${allAgreed ? "text-indigo-900" : "text-slate-700 group-hover:text-indigo-900"}`}>
-            개인정보 수집 이용 및 개인정보 제3자 제공, 조회 모두 동의합니다. <span className="text-indigo-600">(필수)</span>
+            개인정보 수집 이용 및<br />개인정보 제3자 제공, 조회 모두 동의합니다. <span className="text-indigo-600">(필수)</span>
           </span>
         </div>
         {allAgreed && <span className="text-sm font-bold text-indigo-600 animate-pulse">동의 완료</span>}
@@ -133,7 +133,7 @@ export default function ConsentForm({ onNext, onPrev }: ConsentFormProps) {
       {!allAgreed && (
         <div className="flex items-start gap-2 text-rose-500 bg-rose-50 p-4 rounded-xl">
           <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
-          <p className="text-sm font-bold">원활한 상담 진행을 위해 위의 필수 약관 사항에 동의하여 주시기 바랍니다.</p>
+          <p className="text-sm font-bold">원활한 상담 진행을 위해<br />위의 필수 약관 사항에 동의하여 주시기 바랍니다.</p>
         </div>
       )}
 
