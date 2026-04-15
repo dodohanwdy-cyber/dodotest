@@ -64,12 +64,15 @@ export async function POST(req: Request) {
         break; // 성공 시 탈출
       } catch (error: any) {
         lastError = error;
-        // 429 에러인 경우만 재시도
-        if (error.response?.status === 429 || error.status === 429 || error.message?.includes('429')) {
-          console.warn(`⚠️ 과부하(429) 감지. 재시도 중... (${attempt}/${MAX_RETRIES})`);
+        // 429(너무 많은 요청) 또는 503(서비스 이용 불가), 500(서버 내부 오류)인 경우 재시도
+        const status = error.response?.status || error.status;
+        const isRetryableError = status === 429 || status === 503 || status === 500 || (error.message && (error.message.includes('429') || error.message.includes('503')));
+        
+        if (isRetryableError) {
+          console.warn(`⚠️ API 과부하/오류(${status || '알수없음'}) 감지. 재시도 중... (${attempt}/${MAX_RETRIES})`);
           await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)));
         } else {
-          throw error; // 다른 에러는 중단
+          throw error; // 재시도해도 안 되는 에러(예: 400 문법 오류)는 즉시 중단
         }
       }
     }
