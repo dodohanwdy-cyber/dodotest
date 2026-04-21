@@ -54,17 +54,11 @@ const parseConfirmedList = (confirmedRes: any): any[] => {
 };
 
 export default function ManagerDashboard() {
-  const { user, isLoading: isLoadingAuth } = useAuth();
-  const router = useRouter(); // router가 이미 import되어 있는지 확인 필요
+  const { user } = useAuth();
+  const router = useRouter();
+  // 대시보드 데이터 로딩 상태
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // 인증 가드
-  useEffect(() => {
-    if (!isLoadingAuth && !user) {
-      router.push("/login");
-    }
-  }, [user, isLoadingAuth, router]);
   const [showAdjustPopup, setShowAdjustPopup] = useState(false);
   const [showNoSchedulePopup, setShowNoSchedulePopup] = useState(false);
   const [confirmedAppointments, setConfirmedAppointments] = useState<any[]>([]);
