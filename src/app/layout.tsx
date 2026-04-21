@@ -4,6 +4,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import NotificationProvider from "@/components/layout/NotificationProvider";
+import { ToastProvider } from "@/context/ToastContext";
 
 export const metadata: Metadata = {
   title: "열고닫기 - AI 기반 청년정책 맞춤 상담",
@@ -19,14 +20,16 @@ export default function RootLayout({
     <html lang="ko">
       <body className="antialiased font-sans text-zinc-900 bg-white">
         <AuthProvider>
-          <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <div className="flex-1">
-              {children}
+          <ToastProvider>
+            <div className="min-h-screen flex flex-col">
+              <Navbar />
+              <div className="flex-1">
+                {children}
+              </div>
+              <Footer />
+              <NotificationProvider />
             </div>
-            <Footer />
-            <NotificationProvider />
-          </div>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

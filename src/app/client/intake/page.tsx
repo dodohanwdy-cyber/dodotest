@@ -530,7 +530,7 @@ function IntakeContent() {
                     <p className="text-[13px] text-slate-400 font-bold">
                       {isChatFinished 
                         ? '✅ AI 상담이 완료되었습니다' 
-                        : '채팅을 통해 당신의 구체적인 상황을<br />AI에게 들려주세요.'}
+                        : <>간편한 채팅을 통해 현재 상황과<br />필요한 도움을 이야기해 주세요.</>}
                     </p>
                   </div>
                 </div>
