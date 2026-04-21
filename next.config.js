@@ -17,6 +17,8 @@ const ContentSecurityPolicy = `
 `;
 
 const nextConfig = {
+  // 운영 환경에서 브라우저용 소스맵(source map) 생성 비활성화 방지
+  productionBrowserSourceMaps: false,
   async headers() {
     return [
       {

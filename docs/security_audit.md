@@ -13,6 +13,7 @@
 | 2 | CSP (Content-Security-Policy) | ⚠️ 경고 | ✅ 조치 완료 | 2026-04-21 |
 | 3 | 클릭재킹 방어 (X-Frame-Options) | ⚠️ 경고 | ✅ 기 조치 완료 | 2026-04-21 |
 | 4 | 혼합 콘텐츠 방지 (Mixed Content) | ⚠️ 경고 | ✅ 기 조치 완료 | 2026-04-21 |
+| 5 | 소스맵(.map) 공개 노출 방지 | ⚠️ 경고 | ✅ 조치 완료 | 2026-04-21 |
 
 ---
 
@@ -181,6 +182,45 @@ curl -I https://dodohan-ai-counsel.vercel.app/ | grep -i x-frame
 ```bash
 # CSP 헤더 내 upgrade-insecure-requests 포함 여부 확인
 curl -I https://dodohan-ai-counsel.vercel.app/ | grep -i "upgrade-insecure-requests"
+```
+
+---
+
+## 5. 소스맵(.map) 공개 노출 방지
+
+### 발견된 문제
+- 프로덕션 빌드 파일에 대한 소스맵(`.map`) 파일이 브라우저에서 접근 가능하게 열려 있음
+- 예: `https://dodohan-ai-counsel.vercel.app/_next/static/chunks/[hash].js.map`
+
+### 위험성
+- 소스맵이 공개되어 있으면 비즈니스 로직, 내부 주석, 원본 소스코드의 폴더 구조 등이 고스란히 노출됨
+- 이를 통해 악의적 사용자가 취약점을 더 쉽게 분석하거나 핵심 알고리즘을 훔칠 수 있음
+
+### 조치 내용
+- **파일**: `next.config.js` (수정)
+- **방법**: Next.js 설정 내에 브라우저용 프로덕션 소스맵 생성을 영구 비활성화하는 옵션 추가 적용
+
+#### 적용 사항
+
+| 설정 항목 | 설정 값 | 효과 |
+|-----------|---------|------|
+| `productionBrowserSourceMaps` | `false` | `npm run build` 시 브라우저 측 JS 파일에 대한 소스맵(`.map`) 파일 생성을 방지 |
+
+### 적용 코드
+
+```javascript
+// next.config.js
+const nextConfig = {
+  // 운영 환경에서 브라우저용 소스맵(source map) 생성 비활성화 방지
+  productionBrowserSourceMaps: false,
+  async headers() { ... }
+};
+```
+
+### 검증 방법
+```bash
+# 배포 후 기존에 노출되던 .map 파일 경로에 접근 시 404 상태 확인
+curl -I https://dodohan-ai-counsel.vercel.app/_next/static/chunks/37ddf08b330de67b.js.map
 ```
 
 ---
