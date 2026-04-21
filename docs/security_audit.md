@@ -12,6 +12,7 @@
 | 1 | HSTS (Strict-Transport-Security) | ⚠️ 경고 | ✅ 조치 완료 | 2026-04-21 |
 | 2 | CSP (Content-Security-Policy) | ⚠️ 경고 | ✅ 조치 완료 | 2026-04-21 |
 | 3 | 클릭재킹 방어 (X-Frame-Options) | ⚠️ 경고 | ✅ 기 조치 완료 | 2026-04-21 |
+| 4 | 혼합 콘텐츠 방지 (Mixed Content) | ⚠️ 경고 | ✅ 기 조치 완료 | 2026-04-21 |
 
 ---
 
@@ -155,6 +156,31 @@ curl -I https://dodohan-ai-counsel.vercel.app/ | grep -i content-security
 ### 검증 방법
 ```bash
 curl -I https://dodohan-ai-counsel.vercel.app/ | grep -i x-frame
+```
+
+---
+
+## 4. 혼합 콘텐츠 방지 (Mixed Content)
+
+### 발견된 문제
+- HTTPS 페이지 내에서 HTTP 리소스(`http://`) 참조 가능성 감지
+
+### 위험성
+- HTTPS 페이지에서 HTTP 리소스를 불러오면 브라우저에 의해 차단되거나(깨진 디자인/기능), 중간자 공격(MITM)의 대상이 될 수 있음.
+
+### 조치 내용
+- **상태**: ✅ **소스코드 확인 및 이전 CSP 조치 시 반영 완료**
+- 현재 소스코드 내부(`src/`)에 외부 리소스를 `http://`로 불러오는 하드코딩된 부분은 없음을 확인했습니다. (SVG namespace 정의 제외)
+- 추가적으로 누락되었거나 외부에서 동적으로 불러오는 HTTP 링크를 방어하기 위해 **CSP 지시어에 이미 차단 조치가 적용되어 있습니다.**
+
+| 방어 수단 | 설정값 | 위치 | 역할 |
+|-----------|--------|------|------|
+| CSP 지시어 | `upgrade-insecure-requests` | `next.config.js` | 페이지 내의 모든 `http://` 요청을 브라우저가 강제로 `https://`로 업그레이드하여 요청하도록 지시 |
+
+### 검증 방법
+```bash
+# CSP 헤더 내 upgrade-insecure-requests 포함 여부 확인
+curl -I https://dodohan-ai-counsel.vercel.app/ | grep -i "upgrade-insecure-requests"
 ```
 
 ---
