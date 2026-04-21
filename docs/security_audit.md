@@ -14,6 +14,7 @@
 | 3 | 클릭재킹 방어 (X-Frame-Options) | ⚠️ 경고 | ✅ 기 조치 완료 | 2026-04-21 |
 | 4 | 혼합 콘텐츠 방지 (Mixed Content) | ⚠️ 경고 | ✅ 기 조치 완료 | 2026-04-21 |
 | 5 | 소스맵(.map) 공개 노출 방지 | ⚠️ 경고 | ✅ 조치 완료 | 2026-04-21 |
+| 6 | Rate Limiting 헤더 부재 | ⚠️ 경고 | ✅ 조치 완료 | 2026-04-21 |
 
 ---
 
@@ -221,6 +222,51 @@ const nextConfig = {
 ```bash
 # 배포 후 기존에 노출되던 .map 파일 경로에 접근 시 404 상태 확인
 curl -I https://dodohan-ai-counsel.vercel.app/_next/static/chunks/37ddf08b330de67b.js.map
+```
+
+---
+
+## 6. Rate Limiting 헤더 부재
+
+### 발견된 문제
+- API 계층 및 로그인 등의 중요 경로에 Rate Limiting 관련된 제한 헤더(`X-RateLimit-Limit` 등)가 감지되지 않음
+
+### 위험성
+- 악의적인 사용자가 무차별 대입 공격(브루트포스)이나 짧은 시간 내 과도한 요청(DDoS 형태)으로 서버의 리소스를 고갈시키거나 계정을 탈취할 가능성이 있음
+
+### 조치 내용
+- **파일**: `src/middleware.ts` (신규 적용)
+- **방법**: Next.js Edge Middleware를 활용하여 클라이언트 IP 주소별로 일정 시간(1분) 동안 보낼 수 있는 최대 요청 횟수(60회)를 제한하는 인메모리 방식 Rate Limiter 적용
+
+#### 적용 사항
+
+| 대상 경로 | 제한 설정 | 추가된 헤더 |
+|-----------|-----------|-------------|
+| `/api/*`, `/login` | 1분당 최대 60회 (초과 시 `429 Too Many Requests`) | `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset` |
+
+> 🧩 **참고:** Vercel의 Serverless / Edge 특성 상 각 인스턴스마다 메모리가 분리되어 있어 완전 분산된 Rate Limit은 아니지만, 특정 노드를 겨냥한 트래픽 봇/스패머 및 1차 방어막으로서 상당한 효과를 제공합니다. 향후 좀 더 철저한 방어가 필요할 시 Redis 기반 분산 캐시(예: Upstash 등) 적용을 확장할 수 있습니다.
+
+### 적용 코드 (요약)
+
+```typescript
+// src/middleware.ts
+export function middleware(req: NextRequest) {
+  // ... 생략 (IP 수집 및 카운팅)
+  if (currentCount >= MAX_REQUESTS_PER_WINDOW) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 /* ...Headers */ });
+  }
+  
+  // 성공 시 다음 라우트로 헤더 전달
+  response.headers.set('X-RateLimit-Limit', MAX_REQUESTS_PER_WINDOW.toString());
+  response.headers.set('X-RateLimit-Remaining', remaining.toString());
+  // ...
+}
+```
+
+### 검증 방법
+```bash
+# 적용된 헤더값이 응답에 포함되는지 확인 (API 경로 등에 호출 시도)
+curl -I https://dodohan-ai-counsel.vercel.app/login | grep -i rate
 ```
 
 ---
