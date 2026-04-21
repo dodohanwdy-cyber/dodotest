@@ -51,29 +51,34 @@ export default function DocsListPage() {
               <p className="text-zinc-400">등록된 문서가 아직 없습니다.</p>
             </div>
           ) : (
-            docs.map((doc) => {
+            docs.map((doc: any) => {
               const Icon = getIconForSlug(doc.slug);
               return (
                 <Link 
                   key={doc.slug} 
                   href={`/docs/${doc.slug}`}
-                  className="group bg-white p-6 rounded-3xl border border-zinc-100 hover:border-blue-100 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 flex items-center justify-between"
+                  className="group bg-white p-8 rounded-[2.5rem] border border-zinc-100 hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 flex items-start justify-between"
                 >
-                  <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 bg-zinc-50 group-hover:bg-blue-50 rounded-2xl flex items-center justify-center transition-colors">
-                      <Icon className="text-zinc-400 group-hover:text-blue-500 transition-colors" size={24} />
+                  <div className="flex items-start gap-6">
+                    <div className="w-16 h-16 bg-zinc-50 group-hover:bg-blue-50 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 flex-shrink-0">
+                      <Icon className="text-zinc-400 group-hover:text-blue-500 transition-colors" size={28} />
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-zinc-900 group-hover:text-blue-600 transition-colors">
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold text-zinc-900 group-hover:text-blue-600 transition-colors tracking-tight">
                         {doc.title}
                       </h3>
-                      <p className="text-sm text-zinc-400">
-                        {doc.slug}.md
+                      <p className="text-zinc-500 text-sm leading-relaxed max-w-xl">
+                        {doc.description}
                       </p>
+                      <div className="pt-2 flex items-center gap-2">
+                        <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest bg-zinc-50 px-2 py-0.5 rounded-md">
+                          {doc.slug}.md
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-zinc-50 group-hover:bg-blue-600 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0">
-                    <ArrowRight className="text-zinc-300 group-hover:text-white" size={18} />
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-50 group-hover:bg-blue-600 flex items-center justify-center transition-all duration-500 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 shadow-lg group-hover:shadow-blue-500/30 flex-shrink-0">
+                    <ArrowRight className="text-zinc-300 group-hover:text-white" size={20} />
                   </div>
                 </Link>
               );

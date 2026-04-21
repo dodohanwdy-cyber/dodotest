@@ -19,17 +19,31 @@ export function getAllDocs(): DocMetadata[] {
   return fileNames
     .filter((fileName) => fileName.endsWith('.md'))
     .map((fileName) => {
-      // 파일명에서 확장자를 제거하여 슬러그로 사용
       const slug = fileName.replace(/\.md$/, '');
-      // 제목은 파일명에서 언더바나 대시를 공백으로 바꾸고 첫 글자를 대문자로
-      const title = slug
-        .replace(/[_-]/g, ' ')
-        .replace(/\b\w/g, (l) => l.toUpperCase());
-      
+      const fullPath = path.join(docsDirectory, fileName);
+      const content = fs.readFileSync(fullPath, 'utf8');
+
+      // 제목 추출: 첫 번째 # 으로 시작하는 라인
+      const titleMatch = content.match(/^#\s+(.+)$/m);
+      const displayTitle = titleMatch ? titleMatch[1].trim() : slug;
+
+      // 설명 추출: 제목 이후 첫 번째 빈 줄이 아닌 문단 (최대 100자)
+      // 메타데이터(**작성일** 등)는 제외하고 본문 텍스트만 찾음
+      const lines = content.split('\n');
+      let description = '';
+      for (let i = (titleMatch ? content.substring(0, titleMatch.index).split('\n').length : 0); i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line && !line.startsWith('#') && !line.startsWith('---') && !line.startsWith('*') && !line.startsWith('>')) {
+          description = line.substring(0, 120) + (line.length > 120 ? '...' : '');
+          break;
+        }
+      }
+
       return {
         slug,
-        title,
+        title: displayTitle,
         baseName: fileName,
+        description: description || '상세 내용을 확인하려면 클릭하세요.'
       };
     });
 }
