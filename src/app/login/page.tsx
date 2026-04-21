@@ -16,7 +16,7 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
@@ -25,7 +25,22 @@ export default function LoginPage() {
       toast('로그인에 실패했습니다. 이메일이나 비밀번호를 확인해주세요.', 'error')
     } else {
       toast('성공적으로 로그인되었습니다.', 'success')
-      router.push('/')
+      const loggedInUser = data.user
+      if (loggedInUser) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('role')
+          .eq('id', loggedInUser.id)
+          .single()
+        
+        if (profile?.role === 'manager') {
+          router.push('/manager/dashboard')
+        } else {
+          router.push('/client/dashboard')
+        }
+      } else {
+        router.push('/')
+      }
     }
     
     setLoading(false)

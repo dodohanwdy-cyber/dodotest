@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabaseClient'
 interface AuthContextType {
   user: User | null
   session: Session | null
+  userRole: string | null
   loading: boolean
   isLoading: boolean
   signOut: () => Promise<void>
@@ -18,21 +19,45 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const fetchRole = async (userId: string) => {
+      try {
+        const { data } = await supabase
+          .from('user_profiles')
+          .select('role')
+          .eq('id', userId)
+          .single()
+        setUserRole(data?.role || 'client')
+      } catch (e) {
+        setUserRole('client')
+      }
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, currentSession) => {
+      async (_event, currentSession) => {
         setSession(currentSession)
         setUser(currentSession?.user ?? null)
+        if (currentSession?.user) {
+          await fetchRole(currentSession.user.id)
+        } else {
+          setUserRole(null)
+        }
         setLoading(false)
       }
     )
 
     // Initial check just in case
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
+      if (session?.user) {
+        await fetchRole(session.user.id)
+      } else {
+        setUserRole(null)
+      }
       setLoading(false)
     })
 
@@ -46,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isLoading: loading, signOut, logout: signOut }}>
+    <AuthContext.Provider value={{ user, session, userRole, loading, isLoading: loading, signOut, logout: signOut }}>
       {children}
     </AuthContext.Provider>
   )
