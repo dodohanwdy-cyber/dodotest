@@ -63,7 +63,7 @@ export default function Navbar() {
               
               <div className="flex items-center gap-4 text-zinc-600 font-bold">
                 <Link href="/profile" className="text-[14px] flex items-center gap-2 hover:text-primary transition-colors">
-                  <User size={16} className="text-zinc-400" /> {user.email.split("@")[0]}
+                  <User size={16} className="text-zinc-400" /> {user?.email?.split("@")[0] || ""}
                 </Link>
                 <button 
                   onClick={logout}

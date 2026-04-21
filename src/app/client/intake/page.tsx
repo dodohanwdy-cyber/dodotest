@@ -25,9 +25,9 @@ function IntakeContent() {
     request_id: applicationId || `REQ-${new Date().getTime()}`,
     user_id: user?.id || "",
     email: user?.email || "",
-    role: user?.role || "client",
-    password_hash: user?.password_hash || "",
-    name: user?.name || "",
+    role: (user as any)?.role || "client",
+    password_hash: (user as any)?.password_hash || "",
+    name: user?.user_metadata?.full_name || "",
   });
   const [isChatFinished, setIsChatFinished] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
@@ -204,9 +204,9 @@ function IntakeContent() {
         ...prev,
         user_id: user.id,
         email: user.email,
-        role: user.role,
-        password_hash: user.password_hash,
-        name: user.name || prev.name,
+        role: (user as any).role,
+        password_hash: (user as any).password_hash,
+        name: user?.user_metadata?.full_name || prev.name,
       }));
     }
   }, [user, isHydrated]);
@@ -233,7 +233,7 @@ function IntakeContent() {
 
     // Context에 유저가 없을 경우 sessionStorage에서 직접 복구 시도 (웹훅 전송용)
     // user 객체가 있더라도 password_hash가 비어있다면 sessionStorage를 다시 확인
-    let storedUser = user;
+    let storedUser: any = user;
     if (!storedUser || !storedUser.password_hash) {
       if (typeof window !== 'undefined') {
         const sessionUser = JSON.parse(sessionStorage.getItem("user") || 'null');
@@ -327,7 +327,7 @@ function IntakeContent() {
     const kstTime = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).substring(0, 19);
     
     // user 객체가 있더라도 password_hash가 비어있다면 sessionStorage를 다시 확인
-    let storedUser = user;
+    let storedUser: any = user;
     if (!storedUser || !storedUser.password_hash) {
       if (typeof window !== 'undefined') {
         const sessionUser = JSON.parse(sessionStorage.getItem("user") || 'null');

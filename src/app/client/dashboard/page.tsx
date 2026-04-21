@@ -145,7 +145,7 @@ export default function ClientDashboard() {
             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
             <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Logged In</span>
           </div>
-          <h1 className="text-3xl font-black text-zinc-900 tracking-tight">반가워요, {user?.name || "내담자"}님!</h1>
+          <h1 className="text-3xl font-black text-zinc-900 tracking-tight">반가워요, {user?.user_metadata?.full_name || "내담자"}님!</h1>
           <p className="text-zinc-500 mt-2 font-medium">현재 진행 중인 상담 현황을 실시간으로 확인하실 수 있습니다.</p>
         </div>
         <div className="flex gap-3">
@@ -206,7 +206,7 @@ export default function ClientDashboard() {
                 </div>
                 <div className="text-white text-center md:text-left">
                   <h2 className="text-xl font-black tracking-tight mb-1">상담 분석 리포트가 도착했습니다! 🎉</h2>
-                  <p className="text-emerald-50/80 font-bold text-sm">기다려주셔서 감사합니다. {user?.name}님만을 위한 맞춤형 결과가 준비되었습니다.</p>
+                  <p className="text-emerald-50/80 font-bold text-sm">기다려주셔서 감사합니다. {user?.user_metadata?.full_name}님만을 위한 맞춤형 결과가 준비되었습니다.</p>
                 </div>
               </div>
               <button 

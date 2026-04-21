@@ -130,7 +130,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
   const handleFinalSubmit = async () => {
     setIsSaving(true);
     const kstTime = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).substring(0, 19);
-    let storedUser = user;
+    let storedUser: any = user;
     if (!storedUser || !storedUser.password_hash) {
       if (typeof window !== 'undefined') {
         const sessionUser = JSON.parse(sessionStorage.getItem("user") || 'null');

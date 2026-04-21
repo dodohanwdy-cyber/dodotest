@@ -751,7 +751,7 @@ export default function ConsultationPage() {
               </div>
               <div className="flex flex-col">
                 <span className="text-[10px] font-black text-zinc-400 uppercase leading-none">Manager</span>
-                <span className="text-xs font-bold text-zinc-900">{user.email.split("@")[0]}</span>
+                <span className="text-xs font-bold text-zinc-900">{user?.email?.split("@")[0] || "manager"}</span>
               </div>
             </div>
           )}
