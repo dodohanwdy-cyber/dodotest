@@ -11,6 +11,7 @@
 |---|------|--------|------|--------|
 | 1 | HSTS (Strict-Transport-Security) | ⚠️ 경고 | ✅ 조치 완료 | 2026-04-21 |
 | 2 | CSP (Content-Security-Policy) | ⚠️ 경고 | ✅ 조치 완료 | 2026-04-21 |
+| 3 | 클릭재킹 방어 (X-Frame-Options) | ⚠️ 경고 | ✅ 기 조치 완료 | 2026-04-21 |
 
 ---
 
@@ -124,6 +125,36 @@ const ContentSecurityPolicy = `
 ```bash
 # 배포 후 CSP 헤더 확인
 curl -I https://dodohan-ai-counsel.vercel.app/ | grep -i content-security
+```
+
+---
+
+## 3. 클릭재킹 방어 (X-Frame-Options)
+
+### 발견된 문제
+- `X-Frame-Options` 헤더가 미설정
+- CORS 제한으로 헤더 수집이 제한될 수 있음
+
+### 위험성
+- 외부 사이트가 iframe으로 페이지를 감싸 클릭재킹을 유도할 수 있음
+- 사용자가 의도하지 않은 클릭/입력을 하게 되어 데이터 유출 가능
+
+### 조치 내용
+- **상태**: ✅ **1번(HSTS) 및 2번(CSP) 조치 시 이미 함께 적용 완료**
+- **이중 방어 구성**:
+
+| 방어 수단 | 설정값 | 위치 |
+|-----------|--------|------|
+| `X-Frame-Options` | `DENY` | `next.config.js` 보안 헤더 |
+| CSP `frame-ancestors` | `'none'` | `next.config.js` CSP 정책 |
+
+> 💡 `X-Frame-Options: DENY`는 모든 iframe 삽입을 차단하고,
+> CSP `frame-ancestors 'none'`은 최신 브라우저에서 동일한 보호를 제공합니다.
+> 두 가지를 함께 사용하면 구형/신형 브라우저 모두에서 클릭재킹을 방어합니다.
+
+### 검증 방법
+```bash
+curl -I https://dodohan-ai-counsel.vercel.app/ | grep -i x-frame
 ```
 
 ---
