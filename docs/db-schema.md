@@ -57,10 +57,10 @@
 
 ## 섹션별 필드 그룹
 
-### 사용자 인증
-- `email`
-- `password_hash`
-- `role`
+### 사용자 인증 및 권한 (Supabase 연동)
+- `id` (UUID): Supabase `auth.users` 테이블과 1:1로 매핑되는 기본키
+- `email`: 계정 로그인용 이메일 (Auth 시스템 관리)
+- `role`: 사용자 권한 (`client`, `manager`, `admin`) - `user_profiles` 테이블에서 관리
 
 ### 기본 정보 (Section 1)
 - `name`
@@ -101,15 +101,10 @@
 - `confirmed_at`
 - `completed_at`
 
-### 상담 결과
-- `main_issue`
-- `dialog_summary`
-- `risk_grade`
-- `engagement_change`
-- `policy_match`
-- `user_message`
-- `next_step`
-- `counselor_note`
+### 사용자 정보 및 권한
+- `id` (UUID): 자동 생성 식별자
+- `role`
+- `name`
 - `keywords`
 
 ### 메타데이터

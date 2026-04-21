@@ -13,10 +13,7 @@
 ### 1. 전역 및 시스템 수준
 - `00. 시스템 오류 마스터 알림 봇` : 타 워크플로우 장애 발생 시 슬랙으로 쏴주기 위한 중앙 관제 봇 (API 엔드포인트 미존재, n8n `errorWorkflow`에 연결되어 작동)
 
-### 2. 인증 및 내담자 서비스 (Auth & Client Side)
-- `[Auth] 01. 사용자 인증 및 로그인 (/login-id)`
-- `[Auth] 02. 회원가입 및 초기 데이터 생성 (/signup)`
-- `[Auth] 03. 사용자 프로필 수정 (/update-user)`
+### 2. 내담자 서비스 (Client Side)
 - `[Client-Dash] 01. 대시보드 신청 현황 조회 (/dashboard-applications)`
 - `[Client-Dash] 02. 전체 신청 데이터 상세조회 (/application-detail)`
 - `[Client-Intake] S1. 기본정보 및 정책 폼 제출 (/submit-intake)`
@@ -53,9 +50,12 @@
 2. n8n 워크플로우에서 백그라운드 AI 분석 및 구글 시트 업데이트 수행 (일부 무거운 로직의 경우 10~20분 소요).
 
 ### 3. 보안 접근 및 세션 관리
+- **인증 시스템**: **Supabase Auth**를 통해 이메일/비밀번호 인증을 처리하며, 세션은 Supabase Client SDK로 전역 상태(`AuthContext`)로 관리됩니다.
 - **내담자 리포트 (`/report/[id]`)**: 
-  - 로그인된 세션 이메일(`.user.email`)이 리포트의 `email` 또는 `user_email`과 일치시키면 즉시 자동 승인 (접근 차단 보호막 장착됨).
-- **매니저 권한**: `manager` 역할군을 가진 계정만 상담 정보 접근 (AuthContext).
+  - 로그인된 세션 이메일이 리포트의 이메일 정보와 일치할 때만 열람이 허가되는 서버사이드 가드가 적용되어 있습니다.
+- **매니저 보호 (`/manager/*`)**: 
+  - `ManagerLayout` 통합 가드를 통해 `userRole === 'manager'`가 아닌 사용자의 접근을 원천 차단합니다.
+  - 비인가 접근 시 `/login` 또는 메인 페이지로 즉각 리다이렉트됩니다.
 
 ---
 
