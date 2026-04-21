@@ -3,6 +3,7 @@
 > **문서 목적:** 본 서비스의 보안 취약점 점검 이력을 관리하고, 조치된 사항들을 기록하여 안전한 운영 환경을 유지하고 감사에 대응하는 데 목적이 있습니다.
 
 **사이트**: [dodohan-ai-counsel.vercel.app](https://dodohan-ai-counsel.vercel.app)  
+**진단 도구**: [VibeSec Security Scanner](https://vibesec.technote.wiki/?scan=https%3A%2F%2Fdodohan-ai-counsel.vercel.app%2F) (주기적 점검 권장)
 **최종 업데이트**: 2026-04-21
 
 ---
