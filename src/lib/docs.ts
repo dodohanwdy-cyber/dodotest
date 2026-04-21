@@ -29,6 +29,7 @@ export function getAllDocs(): DocMetadata[] {
 
       // 설명 추출: '> **문서 목적:**' 라인을 최우선으로 찾음
       let description = '';
+      const lines = content.split('\n');
       const purposeMatch = content.match(/^>\s*\*\*문서 목적:\*\*\s*(.+)$/m);
       
       if (purposeMatch) {
