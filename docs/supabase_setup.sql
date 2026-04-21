@@ -1,7 +1,7 @@
 -- ==============================================================================
--- 1. profiles 테이블 생성
+-- 1. user_profiles 테이블 생성
 -- ==============================================================================
-CREATE TABLE IF NOT EXISTS public.profiles (
+CREATE TABLE IF NOT EXISTS public.user_profiles (
   id uuid references auth.users on delete cascade not null primary key,
   role text default 'client' not null,
   full_name text,
@@ -13,30 +13,30 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- ==============================================================================
 -- 2. Row Level Security (RLS) 설정
 -- ==============================================================================
--- profiles 테이블에 대한 RLS 활성화
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+-- user_profiles 테이블에 대한 RLS 활성화
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
 -- Select(조회) 정책: 자신의 프로필만 조회 가능하도록 설정
 CREATE POLICY "Users can view own profile."
-  ON public.profiles FOR SELECT
+  ON public.user_profiles FOR SELECT
   USING ( auth.uid() = id );
 
 -- Update(수정) 정책: 자신의 프로필만 수정 가능하도록 설정
 CREATE POLICY "Users can update own profile."
-  ON public.profiles FOR UPDATE
+  ON public.user_profiles FOR UPDATE
   USING ( auth.uid() = id );
 
 -- ==============================================================================
 -- 3. Database Trigger (회원가입 자동 프로필 생성)
 -- ==============================================================================
--- 새로운 회원이 가입하면(public.auth) 자동으로 profiles 테이블에 데이터를 넣어주는 함수
+-- 새로운 회원이 가입하면(public.auth) 자동으로 user_profiles 테이블에 데이터를 넣어주는 함수
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.profiles (id, role, full_name)
+  INSERT INTO public.user_profiles (id, role, full_name)
   VALUES (
     new.id,
     'client',

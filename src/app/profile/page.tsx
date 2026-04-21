@@ -27,7 +27,7 @@ export default function ProfilePage() {
     const fetchProfile = async () => {
       if (user && !initialFetchDone) {
         const { data, error } = await supabase
-          .from('profiles')
+          .from('user_profiles')
           .select('full_name, phone')
           .eq('id', user.id)
           .single()
@@ -48,7 +48,7 @@ export default function ProfilePage() {
 
     setLoading(true)
     const { error } = await supabase
-      .from('profiles')
+      .from('user_profiles')
       .update({
         full_name: fullName,
         phone: phone,
