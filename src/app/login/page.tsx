@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useToast } from '@/context/ToastContext'
 
 export default function LoginPage() {
@@ -47,39 +48,60 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded-2xl shadow-xl border border-zinc-100">
-      <h1 className="text-2xl font-bold mb-6 text-center">로그인</h1>
-      <form onSubmit={handleLogin} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-zinc-700 mb-1">이메일</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-primary outline-none"
-            placeholder="example@email.com"
-          />
+    <main className="min-h-[80vh] flex flex-col items-center justify-center bg-[#F8FAFC] py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h2 className="mt-6 text-3xl font-black tracking-tight text-slate-900">
+            열고닫기 로그인
+          </h2>
+          <p className="mt-2 text-sm text-slate-500 font-bold">
+            안전하고 스마트한 정책 상담을 시작하세요.
+          </p>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-zinc-700 mb-1">비밀번호</label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-primary outline-none"
-            placeholder="********"
-          />
+
+        <div className="mt-8 bg-white py-8 px-6 shadow-xl shadow-slate-200/50 rounded-3xl border border-slate-100 sm:px-10">
+          <form className="space-y-6" onSubmit={handleLogin}>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">이메일</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-slate-400 font-medium"
+                placeholder="example@email.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">비밀번호</label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-slate-400 font-medium"
+                placeholder="********"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 flex justify-center bg-gradient-to-r from-blue-500 to-primary text-white rounded-xl font-black text-[15px] hover:opacity-90 transition-all shadow-md active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+            >
+              {loading ? '로그인 중...' : '로그인'}
+            </button>
+          </form>
+
+          <div className="mt-8 text-center border-t border-slate-100 pt-6">
+            <p className="text-sm text-slate-500 font-medium">
+              아직 계정이 없으신가요?{' '}
+              <Link href="/signup" className="font-bold text-primary hover:text-blue-600 transition-colors underline underline-offset-2">
+                회원가입하기
+              </Link>
+            </p>
+          </div>
         </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-colors disabled:opacity-50"
-        >
-          {loading ? '로그인 중...' : '로그인'}
-        </button>
-      </form>
-    </div>
+      </div>
+    </main>
   )
 }
