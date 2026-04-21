@@ -27,15 +27,20 @@ export function getAllDocs(): DocMetadata[] {
       const titleMatch = content.match(/^#\s+(.+)$/m);
       const displayTitle = titleMatch ? titleMatch[1].trim() : slug;
 
-      // 설명 추출: 제목 이후 첫 번째 빈 줄이 아닌 문단 (최대 100자)
-      // 메타데이터(**작성일** 등)는 제외하고 본문 텍스트만 찾음
-      const lines = content.split('\n');
+      // 설명 추출: '> **문서 목적:**' 라인을 최우선으로 찾음
       let description = '';
-      for (let i = (titleMatch ? content.substring(0, titleMatch.index).split('\n').length : 0); i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line && !line.startsWith('#') && !line.startsWith('---') && !line.startsWith('*') && !line.startsWith('>')) {
-          description = line.substring(0, 120) + (line.length > 120 ? '...' : '');
-          break;
+      const purposeMatch = content.match(/^>\s*\*\*문서 목적:\*\*\s*(.+)$/m);
+      
+      if (purposeMatch) {
+        description = purposeMatch[1].trim();
+      } else {
+        // 백업 로직: 본문 첫 문단 추출
+        for (let i = (titleMatch ? content.substring(0, titleMatch.index).split('\n').length : 0); i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (line && !line.startsWith('#') && !line.startsWith('---') && !line.startsWith('*') && !line.startsWith('>')) {
+            description = line.substring(0, 120) + (line.length > 120 ? '...' : '');
+            break;
+          }
         }
       }
 

@@ -1,4 +1,6 @@
-# 열고닫기(OPCL) 기술 레퍼런스 (Technical Reference) - 2026.03.20 최신화
+# 열고닫기(OPCL) 기술 레퍼런스 (Technical Reference) - 2026.04.21 최신화
+
+> **문서 목적:** 프로젝트에 사용된 기술 스택, 라이브러리, 코딩 컨벤션 및 주요 라이브러리 명세를 정리하여 개발 기준을 일원화하는 데 목적이 있습니다.
 
 본 문서는 서비스의 실 서버 반영 상태에 따른 기술적 세부 명세를 기록합니다. n8n 백엔드 웹후크 연동 규격, 보안 로직, 비동기 상태 관리 규격을 포함합니다.
 
@@ -59,4 +61,5 @@
 
 ## 🛠️ 유지보수 코드 베이스 매핑
 - Frontend API 통신 주소 맵: `src/config/webhooks.js` (신규 Webhook 추가 시 이곳 상수에 먼저 등록할 것)
+- 마크다운 렌더링 라이브러리: `react-markdown`, `remark-gfm` (사내 문서 센터 구현용)
 - n8n 서버: `primary-production-1f39e.up.railway.app`
