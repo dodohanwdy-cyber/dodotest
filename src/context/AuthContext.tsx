@@ -1,96 +1,95 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
-import { LogOut, User, LayoutDashboard, FileText, PlusCircle } from "lucide-react";
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { User, Session } from '@supabase/supabase-js'
+import { supabase } from '../lib/supabaseClient'
 
-export default function Navbar() {
-  // 수정됨: user.role이 아닌 userRole을 명시적으로 불러옵니다.
-  const { user, userRole, logout, isLoading } = useAuth();
+interface AuthContextType {
+  user: User | null
+  session: Session | null
+  userRole: string | null
+  loading: boolean
+  isLoading: boolean
+  signOut: () => Promise<void>
+  logout: () => Promise<void>
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null)
+  const [session, setSession] = useState<Session | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchRole = async (userId: string) => {
+      try {
+        const { data } = await supabase.from('user_profiles').select('role').eq('id', userId).single()
+        if (isMounted) setUserRole(data?.role || 'client')
+      } catch (e) {
+        if (isMounted) setUserRole('client')
+      }
+    }
+
+    // 1. 초기 세션을 명시적으로 한 번 가져와서 무한 로딩(버튼 사라짐) 방지
+    const initSession = async () => {
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      if (!isMounted) return;
+      
+      setSession(initialSession);
+      setUser(initialSession?.user ?? null);
+      if (initialSession?.user) {
+        await fetchRole(initialSession.user.id);
+      } else {
+        setUserRole(null);
+      }
+      setLoading(false); // 로딩 즉시 해제
+    };
+
+    initSession();
+
+    // 2. 이후 로그인/로그아웃 상태 변화 감지
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        // 이미 위에서 초기화를 했으므로 INITIAL_SESSION 이벤트는 무시하여 충돌 방지
+        if (!isMounted || event === 'INITIAL_SESSION') return;
+        
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        
+        if (currentSession?.user) {
+          await fetchRole(currentSession.user.id);
+        } else {
+          setUserRole(null);
+        }
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    }
+  }, [])
+
+  const signOut = async () => {
+    await supabase.auth.signOut()
+  }
 
   return (
-    <nav className="global-navbar sticky top-0 z-50 w-full glass border-b border-slate-100 px-6 py-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-10">
-          <Link href="/" className="flex items-center gap-3 group transition-transform hover:scale-105 active:scale-95">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center text-lg text-white font-black shadow-xl shadow-blue-100">열</div>
-              <div className="flex flex-col">
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">열고닫기</h3>
-                <p className="text-[10px] font-black text-primary uppercase tracking-widest">Official Partner of Youth Center</p>
-              </div>
-            </div>
-          </Link>
-        </div>
+    <AuthContext.Provider value={{ user, session, userRole, loading, isLoading: loading, signOut, logout: signOut }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
 
-        <div className="flex items-center gap-6">
-          {isLoading ? (
-            <div className="w-20 h-8 bg-zinc-100 animate-pulse rounded-xl" />
-          ) : user ? (
-            <>
-              {/* 수정됨: user.role 대신 userRole을 사용합니다. */}
-              {userRole === "client" ? (
-                <div className="flex items-center gap-6">
-                  <Link href="/client/dashboard" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
-                    <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
-                      <LayoutDashboard size={16} className="text-zinc-400 group-hover:text-primary" />
-                    </div>
-                    상담 현황
-                  </Link>
-                  <Link href="/client/intake" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
-                    <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
-                      <PlusCircle size={16} className="text-zinc-400 group-hover:text-primary" />
-                    </div>
-                    신청하기
-                  </Link>
-                </div>
-              ) : (
-                <div className="flex items-center gap-6">
-                  <Link href="/manager/dashboard" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
-                    <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
-                      <LayoutDashboard size={16} className="text-zinc-400 group-hover:text-primary" />
-                    </div>
-                    상담 접수 관리
-                  </Link>
-                  <Link href="/manager/completed" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
-                    <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
-                      <FileText size={16} className="text-zinc-400 group-hover:text-primary" />
-                    </div>
-                    상담 완료 내역
-                  </Link>
-                </div>
-              )}
-              
-              <div className="h-4 w-px bg-zinc-200 mx-2" />
-              
-              <div className="flex items-center gap-4 text-zinc-600 font-bold">
-                <Link href="/profile" className="text-[14px] flex items-center gap-2 hover:text-primary transition-colors">
-                  <User size={16} className="text-zinc-400" /> {user?.email?.split("@")[0] || ""}
-                </Link>
-                <button 
-                  onClick={logout}
-                  className="p-2 hover:bg-zinc-100 rounded-full transition-colors text-zinc-400 hover:text-red-500"
-                  title="로그아웃"
-                >
-                  <LogOut size={18} />
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="text-[14px] font-bold text-zinc-500 hover:text-primary transition-colors">
-                로그인
-              </Link>
-              <Link 
-                href="/signup" 
-                className="text-[14px] font-bold bg-primary text-white px-6 py-3 rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-blue-100"
-              >
-                시작하기
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
-    </nav>
-  );
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
 }
