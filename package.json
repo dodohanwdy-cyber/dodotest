@@ -12,6 +12,7 @@
     "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-accordion": "latest",
     "@supabase/supabase-js": "^2.104.0",
+    "@supabase/ssr": "latest",
     "googleapis": "^171.4.0",
     "lucide-react": "latest",
     "next": "latest",
