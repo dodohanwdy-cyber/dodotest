@@ -26,6 +26,11 @@ export default function LoginPage() {
       toast('로그인에 실패했습니다. 이메일이나 비밀번호를 확인해주세요.', 'error')
     } else {
       toast('성공적으로 로그인되었습니다.', 'success')
+      
+      // 💡 핵심 수정 포인트: 브라우저가 쿠키를 받았음을 서버(Next.js)에 강제로 동기화!
+      // 이 한 줄이 있어야 미들웨어와 레이아웃이 유저를 튕겨내지 않습니다.
+      router.refresh()
+
       const loggedInUser = data.user
       if (loggedInUser) {
         const { data: profile } = await supabase
