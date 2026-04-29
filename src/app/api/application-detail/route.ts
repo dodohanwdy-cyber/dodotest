@@ -1,8 +1,23 @@
 import { NextResponse } from 'next/server';
-import { WEBHOOK_URLS } from '@/config/webhooks';
+import { SERVER_WEBHOOK_URLS } from '@/config/server-webhooks';
+import { createClient } from '@/lib/supabaseServer';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(req: Request) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: '인증되지 않은 사용자입니다.' }, { status: 401 });
+    }
+
+    // Role 검사를 통해 불필요한 열람 제어가 필요할 수 있음
+    // const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', user.id).single();
+    // if (profile?.role !== 'manager' && profile?.role !== 'client') { ... }
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 
@@ -10,29 +25,28 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'ID required' }, { status: 400 });
     }
 
-    if (!WEBHOOK_URLS.GET_APPLICATION_DETAIL) {
+    if (!SERVER_WEBHOOK_URLS.GET_APPLICATION_DETAIL) {
       return NextResponse.json(
         { error: 'n8n 웹훅이 설정되지 않았습니다. 관리자에게 문의하세요.' },
         { status: 503 }
       );
     }
 
-    const response = await fetch(WEBHOOK_URLS.GET_APPLICATION_DETAIL, {
+    const response = await fetch(SERVER_WEBHOOK_URLS.GET_APPLICATION_DETAIL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ request_id: id }),
+      body: JSON.stringify({ request_id: id, email: user.email }), // 이메일 동봉하여 n8n에서 유효성 검사 수행 가능
     });
 
     if (!response.ok) {
       return NextResponse.json(
-        { error: 'n8n 워크플로우가 활성화되지 않았습니다. 관리자에게 문의하세요.' },
+        { error: 'n8n 워크플로우가 활성화되지 않았습니다.' },
         { status: 503 }
       );
     }
 
     const rawData = await response.json();
 
-    // n8n이 배열 형태로 반환하는 경우 처리
     let data: any;
     if (Array.isArray(rawData)) {
       const firstItem = rawData[0];

@@ -130,13 +130,10 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
   const handleFinalSubmit = async () => {
     setIsSaving(true);
     const kstTime = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).substring(0, 19);
-    let storedUser: any = user;
-    if (!storedUser || !storedUser.password_hash) {
-      if (typeof window !== 'undefined') {
-        const sessionUser = JSON.parse(sessionStorage.getItem("user") || 'null');
-        if (sessionUser) storedUser = { ...storedUser, ...sessionUser };
-      }
-    }
+    
+    // AuthContext의 user 정보를 우선적으로 사용하며, 브라우저 스토리지 우회를 차단합니다.
+    const storedUser = user || intakeData; // intakeData에 email 등 1차 정보가 있을 수 있음
+
     try {
       const formattedHistory = messages.map(msg => ({ role: msg.role === "ai" ? "assistant" : "user", content: msg.content }));
       const res = await postToWebhook(WEBHOOK_URLS.AI_CHAT_ANALYZE, {

@@ -5,7 +5,9 @@ import { useAuth } from "@/context/AuthContext";
 import { LogOut, User, LayoutDashboard, FileText, PlusCircle } from "lucide-react";
 
 export default function Navbar() {
-  const { user, logout, isLoading } = useAuth();
+  const { user, userRole, logout, isLoading } = useAuth();
+
+  console.log("[Navbar Debug] Current userRole:", userRole);
 
   return (
     <nav className="global-navbar sticky top-0 z-50 w-full glass border-b border-slate-100 px-6 py-4">
@@ -27,22 +29,7 @@ export default function Navbar() {
             <div className="w-20 h-8 bg-zinc-100 animate-pulse rounded-xl" />
           ) : user ? (
             <>
-              {user.role === "client" ? (
-                <div className="flex items-center gap-6">
-                  <Link href="/client/dashboard" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
-                    <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
-                      <LayoutDashboard size={16} className="text-zinc-400 group-hover:text-primary" />
-                    </div>
-                    상담 현황
-                  </Link>
-                  <Link href="/client/intake" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
-                    <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
-                      <PlusCircle size={16} className="text-zinc-400 group-hover:text-primary" />
-                    </div>
-                    신청하기
-                  </Link>
-                </div>
-              ) : (
+              {userRole === "manager" ? (
                 <div className="flex items-center gap-6">
                   <Link href="/manager/dashboard" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
                     <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
@@ -55,6 +42,21 @@ export default function Navbar() {
                       <FileText size={16} className="text-zinc-400 group-hover:text-primary" />
                     </div>
                     상담 완료 내역
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex items-center gap-6">
+                  <Link href="/client/dashboard" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
+                    <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
+                      <LayoutDashboard size={16} className="text-zinc-400 group-hover:text-primary" />
+                    </div>
+                    상담 현황
+                  </Link>
+                  <Link href="/client/intake" className="flex items-center gap-2 text-[14px] font-bold text-zinc-500 hover:text-primary transition-all group">
+                    <div className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg shadow-sm group-hover:shadow-md group-hover:border-primary/20 transition-all">
+                      <PlusCircle size={16} className="text-zinc-400 group-hover:text-primary" />
+                    </div>
+                    신청하기
                   </Link>
                 </div>
               )}
