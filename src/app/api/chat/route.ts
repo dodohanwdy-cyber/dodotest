@@ -136,7 +136,7 @@ export async function POST(req: Request) {
         { role: "user", parts: [{ text: message }] }
       ];
 
-      let result;
+      let result: any;
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
           result = await model.generateContentStream({
