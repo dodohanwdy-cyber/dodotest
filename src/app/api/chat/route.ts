@@ -94,7 +94,8 @@ export async function POST(req: Request) {
     if (!result) {
       console.warn("🚨 Gemini API 최종 실패. 로컬 AI(EXAONE)로 전환을 시도합니다...");
       
-      const localUrl = process.env.LOCAL_LLM_URL; // 예: https://your-tunnel.ngrok-free.app/v1
+      // 사용자 제공 기본값 적용 (Vercel 환경변수 미설정 시에도 작동)
+      const localUrl = process.env.LOCAL_LLM_URL || "https://gastritic-debbi-unbeneficently.ngrok-free.dev/v1";
       const localModel = process.env.LOCAL_LLM_MODEL || "exaone3.5";
 
       if (!localUrl) {
