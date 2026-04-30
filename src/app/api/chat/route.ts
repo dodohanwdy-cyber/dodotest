@@ -78,18 +78,96 @@ export async function POST(req: Request) {
       }
     }
 
-    // 모든 재시도 실패 시 안내 메시지
+    // ---------------------------------------------------------
+    // [최종 실패 시 페일오버] Gemini 실패 시 로컬 AI로 전환
+    // ---------------------------------------------------------
     if (!result) {
-      console.error("🚨 연결 실패:", lastError);
-      const errorStream = new ReadableStream({
-        start(controller) {
-          const encoder = new TextEncoder();
-          const msg = "죄송합니다. 현재 접속량이 폭주하여 연결이 지연되고 있습니다. 잠시 후 다시 시도 부탁드립니다. 😭";
-          controller.enqueue(encoder.encode(msg));
-          controller.close();
-        }
-      });
-      return new Response(errorStream, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
+      console.warn("🚨 Gemini API 최종 실패. 로컬 AI(EXAONE)로 전환을 시도합니다...");
+      
+      const localUrl = process.env.LOCAL_LLM_URL; // 예: https://your-tunnel.ngrok-free.app/v1
+      const localModel = process.env.LOCAL_LLM_MODEL || "exaone3.5";
+
+      if (!localUrl) {
+        console.error("🚨 로컬 AI URL이 설정되지 않아 페일오버가 불가능합니다.");
+        const errorStream = new ReadableStream({
+          start(controller) {
+            const encoder = new TextEncoder();
+            controller.enqueue(encoder.encode("죄송합니다. 현재 서비스 연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요. 😭"));
+            controller.close();
+          }
+        });
+        return new Response(errorStream, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
+      }
+
+      try {
+        // 로컬 LLM (Ollama/LM Studio 등) 호출
+        const localResponse = await fetch(`${localUrl}/chat/completions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: localModel,
+            messages: [
+              { role: "system", content: systemInstruction },
+              ...sanitizedHistory.map((m: any) => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.parts[0].text })),
+              { role: "user", content: message }
+            ],
+            stream: true,
+            temperature: 0.7,
+          }),
+        });
+
+        if (!localResponse.ok) throw new Error(`Local AI error: ${localResponse.status}`);
+
+        // 로컬 AI 스트림 처리 (SSE 규격 파싱)
+        const localStream = new ReadableStream({
+          async start(controller) {
+            const encoder = new TextEncoder();
+            const reader = localResponse.body?.getReader();
+            if (!reader) return controller.close();
+
+            const decoder = new TextDecoder();
+            let buffer = "";
+
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split("\n");
+                buffer = lines.pop() || "";
+
+                for (const line of lines) {
+                  const trimmed = line.trim();
+                  if (!trimmed || trimmed === "data: [DONE]") continue;
+                  if (trimmed.startsWith("data: ")) {
+                    try {
+                      const json = JSON.parse(trimmed.slice(6));
+                      const content = json.choices[0]?.delta?.content || "";
+                      if (content) controller.enqueue(encoder.encode(content));
+                    } catch (e) {}
+                  }
+                }
+              }
+            } finally {
+              controller.close();
+            }
+          }
+        });
+
+        return new Response(localStream, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
+
+      } catch (localErr) {
+        console.error("🚨 로컬 AI 페일오버 마저 실패:", localErr);
+        const finalErrorStream = new ReadableStream({
+          start(controller) {
+            const encoder = new TextEncoder();
+            controller.enqueue(encoder.encode("죄송합니다. 모든 AI 연결이 지연되고 있습니다. 잠시 후 다시 시도 부탁드립니다."));
+            controller.close();
+          }
+        });
+        return new Response(finalErrorStream, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
+      }
     }
 
     // 정상 스트림 처리 (파싱 에러 방지)
