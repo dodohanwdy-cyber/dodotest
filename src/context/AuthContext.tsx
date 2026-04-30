@@ -8,6 +8,7 @@ interface AuthContextType {
   user: User | null
   session: Session | null
   userRole: string | null
+  roleError: string | null
   loading: boolean
   isLoading: boolean
   signOut: () => Promise<void>
@@ -20,6 +21,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
+  const [roleError, setRoleError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -37,9 +39,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000));
         const fetchPromise = supabase.from('user_profiles').select('role').eq('id', userId).single();
         
-        // 에러가 발생해도 진행되도록 감싸기
-        const response = await Promise.race([fetchPromise, timeoutPromise]).catch(() => ({ data: null, error: true }));
+        const response = await Promise.race([fetchPromise, timeoutPromise]).catch(e => ({ data: null, error: { message: e.message } }));
         const data = (response as any)?.data;
+        const err = (response as any)?.error;
+        
+        if (err) {
+          if (isMounted) setRoleError(err.message || JSON.stringify(err));
+          console.error("Supabase Role Fetch Error:", err);
+        } else {
+          if (isMounted) setRoleError(null);
+        }
         
         if (isMounted) {
           const fetchedRole = data?.role || cachedRole || 'client';
@@ -123,7 +132,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, userRole, loading, isLoading: loading, signOut, logout: signOut }}>
+    <AuthContext.Provider value={{ user, session, userRole, roleError, loading, isLoading: loading, signOut, logout: signOut }}>
       {children}
     </AuthContext.Provider>
   )
