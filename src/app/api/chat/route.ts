@@ -124,7 +124,7 @@ export async function POST(req: Request) {
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
       
-      const geminiHistory = sanitizedHistory.map(m => ({
+      const geminiHistory = sanitizedHistory.map((m: any) => ({
         role: m.role === "assistant" ? "model" : "user",
         parts: [{ text: m.content }],
       }));
