@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { LogOut, User, LayoutDashboard, FileText, PlusCircle } from "lucide-react";
 
 export default function Navbar() {
-  const { user, userRole, roleError, logout, isLoading } = useAuth();
+  const { user, userRole, roleError, debugTrace, logout, isLoading } = useAuth();
 
   console.log("[Navbar Debug] Current userRole:", userRole);
 
@@ -27,7 +27,7 @@ export default function Navbar() {
         <div className="flex items-center gap-6">
           {/* 긴급 디버깅 오버레이 (실제 배포환경에서 상태 확인용) */}
           <div className="fixed top-0 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-xs px-4 py-1 z-[99999] font-mono">
-            DEBUG | loading: {String(isLoading)} | user: {user ? 'YES' : 'NO'} | role: {String(userRole)} | err: {String(roleError)}
+            DEBUG | L: {String(isLoading)} | U: {user ? 'YES' : 'NO'} | R: {String(userRole)} | err: {String(roleError)} | T: {(debugTrace || []).join('>')}
           </div>
 
           {isLoading ? (

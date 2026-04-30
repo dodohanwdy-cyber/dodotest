@@ -9,6 +9,7 @@ interface AuthContextType {
   session: Session | null
   userRole: string | null
   roleError: string | null
+  debugTrace: string[]
   loading: boolean
   isLoading: boolean
   signOut: () => Promise<void>
@@ -22,22 +23,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
   const [roleError, setRoleError] = useState<string | null>(null)
+  const [debugTrace, setDebugTrace] = useState<string[]>(['mount'])
   const [loading, setLoading] = useState(true)
+
+  const addTrace = (msg: string) => {
+    setDebugTrace(prev => [...prev.slice(-4), msg])
+  }
 
   useEffect(() => {
     let isMounted = true;
 
     const fetchRole = async (userId: string) => {
+      addTrace('fetchRole_start');
       try {
-        // 빠른 화면 렌더링을 위해 캐시된 권한 선적용
         const cachedRole = typeof window !== 'undefined' ? localStorage.getItem(`role_${userId}`) : null;
         if (cachedRole && isMounted) {
           setUserRole(cachedRole);
+          addTrace(`cache_hit_${cachedRole}`);
         }
 
-        // Supabase DB 조회 (최대 3초 대기)
         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000));
         const fetchPromise = supabase.from('user_profiles').select('role').eq('id', userId).single();
+        
         
         const response = await Promise.race([fetchPromise, timeoutPromise]).catch(e => ({ data: null, error: { message: e.message } }));
         const data = (response as any)?.data;
@@ -45,9 +52,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         if (err) {
           if (isMounted) setRoleError(err.message || JSON.stringify(err));
+          addTrace(`fetch_err_${err.message}`);
           console.error("Supabase Role Fetch Error:", err);
         } else {
           if (isMounted) setRoleError(null);
+          addTrace(`fetch_ok_${data?.role}`);
         }
         
         if (isMounted) {
@@ -132,7 +141,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, userRole, roleError, loading, isLoading: loading, signOut, logout: signOut }}>
+    <AuthContext.Provider value={{ user, session, userRole, roleError, debugTrace, loading, isLoading: loading, signOut, logout: signOut }}>
       {children}
     </AuthContext.Provider>
   )
