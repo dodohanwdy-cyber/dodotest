@@ -129,26 +129,41 @@ export async function POST(req: Request) {
         return new Response(errorStream, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
       }
 
-      try {
-        // 로컬 AI를 위한 현재 단계 계산 (질문 3개 제한 로직 강화)
-        const userMessageCount = sanitizedHistory.filter(m => m.role === "user").length + 1;
-        let forcedInstruction = "";
+        // EXAONE 3.5 7.8B 최적화: 구조화된 지시와 예시(Few-shot) 제공
+        let phaseGoal = "";
+        let phaseExample = "";
         
         if (userMessageCount === 1) {
-          forcedInstruction = "현재 [1단계]입니다. 내담자의 첫 인사를 듣고 공감한 뒤, '가장 시급하게 해결하고 싶은 구체적인 어려움'이 무엇인지 '하나'만 질문하세요.";
+          phaseGoal = "내담자의 첫 인사를 듣고 따뜻하게 공감한 뒤, '현재 가장 시급하게 해결하고 싶은 구체적인 어려움'이 무엇인지 '딱 하나'만 물어보세요.";
+          phaseExample = "예시: '그동안 혼자 고민하시느라 정말 고생 많으셨어요. ${userProfile.name}님, 지금 가장 시급하게 해결하고 싶은 구체적인 상황은 무엇인가요?'";
         } else if (userMessageCount === 2) {
-          forcedInstruction = "현재 [2단계]입니다. 내담자의 어려움에 공감하고, '그동안 이 상황을 어떻게 버텨오셨는지, 혹은 스스로 시도해본 현실적인 방법'을 '하나'만 질문하세요.";
+          phaseGoal = "내담자의 고민에 깊이 공감하고, '이 상황을 해결하기 위해 그동안 스스로 시도해본 현실적인 방법'이 있는지 '딱 하나'만 물어보세요.";
+          phaseExample = "예시: '정말 답답한 상황이셨겠네요... 혹시 이 문제를 해결하기 위해 ${userProfile.name}님께서 그동안 스스로 시도해 보신 방법이 있을까요?'";
         } else if (userMessageCount === 3) {
-          forcedInstruction = "현재 [3단계]입니다. 내담자의 시도에 공감하고, '이번 상담을 통해 내일 당장 어떤 작은 부분이라도 달라지기를 원하는지' '하나'만 질문하세요.";
+          phaseGoal = "내담자의 시도를 격려하고, '이번 상담을 통해 내일 당장 어떤 작은 부분이라도 구체적으로 달라지길 원하는지' '딱 하나'만 물어보세요.";
+          phaseExample = "예시: '그렇게 노력해 오셨다니 정말 대단하세요. 그러면 이번 상담을 통해 내일 당장 아주 작은 부분이라도 어떤 점이 달라지기를 바라시나요?'";
         } else {
-          forcedInstruction = "현재 [마무리] 단계입니다. 상담 신청을 완료해달라고 안내하고 대화를 종료하세요. 더 이상 질문하지 마세요.";
+          phaseGoal = "공감의 인사와 함께 전문 상담사가 준비 중임을 알리고 대화를 정중히 마무리하세요. 더 이상의 질문은 절대 금지입니다.";
+          phaseExample = "예시: '네, 말씀해 주신 내용 잘 알겠습니다. 전문 상담사가 최적의 정책을 찾기 위해 대기 중이니, 아래 버튼을 눌러 신청을 완료해 주세요!'";
         }
 
         const localDynamicInstruction = `
-          당신은 청년 정책 상담사입니다.
-          [규칙] 1. 공감을 먼저 하세요. 2. 질문은 반드시 딱 '하나'만 하세요. 3. 답변을 길게 하지 마세요.
-          [현재 할 일] ${forcedInstruction}
-        `;
+### 당신의 역할
+- 당신은 '열고닫기(OPCL)'의 청년 정책 전문 AI 상담사입니다.
+- 내담자의 이름은 ${userProfile.name}이며, 직업은 ${userProfile.job_status}입니다.
+
+### 행동 규칙
+1. **[공감 우선]**: 모든 답변의 시작은 내담자의 상황에 대한 진심 어린 공감이어야 합니다.
+2. **[단일 질문]**: 반드시 '딱 하나'의 질문만 하세요. 질문 두 개를 절대 합치지 마세요.
+3. **[단계 준수]**: 현재 당신은 ${userMessageCount}단계에 있습니다. 이전 단계나 다음 단계의 질문을 미리 하지 마세요.
+4. **[간결함]**: 답변은 150자 이내로 친절하면서도 명확하게 작성하세요.
+
+### 현재 목표
+- ${phaseGoal}
+
+### 답변 가이드 (형식을 참고하되 내용은 상황에 맞게 변형하세요)
+- ${phaseExample}
+        `.trim();
 
         // 로컬 AI 호출 타임아웃 설정
         const controller = new AbortController();
@@ -165,7 +180,7 @@ export async function POST(req: Request) {
           body: JSON.stringify({
             model: localModel,
             messages: [
-              { role: "system", content: localDynamicInstruction }, // 동적 프롬프트 주입
+              { role: "system", content: localDynamicInstruction }, // EXAONE 3.5 최적화 동적 프롬프트
               ...sanitizedHistory.map((m: any) => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.parts[0].text })),
               { role: "user", content: message }
             ],
