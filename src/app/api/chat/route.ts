@@ -65,27 +65,31 @@ export async function POST(req: Request) {
       { role: "user", parts: [{ text: message }] }
     ];
 
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-      try {
-        result = await model.generateContentStream({
-          contents: finalContents,
-          generationConfig: { maxOutputTokens: 1000, temperature: 0.7 },
-        });
-        break; // 성공 시 탈출
-      } catch (error: any) {
-        lastError = error;
-        // 429(너무 많은 요청) 또는 503(서비스 이용 불가), 500(서버 내부 오류)인 경우 재시도
-        const status = error.response?.status || error.status;
-        const isRetryableError = status === 429 || status === 503 || status === 500 || (error.message && (error.message.includes('429') || error.message.includes('503')));
-        
-        if (isRetryableError) {
-          console.warn(`⚠️ API 과부하/오류(${status || '알수없음'}) 감지. 재시도 중... (${attempt}/${MAX_RETRIES})`);
-          // 지수 백오프: 1.5초, 3초, 6초, 12초... 로 대기 시간 증가
-          await new Promise(resolve => setTimeout(resolve, 1500 * Math.pow(2, attempt - 1)));
-        } else {
-          throw error; // 재시도해도 안 되는 에러(예: 400 문법 오류)는 즉시 중단
+    try {
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          result = await model.generateContentStream({
+            contents: finalContents,
+            generationConfig: { maxOutputTokens: 1000, temperature: 0.7 },
+          });
+          break; // 성공 시 탈출
+        } catch (error: any) {
+          lastError = error;
+          const status = error.response?.status || error.status;
+          const isRetryableError = status === 429 || status === 503 || status === 500 || (error.message && (error.message.includes('429') || error.message.includes('503')));
+          
+          if (isRetryableError && attempt < MAX_RETRIES) {
+            console.warn(`⚠️ Gemini API 과부하/오류(${status}) 감지. 재시도 중... (${attempt}/${MAX_RETRIES})`);
+            await new Promise(resolve => setTimeout(resolve, 1500 * Math.pow(2, attempt - 1)));
+          } else {
+            // 재시도 불가능하거나 횟수 초과 시 Gemini 시도 종료 (상위 try-catch에서 페일오버로 넘김)
+            throw error;
+          }
         }
       }
+    } catch (geminiError: any) {
+      console.error("🚨 Gemini API 최종 실패:", geminiError.message);
+      // 여기서 result는 undefined 상태로 유지되어 아래의 페일오버 로직으로 진입하게 됨
     }
 
     // ---------------------------------------------------------
@@ -114,7 +118,10 @@ export async function POST(req: Request) {
         // 로컬 LLM (Ollama/LM Studio 등) 호출
         const localResponse = await fetch(`${localUrl}/chat/completions`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true" // ngrok 경고 페이지 우회 필수
+          },
           body: JSON.stringify({
             model: localModel,
             messages: [
