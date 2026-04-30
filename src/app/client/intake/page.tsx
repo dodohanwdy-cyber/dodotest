@@ -152,8 +152,8 @@ function IntakeContent() {
         if (currentStatus === 'step1' || currentStatus === 'basic_complete') {
           setCompletedSteps(['section-1']);
           setValue('section-2');
-        } else if (currentStatus === 'step2' || currentStatus === 'schedule_complete') {
-          // 2단계 완료 상태인데 이미 상담 데이터가 있다면 4단계로 점프
+        } else if (currentStatus === 'step2' || currentStatus === 'schedule_complete' || !!rawCrmData.request_time_1) {
+          // 2단계 완료 상태 (상태값 또는 예약 데이터 존재)
           if (hasChatData) {
             setCompletedSteps(['section-1', 'section-2', 'section-3']);
             setValue('section-4');
