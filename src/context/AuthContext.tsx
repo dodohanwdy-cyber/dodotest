@@ -8,8 +8,6 @@ interface AuthContextType {
   user: User | null
   session: Session | null
   userRole: string | null
-  roleError: string | null
-  debugTrace: string[]
   loading: boolean
   isLoading: boolean
   signOut: () => Promise<void>
@@ -22,42 +20,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
-  const [roleError, setRoleError] = useState<string | null>(null)
-  const [debugTrace, setDebugTrace] = useState<string[]>(['mount'])
   const [loading, setLoading] = useState(true)
-
-  const addTrace = (msg: string) => {
-    setDebugTrace(prev => [...prev.slice(-4), msg])
-  }
 
   useEffect(() => {
     let isMounted = true;
 
     const fetchRole = async (userId: string) => {
-      addTrace('fetchRole_start');
       try {
         const cachedRole = typeof window !== 'undefined' ? localStorage.getItem(`role_${userId}`) : null;
         if (cachedRole && isMounted) {
           setUserRole(cachedRole);
-          addTrace(`cache_hit_${cachedRole}`);
         }
 
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000));
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
         const fetchPromise = supabase.from('user_profiles').select('role').eq('id', userId).single();
         
-        
-        const response = await Promise.race([fetchPromise, timeoutPromise]).catch(e => ({ data: null, error: { message: e.message } }));
+        const response = await Promise.race([fetchPromise, timeoutPromise]).catch(() => ({ data: null, error: true }));
         const data = (response as any)?.data;
-        const err = (response as any)?.error;
-        
-        if (err) {
-          if (isMounted) setRoleError(err.message || JSON.stringify(err));
-          addTrace(`fetch_err_${err.message}`);
-          console.error("Supabase Role Fetch Error:", err);
-        } else {
-          if (isMounted) setRoleError(null);
-          addTrace(`fetch_ok_${data?.role}`);
-        }
         
         if (isMounted) {
           const fetchedRole = data?.role || cachedRole || 'client';
@@ -67,39 +46,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         }
       } catch (e) {
-        console.error("[AuthContext] fetchRole error:", e);
         if (isMounted && !userRole) setUserRole('client');
       }
     }
 
-    // 1. 초기 세션을 명시적으로 한 번 가져와서 무한 로딩(버튼 사라짐) 방지
     const initSession = async () => {
       try {
-        // getSession이 네트워크 문제로 무한 대기하는 현상 방지 (최대 3초)
-        const sessionTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('session_timeout')), 3000));
+        const sessionTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('session_timeout')), 5000));
         const sessionPromise = supabase.auth.getSession();
         
         const response = await Promise.race([sessionPromise, sessionTimeout]) as any;
-        if (response?.error) console.error("getSession error:", response.error);
         if (!isMounted) return;
         
         const initialSession = response?.data?.session || null;
         setSession(initialSession);
         setUser(initialSession?.user ?? null);
         if (initialSession?.user) {
-          await fetchRole(initialSession.user.id);
+          fetchRole(initialSession.user.id);
         } else {
           setUserRole(null);
         }
       } catch (err: any) {
-        console.error("[AuthContext] initSession error:", err);
-        // 타임아웃 등의 에러 발생 시 기존 세션을 강제로 날리지 않음!
-        // onAuthStateChange에서 잡아낸 세션이 이미 존재할 수 있기 때문
       } finally {
-        // 무조건 최우선으로 로딩을 해제하여 빈 화면(스켈레톤)에 갇히는 것을 방지
         if (isMounted) {
           setLoading(false);
-          // 엣지 케이스 방어: fallback 강제 해제
           setTimeout(() => {
             if (isMounted) setLoading(false);
           }, 100);
@@ -118,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(currentSession?.user ?? null);
         
         if (currentSession?.user) {
-          await fetchRole(currentSession.user.id);
+          fetchRole(currentSession.user.id);
         } else {
           setUserRole(null);
         }
@@ -137,7 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, userRole, roleError, debugTrace, loading, isLoading: loading, signOut, logout: signOut }}>
+    <AuthContext.Provider value={{ user, session, userRole, loading, isLoading: loading, signOut, logout: signOut }}>
       {children}
     </AuthContext.Provider>
   )
