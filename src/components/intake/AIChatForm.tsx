@@ -79,16 +79,16 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
     return () => clearInterval(interval);
   }, [isTyping, isSaving]);
 
-  const scrollToBottom = (isSmooth = false) => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: isSmooth ? "smooth" : "auto" });
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      // scrollIntoView 대신 scrollTop을 직접 조작하여 전체 페이지가 튀는 현상 방지
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
 
   // 메시지가 추가되거나 타이핑 중일 때 스크롤 처리
   useEffect(() => {
-    // 사용자가 직접 위로 올린 경우가 아닐 때만 아래로 내림
-    scrollToBottom(false); 
+    scrollToBottom(); 
   }, [messages, isTyping]);
 
   const handleSend = async () => {
@@ -178,8 +178,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
     <div className="flex flex-col h-[550px] border border-zinc-100 rounded-3xl bg-zinc-50 overflow-hidden shadow-inner relative">
       <div 
         ref={chatContainerRef} 
-        className="flex-1 overflow-y-auto p-6 space-y-4 scroll-smooth"
-        style={{ scrollBehavior: 'auto' }}
+        className="flex-1 overflow-y-auto p-6 space-y-4"
       >
         {messages.map((msg, idx) => (
           msg.content && (
