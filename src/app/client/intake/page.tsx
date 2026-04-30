@@ -171,8 +171,13 @@ function IntakeContent() {
           setCompletedSteps(['section-1', 'section-2', 'section-3', 'section-4']);
           setIsChatFinished(true);
           setValue('section-5');
-        } else if (['pending', 'confirmed', 'final_submitted', 'submitted', 'analyzed'].includes(currentStatus)) {
-          // 최종 완료 또는 분석 완료 상태 -> 내용을 확인할 수 있도록 5단계(최종확인)를 바로 열어줌
+        } else if (['confirmed', 'analyzed'].includes(currentStatus)) {
+          // 일정이 확정되었거나 상담이 종료된 건은 수정 불가 -> 대시보드로 리다이렉트
+          alert("이미 일정이 확정되었거나 상담이 종료된 건은 수정할 수 없습니다.");
+          window.location.href = '/client/dashboard';
+          return;
+        } else if (['pending', 'final_submitted', 'submitted'].includes(currentStatus)) {
+          // 최종 제출 대기 상태(pending)인 경우에만 5단계에서 검토 가능
           setCompletedSteps(['section-1', 'section-2', 'section-3', 'section-4', 'section-5']);
           setIsChatFinished(true);
           setValue('section-5');

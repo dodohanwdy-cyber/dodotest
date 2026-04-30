@@ -256,8 +256,9 @@ export default function ClientDashboard() {
                 const isAnalyzed = app.status === 'analyzed';
                 const isCanceled = app.status === 'canceled';
                 const requestId = app.request_id || app.id;
-                // pending 상태: 이어하기 가능
-                const canResume = !isAnalyzed && !isCanceled;
+                // pending 및 이전 단계만 수정(이어하기) 가능
+                // confirmed(확정), analyzed(완료) 등은 수정 불가
+                const canResume = !['confirmed', 'analyzed', 'canceled'].includes(app.status);
 
                 return (
                   <div 
