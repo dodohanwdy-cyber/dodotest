@@ -268,7 +268,7 @@ function IntakeContent() {
           email: storedUser?.email || "",
           role: storedUser?.role || "",
           password_hash: storedUser?.password_hash || "",
-          updated_at: kstTime,
+          time: kstTime,
           status: "step1"
         });
 
@@ -320,7 +320,7 @@ function IntakeContent() {
           request_id: intakeData.request_id,
           user_id: storedUser?.id || "",
           email: storedUser?.email || "",
-          updated_at: kstTime,
+          time: kstTime,
           status: "step4",
           is_agreed_general_privacy: data.is_agreed_general_privacy,
           is_agreed_third_party: data.is_agreed_third_party
@@ -367,7 +367,7 @@ function IntakeContent() {
         email: storedUser?.email || "",
         role: storedUser?.role || "",
         password_hash: storedUser?.password_hash || "",
-        updated_at: kstTime,
+        time: kstTime,
         status: "final_submitted"
       });
 
@@ -376,7 +376,7 @@ function IntakeContent() {
         request_id: intakeData.request_id,
         user_id: storedUser?.id || "",
         email: storedUser?.email || "",
-        updated_at: kstTime,
+        time: kstTime,
         status: "pending"
       });
 
