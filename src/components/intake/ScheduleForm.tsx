@@ -349,7 +349,12 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
     try {
       // 웹훅으로 일정 데이터 전송
       console.log("📤 [일정 확정 웹훅 전송]", scheduleData);
-      const response = await postToWebhook(WEBHOOK_URLS.CHOOSE_SCHEDULE, scheduleData);
+      // [사용자 요청 반영] 일정 정보와 함께 상태값을 step2로 전송
+      const scheduleDataWithStatus = {
+        ...scheduleData,
+        status: "step2"
+      };
+      const response = await postToWebhook(WEBHOOK_URLS.CHOOSE_SCHEDULE, scheduleDataWithStatus);
       console.log("✅ [일정 확정 웹훅 응답]", response);
       
       // 성공 시 다음 단계로

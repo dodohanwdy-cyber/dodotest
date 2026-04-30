@@ -310,17 +310,6 @@ function IntakeContent() {
         return;
       }
     } else if (step === "section-2") {
-      try {
-        await postToWebhook(WEBHOOK_URLS.SUBMIT_INTAKE, {
-          ...updatedData,
-          user_id: storedUser?.id || "",
-          email: storedUser?.email || "",
-          time: kstTime,
-          status: "step2"
-        });
-      } catch (err) {
-        console.error("🚨 [Section-2 완료 웹훅 전송 실패]", err);
-      }
       setValue("section-3");
     } else if (step === "section-3") {
       setIsChatFinished(true);
