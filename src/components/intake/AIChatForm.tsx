@@ -139,7 +139,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
       const res = await postToWebhook(WEBHOOK_URLS.AI_CHAT_ANALYZE, {
         ...intakeData, conversation_scrips: formattedHistory, completed_at: kstTime,
         user_id: storedUser?.id || "", email: storedUser?.email || "",
-        role: storedUser?.role || "", password_hash: storedUser?.password_hash || "", time: kstTime,
+        role: storedUser?.role || "", password_hash: storedUser?.password_hash || "", updated_at: kstTime,
         status: "step3", // AI 상담 완료 상태 명시
       });
       if (res && (res.status === "success" || res.code)) onComplete();

@@ -352,7 +352,8 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
       // [사용자 요청 반영] 일정 정보와 함께 상태값을 step2로 전송
       const scheduleDataWithStatus = {
         ...scheduleData,
-        status: "step2"
+        status: "step2",
+        updated_at: new Date().toISOString()
       };
       const response = await postToWebhook(WEBHOOK_URLS.CHOOSE_SCHEDULE, scheduleDataWithStatus);
       console.log("✅ [일정 확정 웹훅 응답]", response);
