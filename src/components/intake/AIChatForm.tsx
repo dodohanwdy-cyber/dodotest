@@ -137,10 +137,13 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
     try {
       const formattedHistory = messages.map(msg => ({ role: msg.role === "ai" ? "assistant" : "user", content: msg.content }));
       const res = await postToWebhook(WEBHOOK_URLS.AI_CHAT_ANALYZE, {
-        ...intakeData, conversation_scrips: formattedHistory, completed_at: kstTime,
-        user_id: storedUser?.id || "", email: storedUser?.email || "",
-        role: storedUser?.role || "", password_hash: storedUser?.password_hash || "", time: kstTime,
-        status: "step3", // AI 상담 완료 상태 명시
+        request_id: intakeData.request_id,
+        user_id: storedUser?.id || "",
+        email: storedUser?.email || "",
+        conversation_scrips: formattedHistory,
+        completed_at: kstTime,
+        time: kstTime,
+        status: "step3"
       });
       if (res && (res.status === "success" || res.code)) onComplete();
       else alert("상담 완료 처리에 실패했습니다.");
