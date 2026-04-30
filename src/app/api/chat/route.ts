@@ -5,12 +5,15 @@ import { NextResponse } from "next/server";
 export const runtime = 'edge';
 
 const apiKey = process.env.GOOGLE_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey || "");
-
-// 재시도 횟수 설정 (유료 플랜이라도 순간적인 429 방지용)
 const MAX_RETRIES = 5;
 
 export async function POST(req: Request) {
+  if (!apiKey) {
+    return new Response("API 키 설정이 누락되었습니다. 관리자에게 문의해 주세요.", { status: 200 });
+  }
+  
+  const genAI = new GoogleGenerativeAI(apiKey);
+  
   try {
     const body = await req.json();
     const { message, history, userProfile } = body;
@@ -198,7 +201,12 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error("Server Error:", error);
-    return NextResponse.json({ error: "상담 준비 중..." }, { status: 500 });
+    console.error("🚨 Server Error:", error);
+    // 에러 발생 시 스트림으로 에러 메시지 전달 (프론트엔드 파싱 에러 방지)
+    const errorMsg = `시스템 오류가 발생했습니다: ${error.message || '알 수 없는 오류'}. 잠시 후 다시 시도해 주세요.`;
+    return new Response(errorMsg, { 
+      status: 200, // 500 대신 200으로 보내서 프론트엔드가 메시지를 읽게 함
+      headers: { "Content-Type": "text/plain; charset=utf-8" } 
+    });
   }
 }
