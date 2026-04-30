@@ -57,11 +57,31 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const statusMessages = ["내담자 고민 공감 중...", "현재 상황 분석 중...", "청년 정책 매칭 중...", "맞춤 질문 작성 중..."];
+
+  // [아이디어 C] 상태 메시지 순환 로직
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isTyping && !isSaving) {
+      let idx = 0;
+      setStatusMessage(statusMessages[0]);
+      interval = setInterval(() => {
+        idx = (idx + 1) % statusMessages.length;
+        setStatusMessage(statusMessages[idx]);
+      }, 1500);
+    } else {
+      setStatusMessage("");
+    }
+    return () => clearInterval(interval);
+  }, [isTyping, isSaving]);
 
   const scrollToBottom = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({ top: chatContainerRef.current.scrollHeight, behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -166,12 +186,22 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
           )
         ))}
         {isTyping && (
-          <div className="flex justify-start">
-            <div className="bg-white p-4 rounded-2xl rounded-bl-none border border-zinc-100 shadow-sm">
-              <Loader2 className="animate-spin text-primary" size={16} />
+          <div className="flex justify-start animate-in fade-in slide-in-from-left-2 duration-300">
+            <div className="max-w-[85%] space-y-2">
+              <div className="bg-white border-2 border-slate-100 p-4 rounded-2xl rounded-bl-none shadow-sm flex flex-col gap-2">
+                <div className="flex gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></span>
+                </div>
+                <div className="text-[11px] font-black text-primary/60 animate-pulse tracking-tight">
+                  {statusMessage}
+                </div>
+              </div>
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="p-4 bg-white border-t border-zinc-100">
