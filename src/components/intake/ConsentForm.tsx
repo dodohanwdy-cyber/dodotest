@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { CheckCircle, AlertCircle, ShieldCheck } from "lucide-react";
 
 interface ConsentFormProps {
-  onNext: () => void;
+  onNext: (data: any) => void;
   onPrev: () => void;
 }
 
@@ -58,7 +58,7 @@ export default function ConsentForm({ onNext, onPrev }: ConsentFormProps) {
              <CheckCircle size={16} className={allAgreed ? "opacity-100" : "opacity-0"} />
           </div>
           <span className={`font-black text-lg ${allAgreed ? "text-indigo-900" : "text-slate-700 group-hover:text-indigo-900"}`}>
-            개인정보 수집 이용 및<br />개인정보 제3자 제공, 조회 모두 동의합니다. <span className="text-indigo-600">(필수)</span>
+            개인정보 수집 이용 및<br />개인정보 제3자 제공, 조회 모두 동의합니다.
           </span>
         </div>
         {allAgreed && <span className="text-sm font-bold text-indigo-600 animate-pulse">동의 완료</span>}
@@ -115,7 +115,7 @@ export default function ConsentForm({ onNext, onPrev }: ConsentFormProps) {
             }`}>
                {agreements.thirdParty && <CheckCircle size={14} />}
             </div>
-            <span className="font-bold text-slate-700">2. 개인정보의 제3자 제공·조회 동의 <span className="text-rose-500">(필수)</span></span>
+            <span className="font-bold text-slate-700">2. 개인정보의 제3자 제공·조회 동의 <span className="text-indigo-500">(선택)</span></span>
           </div>
           <div className="p-4 bg-slate-50 h-40 overflow-y-auto text-sm text-slate-600 space-y-3 custom-scrollbar">
             <ul className="space-y-3 list-disc list-inside">
@@ -130,10 +130,10 @@ export default function ConsentForm({ onNext, onPrev }: ConsentFormProps) {
       </div>
 
       {/* 안내 메시지 및 버튼 */}
-      {!allAgreed && (
+      {!agreements.privacy && (
         <div className="flex items-start gap-2 text-rose-500 bg-rose-50 p-4 rounded-xl">
           <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
-          <p className="text-sm font-bold">원활한 상담 진행을 위해<br />위의 필수 약관 사항에 동의하여 주시기 바랍니다.</p>
+          <p className="text-sm font-bold">원활한 상담 진행을 위해<br />필수 약관 사항에 동의하여 주시기 바랍니다.</p>
         </div>
       )}
 
@@ -146,16 +146,21 @@ export default function ConsentForm({ onNext, onPrev }: ConsentFormProps) {
         </button>
         <button
           className={`flex-[2] py-4 px-6 rounded-2xl font-bold transition-all duration-300 btn-interactive ${
-            allAgreed
+            agreements.privacy
               ? "bg-primary text-white shadow-lg shadow-indigo-100 hover:shadow-xl hover:bg-indigo-600"
               : "bg-slate-100 text-slate-400 cursor-not-allowed"
           }`}
-          // TODO(Backend Integration): onNext 호출 시 agreements 데이터를 넘겨받아 최종 Intake 데이터에 병합되도록 상위 코드(page.tsx)와 이 라인을 맞춰서 수정하세요.
-          // 예시: onClick={() => allAgreed && onNext({ agreements })}
-          onClick={allAgreed ? (() => onNext()) : undefined}
-          disabled={!allAgreed}
+          onClick={() => {
+            if (agreements.privacy) {
+              onNext({
+                is_agreed_general_privacy: agreements.privacy,
+                is_agreed_third_party: agreements.thirdParty
+              });
+            }
+          }}
+          disabled={!agreements.privacy}
         >
-          {allAgreed ? "동의하고 확인하기" : "약관에 동의해 주세요"}
+          {agreements.privacy ? "동의하고 확인하기" : "필수 약관에 동의해 주세요"}
         </button>
       </div>
 

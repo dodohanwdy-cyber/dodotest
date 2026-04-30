@@ -315,7 +315,9 @@ function IntakeContent() {
           user_id: storedUser?.id || "",
           email: storedUser?.email || "",
           time: kstTime,
-          status: "step4"
+          status: "step4",
+          is_agreed_general_privacy: data.is_agreed_general_privacy,
+          is_agreed_third_party: data.is_agreed_third_party
         });
         console.log("✅ [약관 동의 완료 웹훅 전송 성공]");
       } catch (err) {
@@ -596,7 +598,7 @@ function IntakeContent() {
                <div className="pt-8">
                 <ConsentForm 
                   onPrev={() => setValue("section-3")}
-                  onNext={() => handleStepComplete("section-4", {})} 
+                  onNext={(data) => handleStepComplete("section-4", data)} 
                 />
               </div>
             </Accordion.Content>
