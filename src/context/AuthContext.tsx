@@ -91,13 +91,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setUserRole(null);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("[AuthContext] initSession error:", err);
-        if (isMounted) {
-          setUser(null);
-          setSession(null);
-          setUserRole(null);
-        }
+        // 타임아웃 등의 에러 발생 시 기존 세션을 강제로 날리지 않음!
+        // onAuthStateChange에서 잡아낸 세션이 이미 존재할 수 있기 때문
       } finally {
         // 무조건 최우선으로 로딩을 해제하여 빈 화면(스켈레톤)에 갇히는 것을 방지
         if (isMounted) {
@@ -115,8 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // 2. 이후 로그인/로그아웃 상태 변화 감지
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
-        // 이미 위에서 초기화를 했으므로 INITIAL_SESSION 이벤트는 무시하여 충돌 방지
-        if (!isMounted || event === 'INITIAL_SESSION') return;
+        if (!isMounted) return;
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
