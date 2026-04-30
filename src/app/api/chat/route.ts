@@ -36,10 +36,9 @@ export async function POST(req: Request) {
       - 4단계(최종): 3번의 질문이 끝나면 공감의 인사를 전한 뒤, "전문 상담사가 최적의 정책을 찾아드리기 위해 준비 중이니, 아래 '상담 신청 완료하기' 버튼을 눌러달라"고 정중히 안내하며 마무리. (이후 추가 질문 금지)
     `;
 
-    // [모델 식별자 정정] gemini-1.5-flash -> gemini-1.5-flash-latest
+    // [호환성 최우선] 가장 널리 지원되는 gemini-pro 모델 사용
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash-latest", 
-      systemInstruction: systemInstruction 
+      model: "gemini-pro"
     });
 
     // 히스토리 정제
@@ -58,10 +57,18 @@ export async function POST(req: Request) {
     let result;
     let lastError;
 
+    // 시스템 프롬프트를 대화의 가장 처음에 명시적으로 주입 (호환성 최우선)
+    const finalContents = [
+      { role: "user", parts: [{ text: `시스템 지침: ${systemInstruction}\n\n이 지침을 반드시 숙지하고 대화를 시작하세요.` }] },
+      { role: "model", parts: [{ text: "네, 숙지했습니다. 청년 정책 전문 AI 상담사로서 따뜻하고 친절하게 대화를 시작하겠습니다." }] },
+      ...sanitizedHistory, 
+      { role: "user", parts: [{ text: message }] }
+    ];
+
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
         result = await model.generateContentStream({
-          contents: [...sanitizedHistory, { role: "user", parts: [{ text: message }] }],
+          contents: finalContents,
           generationConfig: { maxOutputTokens: 1000, temperature: 0.7 },
         });
         break; // 성공 시 탈출
