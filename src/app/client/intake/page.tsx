@@ -315,7 +315,7 @@ function IntakeContent() {
           user_id: storedUser?.id || "",
           email: storedUser?.email || "",
           time: kstTime,
-          status: "pending"
+          status: "step4"
         });
         console.log("✅ [약관 동의 완료 웹훅 전송 성공]");
       } catch (err) {
