@@ -36,9 +36,9 @@ export async function POST(req: Request) {
       - 4단계(최종): 3번의 질문이 끝나면 공감의 인사를 전한 뒤, "전문 상담사가 최적의 정책을 찾아드리기 위해 준비 중이니, 아래 '상담 신청 완료하기' 버튼을 눌러달라"고 정중히 안내하며 마무리. (이후 추가 질문 금지)
     `;
 
-    // [모델 안정성 강화] 프리뷰 버전 대신 안정적인 gemini-1.5-flash 사용
+    // [모델 식별자 정정] gemini-1.5-flash -> gemini-1.5-flash-latest
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash", 
+      model: "gemini-1.5-flash-latest", 
       systemInstruction: systemInstruction 
     });
 
