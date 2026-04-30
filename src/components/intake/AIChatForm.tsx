@@ -61,7 +61,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const statusMessages = ["내담자 고민 공감 중...", "현재 상황 분석 중...", "청년 정책 매칭 중...", "맞춤 질문 작성 중..."];
+  const statusMessages = ["내담자 고민 공감 중...", "현재 상황 분석 중...", "상담 맥락 파악 중...", "정보 수집 중..."];
 
   // [아이디어 C] 상태 메시지 순환 로직
   useEffect(() => {

@@ -147,7 +147,16 @@ export async function POST(req: Request) {
             generationConfig: { maxOutputTokens: 1000, temperature: 0.7 },
           });
           break;
-        } catch (err) { if (attempt === MAX_RETRIES) throw err; }
+        } catch (err: any) {
+          const status = err.response?.status || err.status;
+          // 429(할당량 초과) 또는 503(서비스 과부하) 발생 시 재시도
+          if ((status === 429 || status === 503 || err.message?.includes("429")) && attempt < MAX_RETRIES) {
+            console.warn(`⚠️ Gemini 429/503 감지. 재시도 중... (${attempt}/${MAX_RETRIES})`);
+            await new Promise(resolve => setTimeout(resolve, 2000 * attempt)); 
+            continue;
+          }
+          if (attempt === MAX_RETRIES) throw err; 
+        }
       }
 
       const stream = new ReadableStream({
