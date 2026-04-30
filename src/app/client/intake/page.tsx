@@ -130,6 +130,10 @@ function IntakeContent() {
           special_notes: specialNotes,
           request_id: rawCrmData.request_id || id, // ID 불일치 방지
         }));
+
+        // 초기 로딩 시에는 완료된 건이라 하더라도 결과 화면(isFinished)을 바로 보여주지 않고 
+        // Step 5 폼을 보여주어 내용을 확인할 수 있게 합니다.
+        setIsFinished(false); 
         
         const currentStatus = (rawCrmData.status || '').toString().toLowerCase().trim();
         console.log(`[Intake/Resume] 현재 상태: "${currentStatus}"`);
@@ -167,11 +171,12 @@ function IntakeContent() {
           setCompletedSteps(['section-1', 'section-2', 'section-3', 'section-4']);
           setIsChatFinished(true);
           setValue('section-5');
-        } else if (['pending', 'confirmed', 'final_submitted', 'submitted'].includes(currentStatus)) {
-          // 최종 완료 상태 -> 5단계(최종확인)로 이동
+        } else if (['pending', 'confirmed', 'final_submitted', 'submitted', 'analyzed'].includes(currentStatus)) {
+          // 최종 완료 또는 분석 완료 상태 -> 내용을 확인할 수 있도록 5단계(최종확인)를 바로 열어줌
           setCompletedSteps(['section-1', 'section-2', 'section-3', 'section-4', 'section-5']);
           setIsChatFinished(true);
           setValue('section-5');
+          console.log("📝 [완료 건 재진입] 최종 확인을 위해 5단계로 이동합니다.");
         } else {
           // 상태가 명확하지 않지만 데이터는 있을 수 있음 -> 데이터가 있으면 Step 1 완료 처리 시도
           if (rawCrmData.name && rawCrmData.regional_local_government) {
