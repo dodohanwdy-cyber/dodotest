@@ -354,7 +354,8 @@ function IntakeContent() {
     // intakeData 상태에 포함되도록 handleStepComplete("section-4", data)를 통해 병합한 뒤, 
     // 아래의 웹훅 전송 페이로드에 포함시켜 백엔드(DB)로 함께 전달해야 합니다.
     try {
-      const res = await postToWebhook(WEBHOOK_URLS.AI_CHAT_ANALYZE, {
+      // 1. 기존 AI 분석 리포트 생성용 웹훅 (기존 로직 유지)
+      await postToWebhook(WEBHOOK_URLS.AI_CHAT_ANALYZE, {
         ...intakeData,
         user_id: storedUser?.id || "",
         email: storedUser?.email || "",
@@ -362,6 +363,15 @@ function IntakeContent() {
         password_hash: storedUser?.password_hash || "",
         time: kstTime,
         status: "final_submitted"
+      });
+
+      // 2. [추가] 최종 신청서 제출용 전용 웹훅 (S5. 최종 제출)
+      const res = await postToWebhook(WEBHOOK_URLS.SUBMIT_FINAL, {
+        ...intakeData,
+        user_id: storedUser?.id || "",
+        email: storedUser?.email || "",
+        time: kstTime,
+        status: "pending" // 요청하신 대로 status를 'pending'으로 설정
       });
 
       const resData = Array.isArray(res) ? res[0] : res;

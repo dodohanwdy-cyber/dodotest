@@ -29,4 +29,5 @@ export const SERVER_WEBHOOK_URLS: Record<string, string> = {
   GET_REPORT_EXAMPLE: "https://primary-production-1f39e.up.railway.app/webhook/result-example", 
   SYNC_GOOGLE_SHEETS: "", 
   GENERATE_NOTION_REPORT: "https://primary-production-1f39e.up.railway.app/webhook/notion-report", 
+  SUBMIT_FINAL: "https://primary-production-1f39e.up.railway.app/webhook/submit-final",
 };
