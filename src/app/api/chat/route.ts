@@ -2,10 +2,10 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
 // Edge Runtime: 빠르고 스트리밍에 최적화됨
-export const runtime = 'edge';
-
+// export const runtime = 'edge'; // 504 방지를 위해 Node.js 런타임 사용 고려 (주석 처리 시 기본 Node.js)
 const apiKey = process.env.GOOGLE_API_KEY;
-const MAX_RETRIES = 7;
+const MAX_RETRIES = 3; // 7회 -> 3회로 축소 (Vercel 타임아웃 방지)
+const LOCAL_TIMEOUT = 10000; // 로컬 AI 응답 대기 최대 10초
 
 export async function POST(req: Request) {
   if (!apiKey) {
@@ -115,12 +115,17 @@ export async function POST(req: Request) {
       }
 
       try {
+        // 로컬 AI 호출 타임아웃 설정
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), LOCAL_TIMEOUT);
+
         // 로컬 LLM (Ollama/LM Studio 등) 호출
         const localResponse = await fetch(`${localUrl}/chat/completions`, {
           method: "POST",
+          signal: controller.signal,
           headers: { 
             "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true" // ngrok 경고 페이지 우회 필수
+            "ngrok-skip-browser-warning": "true"
           },
           body: JSON.stringify({
             model: localModel,
@@ -134,6 +139,7 @@ export async function POST(req: Request) {
           }),
         });
 
+        clearTimeout(timeoutId);
         if (!localResponse.ok) throw new Error(`Local AI error: ${localResponse.status}`);
 
         // 로컬 AI 스트림 처리 (SSE 규격 파싱)
