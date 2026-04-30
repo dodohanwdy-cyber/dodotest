@@ -36,17 +36,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // 1. 초기 세션을 명시적으로 한 번 가져와서 무한 로딩(버튼 사라짐) 방지
     const initSession = async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      if (!isMounted) return;
-      
-      setSession(initialSession);
-      setUser(initialSession?.user ?? null);
-      if (initialSession?.user) {
-        await fetchRole(initialSession.user.id);
-      } else {
-        setUserRole(null);
+      try {
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        if (error) console.error("getSession error:", error);
+        if (!isMounted) return;
+        
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+        if (initialSession?.user) {
+          await fetchRole(initialSession.user.id);
+        } else {
+          setUserRole(null);
+        }
+      } catch (err) {
+        console.error("AuthContext initSession error:", err);
+        if (isMounted) {
+          setUser(null);
+          setSession(null);
+          setUserRole(null);
+        }
+      } finally {
+        if (isMounted) setLoading(false); // 로딩 즉시 해제
       }
-      setLoading(false); // 로딩 즉시 해제
     };
 
     initSession();
