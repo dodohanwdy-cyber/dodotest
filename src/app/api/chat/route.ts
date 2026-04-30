@@ -34,6 +34,8 @@ export async function POST(req: Request) {
       - 2단계: "그동안 상황을 어떻게 버텨오셨는지, 혹은 스스로 시도해본 현실적인 방법" 질문
       - 3단계: "이번 상담을 통해 내일 당장 어떤 작은 부분이라도 달라지기를 원하는지" 질문
       - 4단계(최종): 3번의 질문이 끝나면 공감의 인사를 전한 뒤, "전문 상담사가 최적의 정책을 찾아드리기 위해 준비 중이니, 아래 '상담 신청 완료하기' 버튼을 눌러달라"고 정중히 안내하며 마무리. (이후 추가 질문 금지)
+
+      [중요!] 절대 한 번에 2개 이상의 질문을 하지 마세요. 반드시 내담자의 답변을 듣고 나서 다음 단계의 질문 하나만 던지세요.
     `;
 
     // [기존 합의 모델 복구] Gemini 2.x 버전 사용
@@ -179,7 +181,12 @@ export async function POST(req: Request) {
           }
         });
 
-        return new Response(localStream, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
+        return new Response(localStream, { 
+          headers: { 
+            "Content-Type": "text/plain; charset=utf-8",
+            "X-AI-Source": "Local-EXAONE" // 로컬 AI 작동 시 헤더 표시
+          } 
+        });
 
       } catch (localErr) {
         console.error("🚨 로컬 AI 페일오버 마저 실패:", localErr);
@@ -218,6 +225,7 @@ export async function POST(req: Request) {
         "Content-Type": "text/plain; charset=utf-8",
         "Cache-Control": "no-cache, no-transform",
         "X-Content-Type-Options": "nosniff",
+        "X-AI-Source": "Google-Gemini" // Gemini 작동 시 헤더 표시
       },
     });
 
