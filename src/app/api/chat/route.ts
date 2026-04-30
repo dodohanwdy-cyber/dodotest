@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export const runtime = 'edge';
 
 const apiKey = process.env.GOOGLE_API_KEY;
-const MAX_RETRIES = 5;
+const MAX_RETRIES = 7;
 
 export async function POST(req: Request) {
   if (!apiKey) {
@@ -36,9 +36,9 @@ export async function POST(req: Request) {
       - 4단계(최종): 3번의 질문이 끝나면 공감의 인사를 전한 뒤, "전문 상담사가 최적의 정책을 찾아드리기 위해 준비 중이니, 아래 '상담 신청 완료하기' 버튼을 눌러달라"고 정중히 안내하며 마무리. (이후 추가 질문 금지)
     `;
 
-    // [호환성 최우선] 가장 널리 지원되는 gemini-pro 모델 사용
+    // [기존 합의 모델 복구] Gemini 2.x 버전 사용
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-pro"
+      model: "gemini-2.0-flash"
     });
 
     // 히스토리 정제
