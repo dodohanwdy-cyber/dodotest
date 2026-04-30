@@ -371,13 +371,13 @@ function IntakeContent() {
         status: "final_submitted"
       });
 
-      // 2. [추가] 최종 신청서 제출용 전용 웹훅 (S5. 최종 제출)
+      // 2. [최적화] 최종 신청서 제출용 전용 웹훅 (식별 정보와 상태값만 전송)
       const res = await postToWebhook(WEBHOOK_URLS.SUBMIT_FINAL, {
-        ...intakeData,
+        request_id: intakeData.request_id,
         user_id: storedUser?.id || "",
         email: storedUser?.email || "",
         time: kstTime,
-        status: "pending" // 요청하신 대로 status를 'pending'으로 설정
+        status: "pending"
       });
 
       const resData = Array.isArray(res) ? res[0] : res;
