@@ -295,17 +295,17 @@ export default function ClientDashboard() {
                           isAnalyzed ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm animate-bounce-subtle' :
                           app.status === 'confirmed' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' :
                           (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' :
-                          (app.status && app.status.includes('step')) ? 'bg-indigo-50 text-primary border border-indigo-100 animate-pulse-subtle' :
+                          (app.status && app.status.includes('step')) ? 'bg-orange-50 text-orange-600 border border-orange-200 animate-pulse-subtle' :
                           'bg-indigo-50 text-primary border border-indigo-100'
                         }`}>
                           {isCanceled ? '상담 취소됨' : 
                            isAnalyzed ? '상담 완료' : 
                            app.status === 'confirmed' ? '일정 정해짐' : 
-                           (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? '최종 신청 완료' :
+                           (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? '신청 완료함' :
                            (app.status === 'step1') ? '기초 정보 입력함' :
-                           (app.status === 'step2') ? '신청 정보 작성함' :
-                           (app.status === 'step3') ? 'AI 대화 완료함' :
-                           (app.status === 'step4') ? '약관 동의 완료함' :
+                           (app.status === 'step2') ? '상담 일정 확인함' :
+                           (app.status === 'step3') ? 'AI 인터뷰 진행함' :
+                           (app.status === 'step4') ? '약관에 동의함' :
                            '신청 작성중'}
                         </div>
                       </div>
@@ -344,6 +344,27 @@ export default function ClientDashboard() {
                           <span className="text-xs font-bold leading-none">{app.job_status || '미입력'}</span>
                         </div>
                       </div>
+
+                      {/* [디자인 개선] 신청 미완료 시 진행률 프로그레스 바 표시 */}
+                      {!isAnalyzed && app.status !== 'confirmed' && !['pending', 'final_submitted', 'submitted'].includes(app.status) && (
+                        <div className="mb-6 p-4 bg-orange-50/50 rounded-2xl border border-orange-100">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-[11px] font-black text-orange-600 flex items-center gap-1">
+                              <AlertCircle size={12} /> 최종 신청까지 단계가 남았습니다
+                            </span>
+                            <span className="text-[11px] font-black text-orange-600">
+                              {app.status === 'step1' ? '20%' : app.status === 'step2' ? '40%' : app.status === 'step3' ? '60%' : '80%'} 완료
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-white rounded-full overflow-hidden border border-orange-100 shadow-inner">
+                            <div 
+                              className="h-full bg-orange-400 transition-all duration-1000"
+                              style={{ width: app.status === 'step1' ? '20%' : app.status === 'step2' ? '40%' : app.status === 'step3' ? '60%' : '80%' }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-orange-400 mt-2 font-bold text-center">아래 '이어하기' 버튼을 눌러 신청을 완료해 주세요!</p>
+                        </div>
+                      )}
 
                       {/* 희망 상담 시간 표시 (검토 중일 때) */}
                       {!isAnalyzed && app.status !== 'confirmed' && (app.request_time_1 || app.request_time_2 || app.request_time_3) && (

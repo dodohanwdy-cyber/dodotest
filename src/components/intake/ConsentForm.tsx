@@ -38,7 +38,6 @@ export default function ConsentForm({ onNext, onPrev }: ConsentFormProps) {
         </div>
         <div>
           <h4 className="font-bold text-slate-800 text-lg">서비스 이용 동의</h4>
-          <p className="text-sm text-slate-500">안전한 맞춤 상담을 위해<br />약관에 동의해 주세요.</p>
         </div>
       </div>
 
