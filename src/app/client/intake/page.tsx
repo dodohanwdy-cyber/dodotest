@@ -35,9 +35,13 @@ function IntakeContent() {
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [toast, setToast] = useState<string>("");
   const [hasWarnedRankFinal, setHasWarnedRankFinal] = useState(false);
+  const isInitialLoadDone = React.useRef(false);
 
   // 1. 수정 모드: URL 파라미터로 데이터 로드
   React.useEffect(() => {
+    // 이미 로드가 완료되었다면 다시 실행하지 않음 (AuthContext 업데이트 등으로 인한 재실행 방지)
+    if (isInitialLoadDone.current) return;
+
     const mode = searchParams.get('mode');
     
     // 강제 신규 모드일 경우 기존 데이터 삭제
@@ -46,11 +50,16 @@ function IntakeContent() {
       sessionStorage.removeItem("intake_persistence");
       if (user?.email) localStorage.removeItem(`intake_backup_${user.email}`);
       setIsHydrated(true);
-      return; // 신규 데이터로 시작 (useState 기본값 사용)
+      isInitialLoadDone.current = true;
+      return; 
     }
 
-    if (applicationId && user?.email) {
+    if (applicationId) {
+      // applicationId가 있는데 user가 아직 로드되지 않았다면 대기 (다음 실행 때 처리)
+      if (!user) return;
+      
       fetchApplicationDetail(applicationId);
+      isInitialLoadDone.current = true;
     } else {
       // 1-1. 신규 모드: 세션 저장소(현재 탭) 확인
       let savedData = sessionStorage.getItem("intake_persistence");
@@ -84,8 +93,9 @@ function IntakeContent() {
         }
       }
       setIsHydrated(true);
+      isInitialLoadDone.current = true;
     }
-  }, [applicationId, user]);
+  }, [applicationId, user, searchParams]);
 
   // 상세 데이터 조회
   const fetchApplicationDetail = async (id: string) => {
