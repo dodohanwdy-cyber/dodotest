@@ -42,16 +42,26 @@ export async function POST(req: Request) {
     const localModel = process.env.LOCAL_LLM_MODEL || "exaone3.5";
 
     try {
-      console.log("🚀 [Primary] 로컬 AI(EXAONE) 연결 시도...");
-      
       const userMessageCount = (history?.filter((m: any) => m.role === "user").length || 0) + 1;
+      
+      // EXAONE 3.5 7.8B 최적화: 구조화된 지시와 예시(Few-shot) 제공
       let phaseGoal = "";
-      if (userMessageCount === 1) phaseGoal = "내담자의 인사를 듣고 공감한 뒤, '시급한 어려움' 하나만 질문하세요.";
-      else if (userMessageCount === 2) phaseGoal = "내담자의 고민에 공감하고, '그동안 시도해본 방법' 하나만 질문하세요.";
-      else if (userMessageCount === 3) phaseGoal = "시도를 격려하고, '내일 당장 달라지길 원하는 작은 변화' 하나만 질문하세요.";
-      else phaseGoal = "공감과 함께 '상담 신청 완료하기' 안내 후 마무리하세요.";
+      let phaseExample = "";
+      if (userMessageCount === 1) {
+        phaseGoal = "내담자의 첫 인사를 듣고 따뜻하게 공감한 뒤, '현재 가장 시급하게 해결하고 싶은 구체적인 어려움'이 무엇인지 '딱 하나'만 물어보세요.";
+        phaseExample = "예시: '그동안 혼자 고민하시느라 정말 고생 많으셨어요. ${userProfile.name}님, 지금 가장 시급하게 해결하고 싶은 구체적인 상황은 무엇인가요?'";
+      } else if (userMessageCount === 2) {
+        phaseGoal = "내담자의 고민에 깊이 공감하고, '이 상황을 해결하기 위해 그동안 스스로 시도해본 현실적인 방법'이 있는지 '딱 하나'만 물어보세요.";
+        phaseExample = "예시: '정말 답답한 상황이셨겠네요... 혹시 이 문제를 해결하기 위해 ${userProfile.name}님께서 그동안 스스로 시도해 보신 방법이 있을까요?'";
+      } else if (userMessageCount === 3) {
+        phaseGoal = "내담자의 시도를 격려하고, '이번 상담을 통해 내일 당장 어떤 작은 부분이라도 구체적으로 달라지길 원하는지' '딱 하나'만 물어보세요.";
+        phaseExample = "예시: '그렇게 노력해 오셨다니 정말 대단하세요. 그러면 이번 상담을 통해 내일 당장 아주 작은 부분이라도 어떤 점이 달라지기를 바라시나요?'";
+      } else {
+        phaseGoal = "공감의 인사와 함께 전문 상담사가 준비 중임을 알리고 대화를 정중히 마무리하세요. 더 이상의 질문은 절대 금지입니다.";
+        phaseExample = "예시: '네, 말씀해 주신 내용 잘 알겠습니다. 전문 상담사가 최적의 정책을 찾기 위해 대기 중이니, 아래 버튼을 눌러 신청을 완료해 주세요!'";
+      }
 
-      const localDynamicInstruction = `당신은 청년 정책 상담사입니다. 규칙: 1.공감 2.질문은 딱 하나만 3.짧은 답변. 목표: ${phaseGoal}`;
+      const localDynamicInstruction = `### 당신의 역할\n- 당신은 '열고닫기(OPCL)'의 청년 정책 전문 AI 상담사입니다.\n- 내담자: ${userProfile.name}\n\n### 행동 규칙\n1. [공감 우선] 2. [단일 질문] 3. [단계 준수] (현재 ${userMessageCount}단계)\n\n### 현재 목표\n- ${phaseGoal}\n\n### 답변 가이드\n- ${phaseExample}`;
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), LOCAL_TIMEOUT);
@@ -59,10 +69,7 @@ export async function POST(req: Request) {
       const localResponse = await fetch(`${localUrl}/chat/completions`, {
         method: "POST",
         signal: controller.signal,
-        headers: { 
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true"
-        },
+        headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
         body: JSON.stringify({
           model: localModel,
           messages: [
@@ -76,9 +83,8 @@ export async function POST(req: Request) {
       });
 
       clearTimeout(timeoutId);
-      if (!localResponse.ok) throw new Error("Local AI connection failed");
+      if (!localResponse.ok) throw new Error(`Local AI error: ${localResponse.status}`);
 
-      // 로컬 AI 스트림 생성
       const localStream = new ReadableStream({
         async start(controller) {
           const encoder = new TextEncoder();
@@ -113,16 +119,13 @@ export async function POST(req: Request) {
         headers: { "Content-Type": "text/plain; charset=utf-8", "X-AI-Source": "Local-EXAONE" } 
       });
 
-    } catch (localErr) {
-      console.warn("⚠️ 로컬 AI 연결 실패. Fallback으로 Google Gemini 전환...", localErr);
+    } catch (localErr: any) {
+      console.warn("⚠️ 로컬 AI 연결 실패. Fallback으로 Google Gemini 전환...", localErr.message);
       
-      // ---------------------------------------------------------
-      // [우선순위 2] Google Gemini (Fallback)
-      // ---------------------------------------------------------
       if (!apiKey) return new Response("AI 연결 실패", { status: 500 });
       
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "models/gemini-2.0-flash" }); // models/ 접두사 추가
+      const model = genAI.getGenerativeModel({ model: "models/gemini-2.0-flash" });
       
       const geminiHistory = sanitizedHistory.map((m: any) => ({
         role: m.role === "assistant" ? "model" : "user",
@@ -164,9 +167,12 @@ export async function POST(req: Request) {
       });
     }
 
+  } catch (error: any) {
+    console.error("🚨 Critical Error:", error);
     const errorMsg = `서비스 연결이 원활하지 않습니다. (원인: ${error.message || "알 수 없는 에러"})`;
     return new Response(errorMsg, { 
       status: 200, 
       headers: { "Content-Type": "text/plain; charset=utf-8", "X-AI-Error": "True" }
     });
+  }
 }
