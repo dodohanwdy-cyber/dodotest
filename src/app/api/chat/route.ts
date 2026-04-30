@@ -8,7 +8,7 @@ const apiKey = process.env.GOOGLE_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
 // 재시도 횟수 설정 (유료 플랜이라도 순간적인 429 방지용)
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5;
 
 export async function POST(req: Request) {
   try {
@@ -33,9 +33,9 @@ export async function POST(req: Request) {
       - 4단계(최종): 3번의 질문이 끝나면 공감의 인사를 전한 뒤, "전문 상담사가 최적의 정책을 찾아드리기 위해 준비 중이니, 아래 '상담 신청 완료하기' 버튼을 눌러달라"고 정중히 안내하며 마무리. (이후 추가 질문 금지)
     `;
 
-    // Gemini 2.0 Flash 모델 사용
+    // [모델 안정성 강화] 프리뷰 버전 대신 안정적인 gemini-1.5-flash 사용
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash", 
+      model: "gemini-1.5-flash", 
       systemInstruction: systemInstruction 
     });
 
@@ -70,7 +70,8 @@ export async function POST(req: Request) {
         
         if (isRetryableError) {
           console.warn(`⚠️ API 과부하/오류(${status || '알수없음'}) 감지. 재시도 중... (${attempt}/${MAX_RETRIES})`);
-          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)));
+          // 지수 백오프: 1.5초, 3초, 6초, 12초... 로 대기 시간 증가
+          await new Promise(resolve => setTimeout(resolve, 1500 * Math.pow(2, attempt - 1)));
         } else {
           throw error; // 재시도해도 안 되는 에러(예: 400 문법 오류)는 즉시 중단
         }
