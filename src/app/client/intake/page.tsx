@@ -157,12 +157,18 @@ function IntakeContent() {
             setCompletedSteps(['section-1', 'section-2']);
             setValue('section-3');
           }
-        } else if (currentStatus === 'sec3' || currentStatus === 'chat_complete' || hasChatData) {
+        } else if (currentStatus === 'sec3' || currentStatus === 'step3' || currentStatus === 'chat_complete' || hasChatData) {
+          // 3단계(AI 상담) 완료 -> 4단계(약관동의)로 이동
           setCompletedSteps(['section-1', 'section-2', 'section-3']);
           setIsChatFinished(true);
-          // 3단계 완료 후에는 약관동의(4단계)가 기본
           setValue('section-4');
+        } else if (currentStatus === 'step4') {
+          // 4단계(동의) 완료 -> 5단계(최종확인)로 이동
+          setCompletedSteps(['section-1', 'section-2', 'section-3', 'section-4']);
+          setIsChatFinished(true);
+          setValue('section-5');
         } else if (['pending', 'confirmed', 'final_submitted', 'submitted'].includes(currentStatus)) {
+          // 최종 완료 상태 -> 5단계(최종확인)로 이동
           setCompletedSteps(['section-1', 'section-2', 'section-3', 'section-4', 'section-5']);
           setIsChatFinished(true);
           setValue('section-5');
