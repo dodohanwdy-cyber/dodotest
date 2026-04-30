@@ -38,6 +38,19 @@ export async function POST(req: Request) {
       [중요!] 절대 한 번에 2개 이상의 질문을 하지 마세요. 반드시 내담자의 답변을 듣고 나서 다음 단계의 질문 하나만 던지세요.
     `;
 
+    // [로컬 전용 프롬프트] EXAONE 등 로컬 모델용 (극도의 간결함과 강제성)
+    const localSystemInstruction = `
+      당신은 청년 정책 상담사입니다. 아래 규칙을 반드시 지키세요.
+      1. 한 번에 딱 **하나의 질문**만 하세요. 절대 질문 두 개를 합치지 마세요.
+      2. 답변은 아주 짧게 하세요. 공감을 먼저 하고 질문하세요.
+      3. 대화 단계:
+         - 1단계: "가장 시급한 구체적인 어려움" 질문.
+         - 2단계: "그동안 시도해본 방법" 질문.
+         - 3단계: "당장 달라지길 원하는 작은 변화" 질문.
+         - 4단계: 마무리 인사와 "상담 신청 완료하기" 안내.
+      현재 내담자(${userProfile.name})의 답변을 듣고, 다음 단계 질문 **하나**만 하세요.
+    `;
+
     // [기존 합의 모델 복구] Gemini 2.x 버전 사용
     const model = genAI.getGenerativeModel({ 
       model: "gemini-2.0-flash"
@@ -117,6 +130,26 @@ export async function POST(req: Request) {
       }
 
       try {
+        // 로컬 AI를 위한 현재 단계 계산 (질문 3개 제한 로직 강화)
+        const userMessageCount = sanitizedHistory.filter(m => m.role === "user").length + 1;
+        let forcedInstruction = "";
+        
+        if (userMessageCount === 1) {
+          forcedInstruction = "현재 [1단계]입니다. 내담자의 첫 인사를 듣고 공감한 뒤, '가장 시급하게 해결하고 싶은 구체적인 어려움'이 무엇인지 '하나'만 질문하세요.";
+        } else if (userMessageCount === 2) {
+          forcedInstruction = "현재 [2단계]입니다. 내담자의 어려움에 공감하고, '그동안 이 상황을 어떻게 버텨오셨는지, 혹은 스스로 시도해본 현실적인 방법'을 '하나'만 질문하세요.";
+        } else if (userMessageCount === 3) {
+          forcedInstruction = "현재 [3단계]입니다. 내담자의 시도에 공감하고, '이번 상담을 통해 내일 당장 어떤 작은 부분이라도 달라지기를 원하는지' '하나'만 질문하세요.";
+        } else {
+          forcedInstruction = "현재 [마무리] 단계입니다. 상담 신청을 완료해달라고 안내하고 대화를 종료하세요. 더 이상 질문하지 마세요.";
+        }
+
+        const localDynamicInstruction = `
+          당신은 청년 정책 상담사입니다.
+          [규칙] 1. 공감을 먼저 하세요. 2. 질문은 반드시 딱 '하나'만 하세요. 3. 답변을 길게 하지 마세요.
+          [현재 할 일] ${forcedInstruction}
+        `;
+
         // 로컬 AI 호출 타임아웃 설정
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), LOCAL_TIMEOUT);
@@ -132,7 +165,7 @@ export async function POST(req: Request) {
           body: JSON.stringify({
             model: localModel,
             messages: [
-              { role: "system", content: systemInstruction },
+              { role: "system", content: localDynamicInstruction }, // 동적 프롬프트 주입
               ...sanitizedHistory.map((m: any) => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.parts[0].text })),
               { role: "user", content: message }
             ],
