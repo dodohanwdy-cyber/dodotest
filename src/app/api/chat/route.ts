@@ -122,7 +122,7 @@ export async function POST(req: Request) {
       if (!apiKey) return new Response("AI 연결 실패", { status: 500 });
       
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      const model = genAI.getGenerativeModel({ model: "models/gemini-2.0-flash" }); // models/ 접두사 추가
       
       const geminiHistory = sanitizedHistory.map((m: any) => ({
         role: m.role === "assistant" ? "model" : "user",
@@ -164,8 +164,9 @@ export async function POST(req: Request) {
       });
     }
 
-  } catch (error: any) {
-    console.error("🚨 Critical Error:", error);
-    return new Response("서비스 연결이 원활하지 않습니다.", { status: 200 });
-  }
+    const errorMsg = `서비스 연결이 원활하지 않습니다. (원인: ${error.message || "알 수 없는 에러"})`;
+    return new Response(errorMsg, { 
+      status: 200, 
+      headers: { "Content-Type": "text/plain; charset=utf-8", "X-AI-Error": "True" }
+    });
 }
