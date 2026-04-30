@@ -295,17 +295,17 @@ export default function ClientDashboard() {
                           isAnalyzed ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm animate-bounce-subtle' :
                           app.status === 'confirmed' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' :
                           (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' :
-                          (app.status && app.status.includes('step') || app.status && app.status.includes('sec')) ? 'bg-indigo-50 text-primary border border-indigo-100 animate-pulse-subtle' :
+                          (app.status && app.status.includes('step')) ? 'bg-indigo-50 text-primary border border-indigo-100 animate-pulse-subtle' :
                           'bg-indigo-50 text-primary border border-indigo-100'
                         }`}>
                           {isCanceled ? '상담 취소됨' : 
                            isAnalyzed ? '상담 완료' : 
                            app.status === 'confirmed' ? '일정 정해짐' : 
                            (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? '최종 신청 완료' :
-                           (app.status === 'sec1' || app.status === 'step1') ? '기본 정보 (1/5)' :
-                           (app.status === 'sec2' || app.status === 'step2') ? '추가 정보 (2/5)' :
-                           (app.status === 'sec3' || app.status === 'step3') ? 'AI 상담 중 (3/5)' :
-                           (app.status === 'step4') ? '동의 완료 (4/5)' :
+                           (app.status === 'step1') ? '기초 정보 입력함' :
+                           (app.status === 'step2') ? '신청 정보 작성함' :
+                           (app.status === 'step3') ? 'AI 대화 완료함' :
+                           (app.status === 'step4') ? '약관 동의 완료함' :
                            '신청 작성중'}
                         </div>
                       </div>

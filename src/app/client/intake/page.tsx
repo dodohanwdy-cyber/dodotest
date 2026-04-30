@@ -145,10 +145,10 @@ function IntakeContent() {
         }
 
         // 상태별 단계 매핑 (Robust Mapping)
-        if (currentStatus === 'sec1' || currentStatus === 'basic_complete') {
+        if (currentStatus === 'step1' || currentStatus === 'basic_complete') {
           setCompletedSteps(['section-1']);
           setValue('section-2');
-        } else if (currentStatus === 'sec2' || currentStatus === 'schedule_complete') {
+        } else if (currentStatus === 'step2' || currentStatus === 'schedule_complete') {
           // 2단계 완료 상태인데 이미 상담 데이터가 있다면 4단계로 점프
           if (hasChatData) {
             setCompletedSteps(['section-1', 'section-2', 'section-3']);
@@ -157,7 +157,7 @@ function IntakeContent() {
             setCompletedSteps(['section-1', 'section-2']);
             setValue('section-3');
           }
-        } else if (currentStatus === 'sec3' || currentStatus === 'step3' || currentStatus === 'chat_complete' || hasChatData) {
+        } else if (currentStatus === 'step3' || currentStatus === 'chat_complete' || hasChatData) {
           // 3단계(AI 상담) 완료 -> 4단계(약관동의)로 이동
           setCompletedSteps(['section-1', 'section-2', 'section-3']);
           setIsChatFinished(true);
@@ -269,7 +269,7 @@ function IntakeContent() {
           role: storedUser?.role || "",
           password_hash: storedUser?.password_hash || "",
           time: kstTime,
-          step: "basic_info"
+          status: "step1"
         });
 
         console.log("📥 [웹훅 응답 원본]", res);
@@ -310,6 +310,17 @@ function IntakeContent() {
         return;
       }
     } else if (step === "section-2") {
+      try {
+        await postToWebhook(WEBHOOK_URLS.SUBMIT_INTAKE, {
+          ...updatedData,
+          user_id: storedUser?.id || "",
+          email: storedUser?.email || "",
+          time: kstTime,
+          status: "step2"
+        });
+      } catch (err) {
+        console.error("🚨 [Section-2 완료 웹훅 전송 실패]", err);
+      }
       setValue("section-3");
     } else if (step === "section-3") {
       setIsChatFinished(true);
