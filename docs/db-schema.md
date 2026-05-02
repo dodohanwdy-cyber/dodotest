@@ -112,9 +112,51 @@
 - `updated_at`
 - `etc_data`
 
+## 프런트엔드-백엔드 동기화 원칙 (FE-BE Sync Rules)
+
+데이터 무결성을 위해 모든 프런트엔드 참여자(인간 및 AI)는 아래 규칙을 엄격히 준수해야 합니다.
+
+### 1. 명명 규칙 (Naming Convention)
+- **Snake Case Only**: 모든 JSON Key, Form Name, State Property는 **소문자와 언더바(`_`)**만 사용합니다.
+- **No CamelCase**: `requestId` (X) -> `request_id` (O).
+- **No Space/Uppercase**: 공백이나 대문자 사용을 엄격히 금지합니다.
+
+### 2. 컴포넌트 구현 가이드
+- **HTML Form**: `<input name="job_status">`와 같이 `name` 속성을 아래의 DB 컬럼명과 1:1로 일치시킵니다.
+- **React State & Fetch**: API 전송 시의 모든 속성명은 아래 리스트의 명칭을 단 하나의 예외 없이 따릅니다.
+
+### 3. 특수 필드 주의사항 (Compatibility)
+아래 필드들은 현재 DB 설계에 따라 고정된 명칭이므로 오타로 오인하여 수정하지 마십시오.
+- `conversation_scrips` (scripts가 아님)
+- `marital_statues` (statuses가 아님)
+
+---
+
+## 공식 데이터 스키마 그룹 (`counselings` 테이블)
+
+### 기초 정보 및 상담 단계
+- `request_id`, `email`, `time`, `status`, `updated_at`, `is_dummy`
+
+### 내담자 인적 사항
+- `name`, `age`, `gender`, `regional_local_government`, `basic_local_government`, `job_status`, `income_level`, `interest_areas`, `education_level`, `marital_statues`, `benefited_policy`
+
+### 상담 일정 및 방식
+- `request_time_1`, `request_time_2`, `request_time_3`, `preferred_location`, `preferred_method`
+
+### AI 상담 및 분석 데이터
+- `conversation_scrips`, `chat_summary`, `special_notes`, `user_interest`, `consultation_guide`, `policy_roadmap`, `recommended_policies`, `pre_consultation_brief`
+
+### 상담 확정 및 관리
+- `confirmed_datetime`, `confirmed_location`, `confirmed_method`, `confirmed_at`, `completed_at`
+
+### 상담 결과 및 리포트
+- `counsel_scripts`, `main_issue`, `dialog_summary`, `risk_grade`, `engagement_change`, `policy_match`, `user_message`, `next_step`, `counselor_note`, `keywords`, `etc_data`
+
+---
+
 ## 주의사항
 
 1. **필드명 변경 금지**: 이 문서의 필드명을 임의로 변경하지 마세요.
 2. **카멜케이스 사용 금지**: DB 필드는 스네이크 케이스(`snake_case`)를 사용합니다.
 3. **신규 필드 추가**: 새로운 필드가 필요한 경우 먼저 이 문서를 업데이트하세요.
-4. **타입 정보**: 추후 각 필드의 데이터 타입, 필수 여부, 제약 조건 등을 추가할 예정입니다.
+4. **동기화**: 모든 API 호출(n8n Webhook) 데이터는 위 리스트와 정확히 일치해야 합니다.
