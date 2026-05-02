@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useToast } from '@/context/ToastContext'
+import { useAuth } from '@/context/AuthContext'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -12,6 +13,18 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+  const { user, userRole } = useAuth()
+
+  // 💡 안전장치: 이미 로그인된 상태라면 자동으로 대시보드로 리다이렉트
+  React.useEffect(() => {
+    if (user && userRole) {
+      if (userRole === 'manager') {
+        router.push('/manager/dashboard')
+      } else {
+        router.push('/client/dashboard')
+      }
+    }
+  }, [user, userRole, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,26 +40,11 @@ export default function LoginPage() {
     } else {
       toast('성공적으로 로그인되었습니다.', 'success')
       
-      // 💡 핵심 수정 포인트: 브라우저가 쿠키를 받았음을 서버(Next.js)에 강제로 동기화!
-      // 이 한 줄이 있어야 미들웨어와 레이아웃이 유저를 튕겨내지 않습니다.
+      // 쿠키 동기화를 위해 refresh 호출 (서버 컴포넌트 대응)
       router.refresh()
-
-      const loggedInUser = data.user
-      if (loggedInUser) {
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('role')
-          .eq('id', loggedInUser.id)
-          .single()
-        
-        if (profile?.role === 'manager') {
-          router.push('/manager/dashboard')
-        } else {
-          router.push('/client/dashboard')
-        }
-      } else {
-        router.push('/')
-      }
+      
+      // handleLogin 내부의 push는 즉각적인 응답을 위함이며, 
+      // 위의 useEffect가 최종적인 리다이렉트 안전장치 역할을 합니다.
     }
     
     setLoading(false)

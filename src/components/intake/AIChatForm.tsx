@@ -164,7 +164,7 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         request_id: intakeData.request_id,
         user_id: storedUser?.id || "",
         email: storedUser?.email || "",
-        conversation_scrips: formattedHistory,
+        conversation_scripts: formattedHistory,
         completed_at: kstTime,
         time: kstTime,
         status: "step3"

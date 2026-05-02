@@ -13,7 +13,7 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
     job_status: data?.job_status || "취업준비생",
     income_level: data?.income_level || "없음",
     education_level: "",
-    marital_statues: "",
+    marital_status: "",
     interest_areas: Array.isArray(data?.interest_areas) ? data.interest_areas : [] as string[],
     benefited_policy: data?.benefited_policy || "",
     special_notes: Array.isArray(data?.special_notes) ? data.special_notes : [] as string[],

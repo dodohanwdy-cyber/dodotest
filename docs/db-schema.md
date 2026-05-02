@@ -126,9 +126,9 @@
 - **React State & Fetch**: API 전송 시의 모든 속성명은 아래 리스트의 명칭을 단 하나의 예외 없이 따릅니다.
 
 ### 3. 특수 필드 주의사항 (Compatibility)
-아래 필드들은 현재 DB 설계에 따라 고정된 명칭이므로 오타로 오인하여 수정하지 마십시오.
-- `conversation_scrips` (scripts가 아님)
-- `marital_statues` (statuses가 아님)
+아래 필드들은 현재 DB 설계에 따라 고정된 명칭이므로 임의로 수정하지 마십시오.
+- `conversation_scripts`
+- `marital_status`
 
 ---
 
@@ -138,13 +138,13 @@
 - `request_id`, `email`, `time`, `status`, `updated_at`, `is_dummy`
 
 ### 내담자 인적 사항
-- `name`, `age`, `gender`, `regional_local_government`, `basic_local_government`, `job_status`, `income_level`, `interest_areas`, `education_level`, `marital_statues`, `benefited_policy`
+- `name`, `age`, `gender`, `regional_local_government`, `basic_local_government`, `job_status`, `income_level`, `interest_areas`, `education_level`, `marital_status`, `benefited_policy`
 
 ### 상담 일정 및 방식
 - `request_time_1`, `request_time_2`, `request_time_3`, `preferred_location`, `preferred_method`
 
 ### AI 상담 및 분석 데이터
-- `conversation_scrips`, `chat_summary`, `special_notes`, `user_interest`, `consultation_guide`, `policy_roadmap`, `recommended_policies`, `pre_consultation_brief`
+- `conversation_scripts`, `chat_summary`, `special_notes`, `user_interest`, `consultation_guide`, `policy_roadmap`, `recommended_policies`, `pre_consultation_brief`
 
 ### 상담 확정 및 관리
 - `confirmed_datetime`, `confirmed_location`, `confirmed_method`, `confirmed_at`, `completed_at`
