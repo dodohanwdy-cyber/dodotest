@@ -163,8 +163,9 @@ export default function ConsultationPage() {
   const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
   const audioChunksRef = React.useRef<Blob[]>([]);
   const [showReviewModal, setShowReviewModal] = useState(false);
-  const [isAnalyzingAudio, setIsAnalyzingAudio] = useState(false);
   const [analyzedText, setAnalyzedText] = useState("");
+  const [showEmptyState, setShowEmptyState] = useState(false);
+  const [isAnalyzingAudio, setIsAnalyzingAudio] = useState(false);
   const [audioFileBlob, setAudioFileBlob] = useState<Blob | null>(null);
   const [loadingStepIdx, setLoadingStepIdx] = useState(0);
 
@@ -181,9 +182,7 @@ export default function ConsultationPage() {
   }, [isAnalyzingAudio]);
 
   // 분석 실패 또는 오디오가 무효할 때 제공할 10분 분량의 STT 안내 대본 샘플
-  const FALLBACK_TEXT = `[안내] 전사된 상담 내용이 없어 가상의 예시 대본을 표시합니다. 이 내용을 지우고 직접 입력하시거나, 내용을 수정하면 글자색이 진하게 변경됩니다.
-
-[상담사] 안녕하세요. 오늘 방문해 주셔서 감사합니다. 오시는 길은 불편하지 않으셨나요?
+  const FALLBACK_TEXT = `[상담사] 안녕하세요. 오늘 방문해 주셔서 감사합니다. 오시는 길은 불편하지 않으셨나요?
 [내담자] 네, 다행히 청년센터가 역이랑 가까워서 금방 찾을 수 있었어요.
 [상담사] 다행이네요. 오늘 첫 상담인데, 혹시 어떤 고민이나 궁금한 점이 있어서 센터를 찾아주셨는지 편하게 말씀해 주시겠어요?
 [내담자] 음... 사실 제가 졸업한 지 1년 정도 지났는데, 아직 제대로 된 직장을 구하지 못해서요. 계속 서류에서 떨어지다 보니까 자신감도 많이 떨어지고, 앞으로 뭘 해야 할지 막막해서 상담을 신청하게 되었습니다.
@@ -391,13 +390,15 @@ export default function ConsultationPage() {
       const resData = await res.json();
       if (!res.ok) throw new Error(resData.error || "STT 분석 실패");
 
-      // 빈 값이 오면 Fallback 텍스트로 대체
-      setAnalyzedText(resData.transcript?.trim() ? resData.transcript : FALLBACK_TEXT);
+      if (resData.transcript?.trim()) {
+        setAnalyzedText(resData.transcript);
+        setShowEmptyState(false);
+      } else {
+        setShowEmptyState(true);
+      }
     } catch (err) {
       console.error(err);
-      // alert("음성 파일 AI 교정 중 문제가 발생하여, 기존 실시간 전사본을 활용합니다.");
-      // 빈 값일 경우를 대비해 10분 가량의 예시 대본 제공
-      setAnalyzedText(FALLBACK_TEXT); 
+      setShowEmptyState(true);
     } finally {
       setIsAnalyzingAudio(false);
     }
@@ -456,11 +457,11 @@ export default function ConsultationPage() {
       setShowReviewModal(true);
       setIsAnalyzingAudio(true);
       
-      // 약간의 딜레이(가짜 로딩) 후 폴백 텍스트 렌더링
+      // 가짜 로딩 후 Empty State 표시
       setTimeout(() => {
-        setAnalyzedText(FALLBACK_TEXT);
+        setShowEmptyState(true);
         setIsAnalyzingAudio(false);
-      }, 3000); 
+      }, 1500); 
     }
   };
 
@@ -1232,13 +1233,41 @@ export default function ConsultationPage() {
                     <p className="text-xs text-zinc-500 font-medium">오디오 길이에 따라 1~2분 정도 소요될 수 있습니다. 창을 닫지 마세요.</p>
                   </div>
                 </div>
+              ) : showEmptyState ? (
+                <div className="flex-1 w-full flex flex-col items-center justify-center p-6 bg-zinc-50 rounded-2xl border border-zinc-200 border-dashed">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                    <Mic className="w-8 h-8 text-zinc-300" />
+                  </div>
+                  <h3 className="text-lg font-bold text-zinc-800 mb-2">전사된 음성 기록이 없습니다</h3>
+                  <p className="text-zinc-500 text-sm text-center mb-8 max-w-sm">
+                    상담 내용을 직접 텍스트로 입력하시거나, 가상의 예시 템플릿을 불러와서 수정하실 수 있습니다.
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        setShowEmptyState(false);
+                        setAnalyzedText("");
+                      }}
+                      className="px-5 py-2.5 rounded-xl bg-white border border-zinc-200 text-zinc-700 font-bold text-sm hover:bg-zinc-50 transition-colors shadow-sm"
+                    >
+                      직접 타이핑하기
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowEmptyState(false);
+                        setAnalyzedText(FALLBACK_TEXT);
+                      }}
+                      className="px-5 py-2.5 rounded-xl bg-primary/10 text-primary font-bold text-sm hover:bg-primary/20 transition-colors"
+                    >
+                      예시 템플릿 불러오기
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <textarea 
                   value={analyzedText}
                   onChange={(e) => setAnalyzedText(e.target.value)}
-                  className={`flex-1 w-full p-6 text-sm leading-relaxed font-medium bg-zinc-50 rounded-2xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none custom-scrollbar ${
-                    analyzedText === FALLBACK_TEXT ? "text-zinc-400" : "text-zinc-800"
-                  }`}
+                  className="flex-1 w-full p-6 text-sm text-zinc-800 leading-relaxed font-medium bg-zinc-50 rounded-2xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none custom-scrollbar"
                   placeholder="분석된 텍스트가 이곳에 표시됩니다. 리포트 생성 전 내용을 직접 편집할 수 있습니다."
                 />
               )}
