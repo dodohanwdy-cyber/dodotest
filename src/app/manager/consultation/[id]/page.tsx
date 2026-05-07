@@ -181,7 +181,9 @@ export default function ConsultationPage() {
   }, [isAnalyzingAudio]);
 
   // 분석 실패 또는 오디오가 무효할 때 제공할 10분 분량의 STT 안내 대본 샘플
-  const FALLBACK_TEXT = `[상담사] 안녕하세요. 오늘 방문해 주셔서 감사합니다. 오시는 길은 불편하지 않으셨나요?
+  const FALLBACK_TEXT = `[안내] 전사된 상담 내용이 없어 가상의 예시 대본을 표시합니다. 이 내용을 지우고 직접 입력하시거나, 내용을 수정하면 글자색이 진하게 변경됩니다.
+
+[상담사] 안녕하세요. 오늘 방문해 주셔서 감사합니다. 오시는 길은 불편하지 않으셨나요?
 [내담자] 네, 다행히 청년센터가 역이랑 가까워서 금방 찾을 수 있었어요.
 [상담사] 다행이네요. 오늘 첫 상담인데, 혹시 어떤 고민이나 궁금한 점이 있어서 센터를 찾아주셨는지 편하게 말씀해 주시겠어요?
 [내담자] 음... 사실 제가 졸업한 지 1년 정도 지났는데, 아직 제대로 된 직장을 구하지 못해서요. 계속 서류에서 떨어지다 보니까 자신감도 많이 떨어지고, 앞으로 뭘 해야 할지 막막해서 상담을 신청하게 되었습니다.
@@ -1234,7 +1236,9 @@ export default function ConsultationPage() {
                 <textarea 
                   value={analyzedText}
                   onChange={(e) => setAnalyzedText(e.target.value)}
-                  className="flex-1 w-full p-6 text-sm text-zinc-800 leading-relaxed font-medium bg-zinc-50 rounded-2xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none custom-scrollbar"
+                  className={`flex-1 w-full p-6 text-sm leading-relaxed font-medium bg-zinc-50 rounded-2xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none custom-scrollbar ${
+                    analyzedText === FALLBACK_TEXT ? "text-zinc-400" : "text-zinc-800"
+                  }`}
                   placeholder="분석된 텍스트가 이곳에 표시됩니다. 리포트 생성 전 내용을 직접 편집할 수 있습니다."
                 />
               )}
