@@ -413,7 +413,7 @@ export default function ConsultationPage() {
         user_name: data?.name || data?.user_name,
         full_text: finalText,
         manager_notes: notes,
-        status: 'analyzed',
+        status: 'completed',
         timestamp: new Date().toISOString()
       });
 
