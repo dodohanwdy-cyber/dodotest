@@ -122,6 +122,8 @@ export default function ConsultationDetailPopup({
     setMounted(true);
   }, []);
 
+  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+
   if (!isOpen || !mounted) return null;
 
   const showToast = (msg: string, type: 'ok' | 'error' = 'ok') => {
@@ -169,7 +171,6 @@ export default function ConsultationDetailPopup({
     }
   };
 
-  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
 
   const handleOpenScript = async () => {
     const rawUrl = data?.counsel_scripts;
