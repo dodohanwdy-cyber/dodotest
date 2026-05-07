@@ -5,7 +5,7 @@ const ContentSecurityPolicy = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval';
   style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
-  img-src 'self' data: blob: https://www.transparenttextures.com https://*.supabase.co;
+  img-src 'self' data: blob: https://www.transparenttextures.com https://*.supabase.co https://*.googleusercontent.com https://*.kakaocdn.net https://*.kakao.com;
   font-src 'self' https://cdn.jsdelivr.net data:;
   connect-src 'self' https://*.supabase.co wss://*.supabase.co https://primary-production-1f39e.up.railway.app https://*.vercel.app;
   frame-src 'none';
@@ -57,7 +57,7 @@ const nextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(self), geolocation=()',
+            value: 'camera=(self), microphone=(self), geolocation=(self)',
           },
         ],
       },
