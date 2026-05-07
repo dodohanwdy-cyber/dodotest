@@ -79,6 +79,9 @@ export default function ManagerDashboard() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const futureAppointments = rawConfirmed.filter((apt: any) => {
+      // 취소된 상담은 제외
+      if (apt.status === 'canceled' || apt.status === 'cancelled') return false;
+      
       const aptDate = getConfirmedDate(apt);
       if (!aptDate) return false;
       aptDate.setHours(0, 0, 0, 0);
@@ -263,19 +266,20 @@ export default function ManagerDashboard() {
       return item;
     });
 
-    return [...mappedBase, ...filteredConfirmed];
+    return [...mappedBase, ...filteredConfirmed].filter(item => item.status !== 'canceled' && item.status !== 'cancelled');
   }, [data?.analyzed_list, confirmedAppointments]);
 
   // 대시보드 캘린더 전용: 기확정 일정만 매핑하여 전달 (기존 calendar_events와 병합 예정)
   const confirmedCalendarEvents = useMemo(() => {
-    return confirmedAppointments.map((apt: any) => ({
-      id: apt.request_id,
-      title: `${apt.name} 상담`, // [확정] 문구 제거
-      start: apt.confirmed_datetime,
-      // 임의로 1시간 뒤를 end 시간으로 지정 (필요 시)
-      end: new Date(new Date(apt.confirmed_datetime).getTime() + 60 * 60 * 1000).toISOString(),
-      color: 'indigo'
-    }));
+    return confirmedAppointments
+      .filter((apt: any) => !!apt.confirmed_datetime) // 날짜가 있는 경우만 캘린더에 표시
+      .map((apt: any) => ({
+        id: apt.request_id,
+        title: `${apt.name} 상담`,
+        start: apt.confirmed_datetime,
+        end: new Date(new Date(apt.confirmed_datetime).getTime() + 60 * 60 * 1000).toISOString(),
+        color: 'indigo'
+      }));
   }, [confirmedAppointments]);
 
   const handleOpenAdjustPopup = () => {
@@ -515,9 +519,11 @@ export default function ManagerDashboard() {
 
                 return confirmedAppointments.map((apt: any) => {
                   // 날짜 시간 포맷팅 (예: "2026-02-28 14:00")
-                  const dateStr = new Date(apt.confirmed_datetime).toLocaleString("ko-KR", {
-                    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
-                  });
+                  const dateStr = apt.confirmed_datetime 
+                    ? new Date(apt.confirmed_datetime).toLocaleString("ko-KR", {
+                        month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
+                      })
+                    : "일정 미정";
 
                   return (
                     <label key={apt.request_id} className="flex items-center gap-3 p-4 border border-zinc-100 rounded-xl cursor-pointer hover:bg-zinc-50 transition-colors">

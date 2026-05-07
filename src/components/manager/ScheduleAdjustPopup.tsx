@@ -20,8 +20,8 @@ interface AnalyzedRequest {
     suggested_time: string;
     suggested_priority: number;
   };
-  status?: string; // "pending", "confirmed", "in_progress", "completed", "cancelled" 등
-  confirmed_datetime?: string; // "YYYY-MM-DD HH:MM:SS" 형식
+  status?: string; // "pending", "confirmed", "in_progress", "completed", "canceled", "cancelled" 등
+  confirmed_datetime?: string | null; // "YYYY-MM-DD HH:MM:SS" 형식 또는 null
 }
 
 interface CalendarEvent {
@@ -92,7 +92,7 @@ export default function ScheduleAdjustPopup({
 
       analyzedList.forEach(req => {
         // 이미 취소된 상태의 요청은 canceledList에 추가
-        if (req.status === "cancelled") {
+        if (req.status === "canceled" || req.status === "cancelled") {
           initialCanceled.push(req.request_id);
           return;
         }

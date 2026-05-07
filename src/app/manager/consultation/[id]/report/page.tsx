@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function ReportPage() {
   const { id } = useParams();
@@ -475,6 +476,48 @@ function ReportDetailView({ baseData, reportData, onBack }: { baseData: any, rep
   const [showResultModal, setShowResultModal] = useState(false);
   const [sendResultStatus, setSendResultStatus] = useState<"idle" | "loading" | "success">("idle");
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [scriptUrl, setScriptUrl] = useState<string | null>(null);
+  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+
+  // Supabase Private Storage Signed URL 생성 함수
+  const handleOpenScript = async () => {
+    const rawUrl = baseData?.counsel_scripts;
+    if (!rawUrl) {
+      alert("상담 스크립트 파일 경로를 찾을 수 없습니다.");
+      return;
+    }
+
+    setIsGeneratingLink(true);
+    try {
+      // URL 파싱: https://.../storage/v1/object/[type]/[bucket]/[path]
+      // 보통 supabase URL 구조에서 bucket과 path를 추출합니다.
+      const urlObj = new URL(rawUrl);
+      const pathSegments = urlObj.pathname.split('/storage/v1/object/')[1]?.split('/');
+      
+      if (!pathSegments || pathSegments.length < 2) {
+        throw new Error("Invalid storage URL format");
+      }
+
+      // pathSegments[0]은 'public' 또는 'authenticated' 일 수 있음
+      // 실제 버킷명은 그 다음 세그먼트임
+      const bucket = pathSegments[1];
+      const filePath = pathSegments.slice(2).join('/');
+
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(filePath, 3600); // 1시간 유효
+
+      if (error) throw error;
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (err) {
+      console.error("Signed URL 생성 실패:", err);
+      alert("보안 링크 생성에 실패했습니다. 관리자에게 문의해 주세요.");
+    } finally {
+      setIsGeneratingLink(false);
+    }
+  };
 
   const handleSendResultAction = async () => {
     if (sendResultStatus === "loading") return;
@@ -678,6 +721,36 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
                 ))}
              </div>
           </section>
+
+          {/* 원본 상담 스크립트 열람 섹션 (Private Storage 대응) */}
+          {baseData?.counsel_scripts && (
+            <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-100 print:hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2 mb-4">
+                <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-500">
+                  <FileText size={16} />
+                </div>
+                원본 상담 기록
+              </h3>
+              <p className="text-[12px] text-zinc-500 mb-6 leading-relaxed font-medium">
+                보안을 위해 암호화된 임시 링크를 생성하여 원본 텍스트 파일을 안전하게 열람할 수 있습니다.
+              </p>
+              <button
+                onClick={handleOpenScript}
+                disabled={isGeneratingLink}
+                className="w-full py-4 bg-indigo-50 text-indigo-700 font-bold rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-all flex items-center justify-center gap-2 group active:scale-95 disabled:opacity-50"
+              >
+                {isGeneratingLink ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" /> 보안 링크 생성 중...
+                  </>
+                ) : (
+                  <>
+                    원본 파일 열람하기 <ExternalLink size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </>
+                )}
+              </button>
+            </section>
+          )}
         </div>
 
         <div className="lg:col-span-2 space-y-10">

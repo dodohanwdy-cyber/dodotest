@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom';
 import { X, User, MapPin, Briefcase, Heart, Calendar, Sparkles, FileText, Lightbulb, Route, AlertCircle, Play, Eye, EyeOff, Zap, Loader2, CheckCircle2 } from 'lucide-react';
 import { postToWebhook } from '@/lib/api';
 import { WEBHOOK_URLS } from '@/config/webhooks';
+import { supabase } from '@/lib/supabaseClient';
+import { ExternalLink } from 'lucide-react';
 
 // ─── 프론트엔드 예시 데이터 (외부 API 호출 없음) ────────────────────────────
 const EXAMPLE_AI_ANALYSIS = {
@@ -164,6 +166,43 @@ export default function ConsultationDetailPopup({
       setTimeout(() => setPrepareStatus('idle'), 5000);
     } finally {
       setIsPreparing(false);
+    }
+  };
+
+  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+
+  const handleOpenScript = async () => {
+    const rawUrl = data?.counsel_scripts;
+    if (!rawUrl) {
+      showToast('상담 스크립트 파일 경로를 찾을 수 없습니다.', 'error');
+      return;
+    }
+
+    setIsGeneratingLink(true);
+    try {
+      const urlObj = new URL(rawUrl);
+      const pathSegments = urlObj.pathname.split('/storage/v1/object/')[1]?.split('/');
+      
+      if (!pathSegments || pathSegments.length < 2) {
+        throw new Error("Invalid storage URL format");
+      }
+
+      const bucket = pathSegments[1];
+      const filePath = pathSegments.slice(2).join('/');
+
+      const { data: signedData, error } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(filePath, 3600);
+
+      if (error) throw error;
+      if (signedData?.signedUrl) {
+        window.open(signedData.signedUrl, '_blank');
+      }
+    } catch (err) {
+      console.error("Signed URL 생성 실패:", err);
+      showToast('보안 링크 생성에 실패했습니다.', 'error');
+    } finally {
+      setIsGeneratingLink(false);
     }
   };
 
@@ -548,12 +587,12 @@ export default function ConsultationDetailPopup({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   <div className="bg-white/60 p-4 rounded-2xl border border-white">
                     <p className="text-xs font-bold text-emerald-600/70 uppercase tracking-wider mb-2 text-center">확정 일시</p>
-                    <p className="text-zinc-900 font-bold text-center">{data.confirmed?.datetime || "-"}</p>
+                    <p className="text-zinc-900 font-bold text-center">{data.confirmed?.datetime || "미정 (대기 중)"}</p>
                   </div>
                   <div className="bg-white/60 p-4 rounded-2xl border border-white">
                     <p className="text-xs font-bold text-emerald-600/70 uppercase tracking-wider mb-2 text-center">상담 장소</p>
                     <p className="text-zinc-900 font-bold text-center">
-                      {data.confirmed?.location === 'center' ? '청년센터' : (data.confirmed?.location || "-")}
+                      {data.confirmed?.location === 'center' ? '청년센터' : (data.confirmed?.location || "미정")}
                     </p>
                   </div>
                   <div className="bg-white/60 p-4 rounded-2xl border border-white">
@@ -561,11 +600,37 @@ export default function ConsultationDetailPopup({
                     <p className="text-zinc-900 font-bold text-center">
                       {data.confirmed?.method === 'online' ? '💻 온라인' :
                        data.confirmed?.method === 'offline' ? '🤝 오프라인' :
-                       data.confirmed?.method === 'phone' ? '📞 전화' : (data.confirmed?.method || "-")}
+                       data.confirmed?.method === 'phone' ? '📞 전화' : (data.confirmed?.method || "미정")}
                     </p>
                   </div>
                 </div>
               </div>
+
+              {/* 5.5 원본 상담 스크립트 (Private Storage 대응) */}
+              {data?.counsel_scripts && (
+                <div className="bg-white rounded-[2rem] p-8 border border-zinc-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 bg-indigo-50 rounded-[20px] flex items-center justify-center text-indigo-500 shadow-inner">
+                      <FileText size={28} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-zinc-900">원본 상담 기록</h3>
+                      <p className="text-sm text-zinc-400 mt-1 font-medium leading-relaxed">보안 링크를 통해 원본 상담 텍스트를 안전하게 확인하세요</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleOpenScript}
+                    disabled={isGeneratingLink}
+                    className="w-full sm:w-auto px-8 py-4 bg-zinc-900 text-white font-bold rounded-2xl hover:bg-zinc-800 transition-all active:scale-95 disabled:opacity-50 text-sm shadow-xl shadow-zinc-200 flex items-center justify-center gap-2"
+                  >
+                    {isGeneratingLink ? (
+                      <><Loader2 size={18} className="animate-spin" /> 보안 링크 생성 중</>
+                    ) : (
+                      <>원본 파일 열람 <ExternalLink size={18} /></>
+                    )}
+                  </button>
+                </div>
+              )}
 
               <div className="bg-[#fff9eb] rounded-[32px] p-8 border border-amber-100/50 relative min-h-[500px]">
                 {/* 섹션 헤더 + 예시/준비 버튼 */}

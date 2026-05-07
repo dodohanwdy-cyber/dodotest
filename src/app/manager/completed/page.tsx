@@ -12,7 +12,8 @@ import {
   MoreHorizontal,
   ChevronLeft,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  X
 } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
@@ -68,8 +69,10 @@ export default function CompletedConsultationsPage() {
           rawData = response?.data || response?.applications || response?.completed_list || [];
         }
 
-        // 안전을 위해 한 번 더 status 필터링 (completed 와 analyzed 모두 포함)
-        const filtered = Array.isArray(rawData) ? rawData.filter((item: any) => item.status === "completed" || item.status === "analyzed") : [];
+        // 완료(completed, analyzed) 및 취소(canceled/cancelled) 내역을 모두 포함
+        const filtered = Array.isArray(rawData) ? rawData.filter((item: any) => 
+          ["completed", "analyzed", "canceled", "cancelled"].includes(item.status)
+        ) : [];
         setCompletedList(filtered);
 
         // 사용 가능한 월 리스트 추출 (YYYY-MM)
@@ -121,7 +124,9 @@ export default function CompletedConsultationsPage() {
         rawData = response?.data || response?.applications || response?.completed_list || [];
       }
 
-      const filtered = Array.isArray(rawData) ? rawData.filter((item: any) => item.status === "completed" || item.status === "analyzed") : [];
+      const filtered = Array.isArray(rawData) ? rawData.filter((item: any) => 
+        ["completed", "analyzed", "canceled", "cancelled"].includes(item.status)
+      ) : [];
       setCompletedList(filtered);
     } catch (error) {
       console.error("Failed to refresh completed consultations:", error);
@@ -311,6 +316,10 @@ export default function CompletedConsultationsPage() {
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
                           <FileCheck size={12} /> 분석 완료
                         </span>
+                      ) : (item.status === 'canceled' || item.status === 'cancelled') ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-500 border border-rose-100">
+                          <X size={12} /> 상담 취소
+                        </span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">
                           <Loader2 size={12} className="animate-spin" /> 분석 진행 중
@@ -335,6 +344,10 @@ export default function CompletedConsultationsPage() {
                         >
                           리포트 보기 <ExternalLink size={14} />
                         </Link>
+                      ) : (item.status === 'canceled' || item.status === 'cancelled') ? (
+                        <span className="text-[11px] font-bold text-rose-400 px-3 py-2 bg-rose-50/50 rounded-xl border border-rose-100/50 cursor-default block text-center">
+                          기록 삭제됨
+                        </span>
                       ) : (
                         <button
                           onClick={() => alert('AI가 상담 내용을 분석 중입니다. 잠시 후 새로고침하여 확인해 주세요.')}
