@@ -39,8 +39,13 @@ export async function GET(req: Request) {
     });
 
     if (!response.ok) {
+      const errorText = await response.text().catch(() => 'no body');
+      console.error(`[Application Detail API] n8n error status: ${response.status}, body: ${errorText}`);
       return NextResponse.json(
-        { error: 'n8n 워크플로우가 활성화되지 않았습니다.' },
+        { 
+          error: `n8n 웹훅 호출 실패 (Status: ${response.status}). 워크플로우가 비활성화 상태이거나 인증 정보가 잘못되었습니다.`,
+          details: errorText.slice(0, 200)
+        },
         { status: 503 }
       );
     }
