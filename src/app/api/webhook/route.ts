@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabaseServer';
 import { SERVER_WEBHOOK_URLS } from '@/config/server-webhooks';
+import { n8nFetch } from '@/lib/n8nClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,12 +34,9 @@ export async function POST(req: Request) {
       if ('user_id' in securePayload) securePayload.user_id = user.id;
     }
 
-    // 서버 측에서 n8n으로 실제 전송
-    const response = await fetch(SERVER_WEBHOOK_URLS[action], {
+    // 서버 측에서 n8n으로 실제 전송 (n8nFetch 적용으로 X-Api-Key 보안 헤더 자동 동봉)
+    const response = await n8nFetch(SERVER_WEBHOOK_URLS[action], {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(securePayload),
     });
 
