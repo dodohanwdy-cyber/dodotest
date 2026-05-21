@@ -1,7 +1,7 @@
 // src/lib/n8nClient.ts
 
-const N8N_BASE_URL = process.env.NEXT_PUBLIC_N8N_BASE_URL || '';
-const N8N_API_KEY = process.env.NEXT_PUBLIC_N8N_API_KEY || '';
+const N8N_BASE_URL = process.env.NEXT_PUBLIC_N8N_BASE_URL || process.env.N8N_BASE_URL || '';
+const N8N_API_KEY = process.env.NEXT_PUBLIC_N8N_API_KEY || process.env.N8N_API_KEY || '';
 
 /**
  * n8n 웹훅 API 호출을 위한 전용 fetch 클라이언트

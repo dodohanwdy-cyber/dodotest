@@ -37,8 +37,9 @@ export async function GET(req: Request) {
       const errorText = await response.text().catch(() => 'no body');
       console.error(`[Dashboard API] n8n error status: ${response.status}, body: ${errorText}`);
       
-      const apiKeyExists = !!process.env.NEXT_PUBLIC_N8N_API_KEY;
-      const apiKeyLength = process.env.NEXT_PUBLIC_N8N_API_KEY ? process.env.NEXT_PUBLIC_N8N_API_KEY.length : 0;
+      const activeApiKey = process.env.NEXT_PUBLIC_N8N_API_KEY || process.env.N8N_API_KEY;
+      const apiKeyExists = !!activeApiKey;
+      const apiKeyLength = activeApiKey ? activeApiKey.length : 0;
       const apiEnvStatus = apiKeyExists ? `설정됨 (글자수: ${apiKeyLength}자)` : '누락됨 (빈 값)';
 
       return NextResponse.json(
