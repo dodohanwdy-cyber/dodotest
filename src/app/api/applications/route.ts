@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { SERVER_WEBHOOK_URLS } from '@/config/server-webhooks';
 import { createClient } from '@/lib/supabaseServer';
+import { n8nFetch } from '@/lib/n8nClient';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -27,9 +28,8 @@ export async function GET(req: Request) {
       );
     }
 
-    const response = await fetch(SERVER_WEBHOOK_URLS.GET_DASHBOARD_APPLICATIONS, {
+    const response = await n8nFetch(SERVER_WEBHOOK_URLS.GET_DASHBOARD_APPLICATIONS, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: secureEmail }),
     });
 
@@ -86,9 +86,8 @@ export async function DELETE(req: Request) {
     const CANCEL_WEBHOOK = 'https://primary-production-1f39e.up.railway.app/webhook/cancel-assignment';
     
     // [보안] 자신이 취소하는 것인지 추가 인증이 이상적이나 여기서는 우선 email 로깅 차원에서 보안 처리
-    const response = await fetch(CANCEL_WEBHOOK, {
+    const response = await n8nFetch(CANCEL_WEBHOOK, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         manager_email: 'client_cancel', // N8N에서 사용자 취소 구분
         canceled_requests: [request_id],

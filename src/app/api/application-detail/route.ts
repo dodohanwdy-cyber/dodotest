@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { SERVER_WEBHOOK_URLS } from '@/config/server-webhooks';
 import { createClient } from '@/lib/supabaseServer';
+import { n8nFetch } from '@/lib/n8nClient';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -32,9 +33,8 @@ export async function GET(req: Request) {
       );
     }
 
-    const response = await fetch(SERVER_WEBHOOK_URLS.GET_APPLICATION_DETAIL, {
+    const response = await n8nFetch(SERVER_WEBHOOK_URLS.GET_APPLICATION_DETAIL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ request_id: id, email: user.email }), // 이메일 동봉하여 n8n에서 유효성 검사 수행 가능
     });
 
