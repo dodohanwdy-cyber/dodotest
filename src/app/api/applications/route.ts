@@ -36,10 +36,16 @@ export async function GET(req: Request) {
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'no body');
       console.error(`[Dashboard API] n8n error status: ${response.status}, body: ${errorText}`);
+      
+      const apiKeyExists = !!process.env.NEXT_PUBLIC_N8N_API_KEY;
+      const apiKeyLength = process.env.NEXT_PUBLIC_N8N_API_KEY ? process.env.NEXT_PUBLIC_N8N_API_KEY.length : 0;
+      const apiEnvStatus = apiKeyExists ? `설정됨 (글자수: ${apiKeyLength}자)` : '누락됨 (빈 값)';
+
       return NextResponse.json(
         { 
           error: `n8n 웹훅 호출 실패 (Status: ${response.status}). 워크플로우가 비활성화 상태이거나 인증 정보가 잘못되었습니다.`, 
           details: errorText.slice(0, 200),
+          nextJsEnvStatus: apiEnvStatus,
           applications: [] 
         },
         { status: 200 }
