@@ -1,19 +1,22 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { NextResponse } from "next/server";
 
-// export const runtime = 'edge';
 const apiKey = process.env.GOOGLE_API_KEY;
 const MAX_RETRIES = 3; 
 const LOCAL_TIMEOUT = 10000; 
 
 export async function POST(req: Request) {
-  let geminiErrorMessage = ""; // 제미나이 에러 저장용
+  let geminiErrorMessage = ""; 
 
   try {
     const body = await req.json();
     const { message, history, userProfile } = body;
 
-    const systemInstruction = `당신은 청년 정책 전문 AI 상담사입니다... (중략)`;
+    // 1. 사용자 메세지 카운트 계산 (복원)
+    const userMessageCount = (history?.filter((m: any) => m.role === "user").length || 0) + 1;
+
+    // 2. 기본 지침 + 단계별 동적 지침 결합
+    const baseSystemInstruction = `당신은 청년 정책 전문 AI 상담사입니다.`; // (기존 프롬프트 내용 유지)
+    const dynamicInstruction = `${baseSystemInstruction}\n\n[상담 진행 지침]\n- 당신은 상담사입니다.\n- 한 번에 하나만 질문하세요.\n- 현재 ${userMessageCount}단계 상담 진행 중입니다.`;
 
     const sanitizedHistory = (history || [])
       .filter((msg: any) => msg.content && msg.content.trim() !== "")
@@ -29,10 +32,9 @@ export async function POST(req: Request) {
       if (!apiKey) throw new Error("API 키 누락");
       
       const genAI = new GoogleGenerativeAI(apiKey);
-      // [수정 포인트] 모델명 개편 및 systemInstruction 정석 설정
       const model = genAI.getGenerativeModel({ 
-        model: "gemini-2.5-flash",
-        systemInstruction: systemInstruction 
+        model: "gemini-1.5-flash",
+        systemInstruction: dynamicInstruction // 복원된 동적 지침 적용
       });
       
       const geminiHistory = sanitizedHistory.map((m: any) => ({
@@ -87,9 +89,6 @@ export async function POST(req: Request) {
       const localUrl = process.env.LOCAL_LLM_URL || "https://gastritic-debbi-unbeneficently.ngrok-free.dev/v1";
       const localModel = process.env.LOCAL_LLM_MODEL || "exaone3.5";
 
-      const userMessageCount = (history?.filter((m: any) => m.role === "user").length || 0) + 1;
-      const localDynamicInstruction = `당신은 상담사입니다. 한 번에 하나만 질문하세요. 현재 ${userMessageCount}단계입니다.`;
-
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), LOCAL_TIMEOUT);
 
@@ -99,7 +98,7 @@ export async function POST(req: Request) {
         headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
         body: JSON.stringify({
           model: localModel,
-          messages: [{ role: "system", content: localDynamicInstruction }, ...sanitizedHistory, { role: "user", content: message }],
+          messages: [{ role: "system", content: dynamicInstruction }, ...sanitizedHistory, { role: "user", content: message }],
           stream: true,
           temperature: 0.7,
         }),
@@ -141,7 +140,6 @@ export async function POST(req: Request) {
     }
 
   } catch (error: any) {
-    // 제미나이 에러와 최종 로컬 에러를 동시에 리포팅
     const finalErrorMsg = `Gemini 실패(${geminiErrorMessage || "연결안됨"}) / Local 최종 실패(${error.message})`;
     return new Response(`서비스 연결이 원활하지 않습니다. (진단: ${finalErrorMsg})`, { 
       status: 200, 
