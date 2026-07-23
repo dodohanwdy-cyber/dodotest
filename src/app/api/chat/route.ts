@@ -29,7 +29,11 @@ export async function POST(req: Request) {
       if (!apiKey) throw new Error("API 키 누락");
       
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "models/gemini-2.0-flash" });
+      // [수정 포인트] 모델명 개편 및 systemInstruction 정석 설정
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
+        systemInstruction: systemInstruction 
+      });
       
       const geminiHistory = sanitizedHistory.map((m: any) => ({
         role: m.role === "assistant" ? "model" : "user",
@@ -37,8 +41,6 @@ export async function POST(req: Request) {
       }));
 
       const finalContents = [
-        { role: "user", parts: [{ text: `시스템 지침: ${systemInstruction}` }] },
-        { role: "model", parts: [{ text: "숙지했습니다." }] },
         ...geminiHistory, 
         { role: "user", parts: [{ text: message }] }
       ];
