@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
         systemInstruction: dynamicInstruction // 복원된 동적 지침 적용
       });
       
