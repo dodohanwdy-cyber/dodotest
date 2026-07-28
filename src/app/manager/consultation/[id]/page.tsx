@@ -778,7 +778,7 @@ export default function ConsultationPage() {
                   <div>
                     <p className="text-[10px] font-bold text-zinc-400 mb-0.5">인적 사항</p>
                     <p className="font-bold text-zinc-900">
-                      {data?.name} ({data?.age}세, {(() => {
+                      {data?.name || data?.user_name || "내담자"} ({data?.age || data?.birth_year || "?"}세, {(() => {
                         const g = (data?.gender || data?.Gender || "").toString().toLowerCase().trim();
                         if (g === "male" || g === "남성" || g === "남") return "남";
                         if (g === "female" || g === "여성" || g === "여") return "여";
@@ -792,12 +792,26 @@ export default function ConsultationPage() {
                   <div className="flex items-center gap-3">
                     <MapPin size={16} className="text-zinc-400" />
                     <span className="text-xs font-bold text-zinc-600">
-                      {data?.location ? `${data.location.regional} ${data.location.basic}` : "지역 정보 없음"}
+                      {(() => {
+                        if (!data) return "지역 정보 없음";
+                        if (data.location && typeof data.location === 'object') {
+                          const reg = data.location.regional || data.location.region || "";
+                          const bas = data.location.basic || data.location.city || "";
+                          if (reg || bas) return `${reg} ${bas}`.trim();
+                        }
+                        const regional = data.regional_local_government || data.regional || data.region || "";
+                        const basic = data.basic_local_government || data.basic || data.city || "";
+                        if (regional || basic) return `${regional} ${basic}`.trim();
+                        if (typeof data.location === 'string' && data.location.trim()) return data.location.trim();
+                        return "지역 정보 없음";
+                      })()}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Briefcase size={16} className="text-zinc-400" />
-                    <span className="text-xs font-bold text-zinc-600">{data?.job_status || "직업 정보 없음"}</span>
+                    <span className="text-xs font-bold text-zinc-600">
+                      {data?.job_status || data?.employment_status || data?.job || data?.social_status || "직업 정보 없음"}
+                    </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Wallet size={16} className="text-zinc-400" />

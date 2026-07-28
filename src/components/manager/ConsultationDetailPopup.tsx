@@ -492,7 +492,7 @@ export default function ConsultationDetailPopup({
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                   <div>
                     <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">이름</p>
-                    {renderField(data.name)}
+                    {renderField(data.name || data.user_name)}
                   </div>
                   <div>
                     <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">이메일</p>
@@ -500,7 +500,7 @@ export default function ConsultationDetailPopup({
                   </div>
                   <div>
                     <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">나이</p>
-                    {renderField(data.age ? `${data.age}세` : null)}
+                    {renderField((data.age || data.birth_year) ? `${data.age || data.birth_year}세` : null)}
                   </div>
                   <div>
                     <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">성별</p>
@@ -508,7 +508,7 @@ export default function ConsultationDetailPopup({
                       const g = (data.gender || data.Gender || "").toString().toLowerCase().trim();
                       if (g === "male" || g === "남성" || g === "남") return "남성";
                       if (g === "female" || g === "여성" || g === "여") return "여성";
-                      return g || "성별미정";
+                      return g || null;
                     })())}
                   </div>
                 </div>
@@ -527,11 +527,11 @@ export default function ConsultationDetailPopup({
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-xs font-bold text-green-500/70 uppercase tracking-wider mb-2">광역 자치단체</p>
-                      {renderField(data.region?.regional)}
+                      {renderField(data.region?.regional || data.regional_local_government || data.regional || data.location?.regional)}
                     </div>
                     <div>
                       <p className="text-xs font-bold text-green-500/70 uppercase tracking-wider mb-2">기초 자치단체</p>
-                      {renderField(data.region?.basic)}
+                      {renderField(data.region?.basic || data.basic_local_government || data.basic || data.location?.basic)}
                     </div>
                   </div>
                 </div>
@@ -547,7 +547,7 @@ export default function ConsultationDetailPopup({
                   <div className="grid grid-cols-2 gap-x-4 gap-y-5">
                     <div>
                       <p className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2">직업 상태</p>
-                      {renderField(data.job_status)}
+                      {renderField(data.job_status || data.employment_status || data.job || data.social_status)}
                     </div>
                     <div>
                       <p className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2">소득 수준</p>
