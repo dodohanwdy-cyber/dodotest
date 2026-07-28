@@ -399,6 +399,9 @@ export default function ConsultationPage() {
     try {
       const formData = new FormData();
       formData.append("audio", blob, "consultation_audio.webm");
+      if (transcript && transcript.trim()) {
+        formData.append("realtime_transcript", transcript);
+      }
 
       const res = await fetch("/api/stt", {
         method: "POST",
