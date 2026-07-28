@@ -43,11 +43,12 @@ export default function ConsultationPage() {
   
   // --- 마이크 볼륨 체크 & 오늘의 명언 Logic ---
   const [audioLevel, setAudioLevel] = useState(0);
-  const [gainValue, setGainValue] = useState(1); // 증폭값 (기본 1)
+  const [gainValue, setGainValue] = useState(2.5); // 기본 증폭값을 2.5배로 상향하여 초기 민감도 확보
   const [dailyQuote, setDailyQuote] = useState({ message: "상담은 마음을 잇는 대화입니다.", author: "열고닫기" });
   const audioContextRef = React.useRef<AudioContext | null>(null);
   const analyserRef = React.useRef<AnalyserNode | null>(null);
   const gainNodeRef = React.useRef<GainNode | null>(null);
+  const compressorRef = React.useRef<DynamicsCompressorNode | null>(null);
   const animationFrameRef = React.useRef<number | null>(null);
 
   const quotes = [
@@ -64,41 +65,60 @@ export default function ConsultationPage() {
 
     const startVolumeCheck = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // [방안 1] 하드웨어 레벨 자동 게인 제어(AGC) 및 노이즈 억제 활성화
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            channelCount: 1
+          } 
+        });
         const AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
         const audioContext = new AudioContext();
         const source = audioContext.createMediaStreamSource(stream);
         
-        // GainNode 추가 (증폭 제어용)
+        // [방안 2-1] 다이내믹 컴프레서 노드 (작은 소리 끌어올리고 큰 소리 피킹 억제하여 STT 선명도 향상)
+        const compressor = audioContext.createDynamicsCompressor();
+        compressor.threshold.setValueAtTime(-24, audioContext.currentTime);
+        compressor.knee.setValueAtTime(30, audioContext.currentTime);
+        compressor.ratio.setValueAtTime(12, audioContext.currentTime);
+        compressor.attack.setValueAtTime(0.003, audioContext.currentTime);
+        compressor.release.setValueAtTime(0.25, audioContext.currentTime);
+
+        // GainNode (소프트웨어 추가 증폭)
         const gainNode = audioContext.createGain();
         gainNode.gain.value = gainValue;
 
         const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 2048; // 주파수 해상도를 높이기 위해 크기 증가
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = 0.8;
         
-        // 연결: Source -> Gain -> Analyser
-        source.connect(gainNode);
+        // 오디오 연결 체인: Source -> Compressor -> Gain -> Analyser
+        source.connect(compressor);
+        compressor.connect(gainNode);
         gainNode.connect(analyser);
 
         audioContextRef.current = audioContext;
+        compressorRef.current = compressor;
         analyserRef.current = analyser;
         gainNodeRef.current = gainNode;
 
         const updateLevel = () => {
           const dataArray = new Uint8Array(analyser.frequencyBinCount);
-          analyser.getByteTimeDomainData(dataArray); // 시간 도메인 데이터 사용 (RMS 계산용)
+          analyser.getByteTimeDomainData(dataArray);
           
-          // RMS (Root Mean Square) 계산으로 실시간 볼륨 정밀도 향상
           let squares = 0;
           for (let i = 0; i < dataArray.length; i++) {
-            const normalized = (dataArray[i] - 128) / 128; // -1 ~ 1 사이로 정규화
+            const normalized = (dataArray[i] - 128) / 128;
             squares += normalized * normalized;
           }
           const rms = Math.sqrt(squares / dataArray.length);
           
-          // 증폭값이 반영된 최종 레벨 계산
-          const level = Math.min(rms * 500, 100); 
-          setAudioLevel(prev => (prev * 0.7) + (level * 0.3));
+          // [방안 3] 비선형 감도 계산식 (작은 소리도 시각 미터와 STT에 민감하게 포착되도록 보정)
+          const boostedLevel = Math.pow(rms, 0.6) * 220; 
+          const level = Math.min(Math.max(boostedLevel, 0), 100);
+          setAudioLevel(prev => (prev * 0.6) + (level * 0.4));
 
           // 실시간 음높이(Pitch) 감지 (노이즈 게이트 적용)
           const freqData = new Uint8Array(analyser.frequencyBinCount);
@@ -106,19 +126,17 @@ export default function ConsultationPage() {
           
           let maxEnergy = 0;
           let maxBin = 0;
-          // 인간 음성 대역 (약 85Hz ~ 800Hz) 집중 분석
-          for (let i = 5; i < freqData.length / 5; i++) {
+          for (let i = 5; i < freqData.length / 4; i++) {
             if (freqData[i] > maxEnergy) {
               maxEnergy = freqData[i];
               maxBin = i;
             }
           }
           
-          // Noise Gate: 주변 소음보다 확실히 클 때만 피치 업데이트 (임계값 상향, 배경 노이즈로 108Hz가 고정되는 현상 방지)
-          if (maxEnergy > 120) { 
+          // [방안 2-2] Noise Gate 민감도 상향: 임계값을 120 -> 50으로 낮추어 조용한 목소리나 첫 마디도 즉각 포착
+          if (maxEnergy > 50) { 
             const pitch = maxBin * (audioContext.sampleRate / analyser.fftSize);
-            // 비현실적인 주파수 필터링
-            if (pitch >= 85 && pitch <= 1000) {
+            if (pitch >= 80 && pitch <= 1000) {
               setCurrentPitch(Math.round(pitch));
             }
           } else {
