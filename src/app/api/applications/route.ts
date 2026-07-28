@@ -96,10 +96,10 @@ export async function DELETE(req: Request) {
     }
 
     // N8N 취소 웹훅 (매니저 쪽과 동일한 엔드포인트 사용)
-    const CANCEL_WEBHOOK = 'https://primary-production-1f39e.up.railway.app/webhook/cancel-assignment';
+    const cancelWebhookUrl = SERVER_WEBHOOK_URLS.CANCEL_ASSIGNMENT || 'https://primary-production-1f39e.up.railway.app/webhook/cancel-assignment';
     
     // [보안] 자신이 취소하는 것인지 추가 인증이 이상적이나 여기서는 우선 email 로깅 차원에서 보안 처리
-    const response = await n8nFetch(CANCEL_WEBHOOK, {
+    const response = await n8nFetch(cancelWebhookUrl, {
       method: 'POST',
       body: JSON.stringify({
         manager_email: 'client_cancel', // N8N에서 사용자 취소 구분
