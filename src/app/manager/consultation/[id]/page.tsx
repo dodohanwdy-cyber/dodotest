@@ -1259,10 +1259,10 @@ export default function ConsultationPage() {
                   <div className="text-center space-y-2">
                     <p className="text-zinc-800 font-bold mb-1 transition-all duration-300">
                       {[
-                        "오디오 파일 암호화 및 업로드 준비 중... 🚀", 
-                        "Gemini 2.0 모델 서버 파형 분석 중... 🎧", 
+                        "오디오 파일 업로드 및 분석 준비 중... 🚀", 
+                        "AI 음성 파형 및 대화 흐름 분석 중... 🎧", 
                         "대화 문맥 기반 화자 분리 진행 중... 🗣️", 
-                        "한국어 맞춤법 교정 및 최종 텍스트 다듬는 중... ✨"
+                        "원문 대치 검토 및 최종 텍스트 다듬는 중... ✨"
                       ][loadingStepIdx]}
                     </p>
                     <p className="text-xs text-zinc-500 font-medium">오디오 길이에 따라 1~2분 정도 소요될 수 있습니다. 창을 닫지 마세요.</p>
