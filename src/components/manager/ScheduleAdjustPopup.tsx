@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, Calendar, User, Award, Clock, CheckCircle, AlertCircle, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { postToWebhook } from "@/lib/api";
+import { WEBHOOK_URLS } from "@/config/webhooks";
 
 interface AnalyzedRequest {
   request_id: string;
@@ -338,32 +340,24 @@ export default function ScheduleAdjustPopup({
       
       // 1. 배정 웹훅 호출
       if (assignmentsData.length > 0) {
-        const assignResponse = await fetch('https://primary-production-1f39e.up.railway.app/webhook/schedule-confirm', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            manager_email: managerEmail,
-            assignments: assignmentsData,
-            timestamp: new Date().toISOString()
-          })
+        const assignResponse = await postToWebhook(WEBHOOK_URLS.ADJUST_SCHEDULE, {
+          manager_email: managerEmail,
+          assignments: assignmentsData,
+          timestamp: new Date().toISOString()
         });
-        if (!assignResponse.ok) hasError = true;
-        else finalResult = await assignResponse.json();
+        if (assignResponse?.error || assignResponse?.success === false) hasError = true;
+        else finalResult = assignResponse;
       }
 
       // 2. 취소 웹훅 호출
       if (canceledList.length > 0 && !hasError) {
-        const cancelResponse = await fetch('https://primary-production-1f39e.up.railway.app/webhook/cancel-assignment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            manager_email: managerEmail,
-            canceled_requests: canceledList,
-            timestamp: new Date().toISOString()
-          })
+        const cancelResponse = await postToWebhook(WEBHOOK_URLS.CANCEL_ASSIGNMENT, {
+          manager_email: managerEmail,
+          canceled_requests: canceledList,
+          timestamp: new Date().toISOString()
         });
-        if (!cancelResponse.ok) hasError = true;
-        else finalResult = finalResult || await cancelResponse.json();
+        if (cancelResponse?.error || cancelResponse?.success === false) hasError = true;
+        else finalResult = finalResult || cancelResponse;
       }
       
       // 3. 재조정(배정 해제) 웹훅 호출
@@ -373,17 +367,13 @@ export default function ScheduleAdjustPopup({
         .map(req => req.request_id);
 
       if (readjustmentIds.length > 0 && !hasError) {
-        const readjustResponse = await fetch('https://primary-production-1f39e.up.railway.app/webhook/request-readjustment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            manager_email: managerEmail,
-            readjust_requests: readjustmentIds,
-            timestamp: new Date().toISOString()
-          })
+        const readjustResponse = await postToWebhook(WEBHOOK_URLS.REQUEST_READJUSTMENT, {
+          manager_email: managerEmail,
+          readjust_requests: readjustmentIds,
+          timestamp: new Date().toISOString()
         });
-        if (!readjustResponse.ok) hasError = true;
-        else finalResult = finalResult || await readjustResponse.json();
+        if (readjustResponse?.error || readjustResponse?.success === false) hasError = true;
+        else finalResult = finalResult || readjustResponse;
       }
       
       if (hasError) {
@@ -423,19 +413,15 @@ export default function ScheduleAdjustPopup({
       const toastId = showToast('일정 초기화를 진행 중입니다...', 'loading');
       console.log('[handleResetSchedule] 전송 데이터:', payload);
 
-      const resetResponse = await fetch("https://primary-production-1f39e.up.railway.app/webhook/reset-schedule", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...payload,
-          manager_email: managerEmail
-        })
+      const resetResponse = await postToWebhook(WEBHOOK_URLS.RESET_SCHEDULE, {
+        ...payload,
+        manager_email: managerEmail
       });
       
-      if (!resetResponse.ok) {
+      if (resetResponse?.error || resetResponse?.success === false) {
         throw new Error('초기화 요청에 실패했습니다.');
       }
-      const result = await resetResponse.json();
+      const result = resetResponse;
 
       hideToast(toastId);
       showToast('모든 일정이 성공적으로 초기화되었습니다.\n일정 재배정은 현재 창이 닫힌 후 다시 \'일정 조율하기\' 버튼을 눌러주세요.', 'success');
