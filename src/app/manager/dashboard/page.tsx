@@ -180,7 +180,7 @@ export default function ManagerDashboard() {
     setShowDetailPopup(true);
     try {
       const result = await postToWebhook(
-        WEBHOOK_URLS.GET_DASHBOARD_PREVIEW,
+        WEBHOOK_URLS.GET_PREVIEW_DETAIL,
         { request_id: requestId, email }
       );
       setDetailData(Array.isArray(result) ? result[0] : result);
@@ -196,7 +196,7 @@ export default function ManagerDashboard() {
     if (!detailData?.request_id || !detailData?.email) return;
     try {
       const result = await postToWebhook(
-        WEBHOOK_URLS.GET_DASHBOARD_PREVIEW,
+        WEBHOOK_URLS.GET_PREVIEW_DETAIL,
         { request_id: detailData.request_id, email: detailData.email }
       );
       setDetailData(Array.isArray(result) ? result[0] : result);
