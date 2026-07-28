@@ -1,0 +1,380 @@
+[
+  {
+    "table_name": "consent_logs",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "consent_logs",
+    "column_name": "request_id",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "consent_logs",
+    "column_name": "email",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "consent_logs",
+    "column_name": "agreed_general_privacy_version",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "consent_logs",
+    "column_name": "is_agreed_general_privacy",
+    "data_type": "boolean",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "consent_logs",
+    "column_name": "agreed_third_party_version",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "consent_logs",
+    "column_name": "is_agreed_third_party",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "consent_logs",
+    "column_name": "agreed_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "consent_logs",
+    "column_name": "user_ip",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "consent_logs",
+    "column_name": "user_agent",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "request_id",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "email",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "time",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "role",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "age",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "gender",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "regional_local_government",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "basic_local_government",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "job_status",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "income_level",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "interest_areas",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "education_level",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "marital_status",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "benefited_policy",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "request_time_1",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "request_time_2",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "request_time_3",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "preferred_location",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "preferred_method",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "conversation_scripts",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "chat_summary",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "special_notes",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "user_interest",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "consultation_guide",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "policy_roadmap",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "recommended_policies",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "pre_consultation_brief",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "confirmed_datetime",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "confirmed_location",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "confirmed_method",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "confirmed_at",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "completed_at",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "counsel_scripts",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "main_issue",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "dialog_summary",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "risk_grade",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "engagement_change",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "policy_match",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "user_message",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "next_step",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "counselor_note",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "keywords",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "etc_data",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "is_dummy",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "counselings",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "role",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "full_name",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "phone",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO"
+  }
+]

@@ -869,16 +869,16 @@ export default function ConsultationPage() {
                      <div className="bg-white p-6 rounded-[2rem] border border-zinc-100 shadow-sm space-y-4">
                         <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Chat Summary</p>
                         <p className="text-sm text-zinc-700 leading-relaxed font-medium">
-                          {data?.ai_insights?.chat_summary || "요약된 내용이 없습니다."}
+                          {data?.chat_summary || data?.ai_insights?.chat_summary || "요약된 내용이 없습니다."}
                         </p>
                      </div>
                      <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 rounded-[2rem] shadow-xl text-white space-y-4">
                         <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">Key Insights</p>
                         <p className="text-sm font-bold leading-relaxed">
-                          {data?.ai_insights?.pre_consultation_brief || "추출된 인사이트가 없습니다."}
+                          {data?.pre_consultation_brief || data?.ai_insights?.pre_consultation_brief || "추출된 인사이트가 없습니다."}
                         </p>
                         <div className="pt-2">
-                           <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold">🎯 핵심: {(() => { const ui = data?.ai_insights?.user_interest; if (!ui) return ''; if (typeof ui === 'string') return ui; if (Array.isArray(ui)) return ui.join(', '); return JSON.stringify(ui); })()}</span>
+                           <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold">🎯 핵심: {(() => { const ui = data?.user_interest || data?.ai_insights?.user_interest; if (!ui) return ''; if (typeof ui === 'string') return ui; if (Array.isArray(ui)) return ui.join(', '); return JSON.stringify(ui); })()}</span>
                         </div>
                      </div>
                   </div>
@@ -890,7 +890,7 @@ export default function ConsultationPage() {
                       <Lightbulb size={18} className="text-amber-500" /> 커스터마이징 전략
                     </h2>
                     <div className="bg-white p-6 rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[150px]">
-                       {formatGuideText(data?.ai_insights?.consultation_guide)}
+                       {formatGuideText(data?.consultation_guide || data?.ai_insights?.consultation_guide)}
                     </div>
                   </div>
                   <div className="space-y-6">
@@ -900,7 +900,7 @@ export default function ConsultationPage() {
                      <div className="bg-white p-7 rounded-[2.5rem] border border-primary/10 shadow-sm border-dashed min-h-[150px]">
                         <div className="space-y-4">
                            {(() => {
-                              let pr = data?.ai_insights?.policy_roadmap;
+                              let pr = data?.policy_roadmap || data?.ai_insights?.policy_roadmap;
                               if (!pr) return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">설정된 로드맵이 없습니다.</p>;
                               
                               if (typeof pr === 'string') {
