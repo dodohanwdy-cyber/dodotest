@@ -70,7 +70,10 @@ export default function Navbar() {
                   <User size={16} className="text-zinc-400" /> {user?.email?.split("@")[0] || ""}
                 </Link>
                 <button 
-                  onClick={logout}
+                  onClick={async () => {
+                    await logout();
+                    window.location.href = "/";
+                  }}
                   className="p-2 hover:bg-zinc-100 rounded-full transition-colors text-zinc-400 hover:text-red-500"
                   title="로그아웃"
                 >

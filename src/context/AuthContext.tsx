@@ -103,7 +103,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut()
+    } catch (e) {
+      console.error("Logout error:", e)
+    } finally {
+      setUser(null)
+      setSession(null)
+      setUserRole(null)
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.clear()
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('role_') || key.startsWith('intake_backup_')) {
+              localStorage.removeItem(key)
+            }
+          })
+        } catch (e) {}
+        window.location.href = '/'
+      }
+    }
   }
 
   return (
