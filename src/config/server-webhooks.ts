@@ -14,7 +14,7 @@ export const SERVER_WEBHOOK_URLS: Record<string, string> = {
 
   // 3단계: 매니저 대시보드
   GET_MANAGER_DASHBOARD: "https://primary-production-1f39e.up.railway.app/webhook/schedule-start", 
-  GET_DASHBOARD_PREVIEW: "https://primary-production-1f39e.up.railway.app/webhook/send-confirmed-list-data", 
+  GET_DASHBOARD_PREVIEW: "https://primary-production-1f39e.up.railway.app/webhook/send-preview-data", 
   GET_COMPLETED_LIST: "https://primary-production-1f39e.up.railway.app/webhook/completed-list", 
   ADJUST_SCHEDULE: "https://primary-production-1f39e.up.railway.app/webhook/schedule-confirm", 
   CANCEL_ASSIGNMENT: "https://primary-production-1f39e.up.railway.app/webhook/cancel-assignment",

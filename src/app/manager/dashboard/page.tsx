@@ -180,7 +180,7 @@ export default function ManagerDashboard() {
     setShowDetailPopup(true);
     try {
       const result = await postToWebhook(
-        "https://primary-production-1f39e.up.railway.app/webhook/send-preview-data",
+        WEBHOOK_URLS.GET_DASHBOARD_PREVIEW,
         { request_id: requestId, email }
       );
       setDetailData(Array.isArray(result) ? result[0] : result);
@@ -196,7 +196,7 @@ export default function ManagerDashboard() {
     if (!detailData?.request_id || !detailData?.email) return;
     try {
       const result = await postToWebhook(
-        "https://primary-production-1f39e.up.railway.app/webhook/send-preview-data",
+        WEBHOOK_URLS.GET_DASHBOARD_PREVIEW,
         { request_id: detailData.request_id, email: detailData.email }
       );
       setDetailData(Array.isArray(result) ? result[0] : result);
