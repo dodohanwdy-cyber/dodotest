@@ -331,7 +331,6 @@ function IntakeContent() {
           user_id: storedUser?.id || "",
           email: storedUser?.email || "",
           time: kstTime,
-          status: "step4",
           is_agreed_general_privacy: data.is_agreed_general_privacy,
           is_agreed_third_party: data.is_agreed_third_party
         });
@@ -370,19 +369,9 @@ function IntakeContent() {
     // intakeData 상태에 포함되도록 handleStepComplete("section-4", data)를 통해 병합한 뒤, 
     // 아래의 웹훅 전송 페이로드에 포함시켜 백엔드(DB)로 함께 전달해야 합니다.
     try {
-      // 1. 기존 AI 분석 리포트 생성용 웹훅 (기존 로직 유지)
-      await postToWebhook(WEBHOOK_URLS.AI_CHAT_ANALYZE, {
-        ...intakeData,
-        user_id: storedUser?.id || "",
-        email: storedUser?.email || "",
-        role: storedUser?.role || "",
-        password_hash: storedUser?.password_hash || "",
-        time: kstTime,
-        status: "final_submitted"
-      });
-
-      // 2. [최적화] 최종 신청서 제출용 전용 웹훅 (식별 정보와 상태값만 전송)
+      // 최종 신청서 제출 전용 웹훅 (식별 정보 및 최종 상태 pending 전송)
       const res = await postToWebhook(WEBHOOK_URLS.SUBMIT_FINAL, {
+        ...intakeData,
         request_id: intakeData.request_id,
         user_id: storedUser?.id || "",
         email: storedUser?.email || "",
