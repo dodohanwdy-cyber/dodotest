@@ -331,6 +331,7 @@ function IntakeContent() {
           user_id: storedUser?.id || "",
           email: storedUser?.email || "",
           time: kstTime,
+          status: "step4",
           is_agreed_general_privacy: data.is_agreed_general_privacy,
           is_agreed_third_party: data.is_agreed_third_party
         });

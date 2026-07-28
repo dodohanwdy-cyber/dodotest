@@ -166,7 +166,8 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         email: storedUser?.email || "",
         conversation_scripts: formattedHistory,
         completed_at: kstTime,
-        time: kstTime
+        time: kstTime,
+        status: "step3"
       });
       if (res && (res.status === "success" || res.code)) onComplete();
       else alert("상담 완료 처리에 실패했습니다.");
