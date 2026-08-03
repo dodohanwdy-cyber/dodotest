@@ -426,12 +426,10 @@ export default function ConsultationDetailPopup({
     );
   };
 
-  // AI 섹션 데이터가 모두 비어있는지 확인
-  const isAiDataEmpty =
-    isEmpty(data?.ai_analysis?.chat_summary) &&
-    isEmpty(data?.ai_analysis?.special_notes) &&
-    isEmpty(data?.ai_analysis?.consultation_guide) &&
-    isEmpty(data?.ai_analysis?.policy_roadmap) &&
+  // AI 가이드 및 정책 항목 중 하나라도 비어있는지 확인
+  const isGuideOrPolicyEmpty =
+    isEmpty(data?.ai_analysis?.consultation_guide) ||
+    isEmpty(data?.ai_analysis?.policy_roadmap) ||
     isEmpty(data?.ai_analysis?.recommended_policies);
 
   const handleStartConsultation = async () => {
@@ -747,7 +745,7 @@ export default function ConsultationDetailPopup({
                   </div>
 
                   {/* 상담 가이드 & 정책 로드맵 / 온보딩 카드 */}
-                  {isAiDataEmpty && !showExample ? (
+                  {isGuideOrPolicyEmpty && !showExample ? (
                     <div className="lg:col-span-2 bg-gradient-to-br from-indigo-50/80 via-blue-50/50 to-white border border-indigo-100/80 p-8 rounded-[32px] shadow-sm text-center relative overflow-hidden space-y-5 my-2">
                       <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-100/80 text-indigo-700 text-xs font-black uppercase tracking-wider">
                         <Sparkles size={14} className="text-indigo-600 animate-pulse" /> Step 1. 상담 전 실시간 준비
@@ -755,7 +753,7 @@ export default function ConsultationDetailPopup({
                       <div className="max-w-md mx-auto space-y-2">
                         <h3 className="text-xl font-black text-zinc-900 tracking-tight">AI 실시간 맞춤 정책 가이드 생성 준비 완료</h3>
                         <p className="text-sm text-zinc-500 font-medium leading-relaxed">
-                          내담자의 최근 상담 신청 정보와 오늘 기준 최신 청년정책 DB를 바탕으로 맞춤 가이드를 구성합니다. 아래 [상담 준비 시작] 버튼을 눌러 실시간 리포트를 갱신해 보세요.
+                          내담자의 상담 신청 정보와 오늘 기준 최신 청년정책 DB를 바탕으로 맞춤 가이드를 구성합니다. 아래 [상담 준비하기] 버튼을 눌러 실시간 가이드를 생성해 보세요.
                         </p>
                       </div>
                       <div className="pt-2">
@@ -765,13 +763,13 @@ export default function ConsultationDetailPopup({
                           className="inline-flex items-center gap-2.5 px-8 py-4 bg-primary hover:bg-blue-600 active:scale-95 text-white font-bold text-base rounded-2xl shadow-xl shadow-blue-200/80 transition-all disabled:opacity-60"
                         >
                           {isPreparing ? (
-                            <><Loader2 size={20} className="animate-spin" /> AI 실시간 가이드 분석 요청 중...</>
+                            <><Loader2 size={20} className="animate-spin" /> AI 가이드 분석 준비 중...</>
                           ) : prepareStatus === 'ok' ? (
                             <><CheckCircle2 size={20} /> AI 맞춤 가이드 생성 완료!</>
                           ) : prepareStatus === 'error' ? (
                             <><AlertCircle size={20} /> 분석 재시도하기</>
                           ) : (
-                            <><Zap size={20} /> 🚀 상담 준비 시작 (최신 AI 정책 가이드 생성)</>
+                            <><Zap size={20} /> 🚀 상담 준비하기</>
                           )}
                         </button>
                       </div>
