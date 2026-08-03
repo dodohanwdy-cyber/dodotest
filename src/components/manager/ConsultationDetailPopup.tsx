@@ -485,128 +485,73 @@ export default function ConsultationDetailPopup({
           ) : data ? (
             <div className="space-y-8">
 
-              {/* 1. 기본 정보 */}
-              <div className="bg-[#f2f8ff] rounded-3xl p-7 border border-blue-50/50">
-                <div className="flex items-center gap-3.5 mb-6">
-                  <div className="w-11 h-11 bg-white shadow-sm rounded-2xl flex items-center justify-center">
-                    <User className="text-blue-500" size={22} />
+              {/* 1 & 2 통합 컴팩트 내담자 요약 정보 (스크롤 75% 대폭 축소) */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* 왼쪽: 기본 & 지역 & 사회적 상태 통합 카드 */}
+                <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/60 space-y-3">
+                  <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+                    <User size={16} className="text-primary" />
+                    <h3 className="text-sm font-bold text-zinc-900">내담자 인적 및 지역 상태</h3>
                   </div>
-                  <h3 className="text-xl font-bold text-zinc-900">기본 정보</h3>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div>
-                    <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">이름</p>
-                    {renderField(data.name || data.user_name)}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">이메일</p>
-                    <div className="break-all">{renderField(data.email)}</div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">나이</p>
-                    {renderField((data.age || data.birth_year) ? `${data.age || data.birth_year}세` : null)}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">성별</p>
-                    {renderField((() => {
-                      const g = (data.gender || data.Gender || "").toString().toLowerCase().trim();
-                      if (g === "male" || g === "남성" || g === "남") return "남성";
-                      if (g === "female" || g === "여성" || g === "여") return "여성";
-                      return g || null;
-                    })())}
-                  </div>
-                </div>
-              </div>
-
-              {/* 2 & 3 그리드 배치 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* 지역 정보 */}
-                <div className="bg-[#f0f9f4] rounded-3xl p-7 border border-green-50/50">
-                  <div className="flex items-center gap-3.5 mb-6">
-                    <div className="w-11 h-11 bg-white shadow-sm rounded-2xl flex items-center justify-center">
-                      <MapPin className="text-green-500" size={22} />
-                    </div>
-                    <h3 className="text-xl font-bold text-zinc-900">지역 정보</h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-x-3 gap-y-2 text-xs">
                     <div>
-                      <p className="text-xs font-bold text-green-500/70 uppercase tracking-wider mb-2">광역 자치단체</p>
-                      {renderField(data.region?.regional || data.regional_local_government || data.regional || data.location?.regional)}
+                      <p className="font-bold text-zinc-400 text-[10px] uppercase">이름 / 나이(성별)</p>
+                      <p className="font-bold text-zinc-900 truncate">
+                        {data.name || data.user_name || "미정"} 
+                        <span className="text-zinc-500 font-normal ml-1">
+                          ({(data.age || data.birth_year) ? `${data.age || data.birth_year}세` : ""}{((data.gender || "").toString().toLowerCase().includes("m") || (data.gender || "").includes("남")) ? ", 남" : ((data.gender || "").toString().toLowerCase().includes("f") || (data.gender || "").includes("여")) ? ", 여" : ""})
+                        </span>
+                      </p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="font-bold text-zinc-400 text-[10px] uppercase">이메일</p>
+                      <p className="font-medium text-zinc-800 truncate">{data.email || "-"}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-green-500/70 uppercase tracking-wider mb-2">기초 자치단체</p>
-                      {renderField(data.region?.basic || data.basic_local_government || data.basic || data.location?.basic)}
+                      <p className="font-bold text-zinc-400 text-[10px] uppercase">거주 지역</p>
+                      <p className="font-bold text-zinc-800 truncate">
+                        {(data.region?.regional || data.regional_local_government || data.location?.regional || "")} {(data.region?.basic || data.basic_local_government || data.location?.basic || "")}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-bold text-zinc-400 text-[10px] uppercase">직업 상태</p>
+                      <p className="font-bold text-zinc-800 truncate">{data.job_status || data.employment_status || data.job || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="font-bold text-zinc-400 text-[10px] uppercase">소득 수준</p>
+                      <p className="font-bold text-zinc-800 truncate">{data.income_level || "-"}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* 사회적 상태 */}
-                <div className="bg-[#f5f3ff] rounded-3xl p-7 border border-purple-50/50">
-                  <div className="flex items-center gap-3.5 mb-6">
-                    <div className="w-11 h-11 bg-white shadow-sm rounded-2xl flex items-center justify-center">
-                      <Briefcase className="text-purple-500" size={22} />
-                    </div>
-                    <h3 className="text-xl font-bold text-zinc-900">사회적 상태</h3>
+                {/* 오른쪽: 상담 확정 & 관심 분야 통합 카드 */}
+                <div className="bg-emerald-50/50 rounded-2xl p-4 border border-emerald-100 space-y-3">
+                  <div className="flex items-center gap-2 pb-2 border-b border-emerald-100">
+                    <Calendar size={16} className="text-emerald-600" />
+                    <h3 className="text-sm font-bold text-zinc-900">상담 확정 &amp; 주요 관심</h3>
                   </div>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-5">
+                  <div className="grid grid-cols-3 gap-x-3 gap-y-2 text-xs">
                     <div>
-                      <p className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2">직업 상태</p>
-                      {renderField(data.job_status || data.employment_status || data.job || data.social_status)}
+                      <p className="font-bold text-emerald-700/70 text-[10px] uppercase">확정 일시</p>
+                      <p className="font-bold text-emerald-900 truncate">{data.confirmed?.datetime || "미정 (대기 중)"}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2">소득 수준</p>
-                      {renderField(data.income_level)}
+                      <p className="font-bold text-emerald-700/70 text-[10px] uppercase">장소 / 방식</p>
+                      <p className="font-bold text-emerald-900 truncate">
+                        {data.confirmed?.location === 'center' ? '청년센터' : (data.confirmed?.location || "미정")} / 
+                        {data.confirmed?.method === 'online' ? ' 💻온라인' : data.confirmed?.method === 'offline' ? ' 🤝오프라인' : ' 📞전화'}
+                      </p>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 4. 관심 분야 & 수혜 정책 */}
-              <div className="bg-zinc-50 rounded-3xl p-7 border border-zinc-100">
-                <div className="flex items-center gap-3.5 mb-6">
-                  <div className="w-11 h-11 bg-white shadow-sm rounded-2xl flex items-center justify-center">
-                    <Heart className="text-rose-400" size={22} />
-                  </div>
-                  <h3 className="text-xl font-bold text-zinc-900">관심 및 수혜</h3>
-                </div>
-                <div className="space-y-6">
-                  <div>
-                    <p className="text-sm font-bold text-zinc-500 mb-3 ml-1">주요 관심 분야</p>
-                    {renderArrayField(data.interest_areas)}
-                  </div>
-                  <div className="pt-4 border-t border-zinc-200/60">
-                    <p className="text-sm font-bold text-zinc-500 mb-2 ml-1">현재 수혜 중인 정책</p>
-                    {renderField(data.benefited_policy)}
-                  </div>
-                </div>
-              </div>
-
-              {/* 5. 상담 확정 정보 */}
-              <div className="bg-emerald-50/50 rounded-3xl p-7 border border-emerald-100">
-                <div className="flex items-center gap-3.5 mb-6">
-                  <div className="w-11 h-11 bg-white shadow-sm rounded-2xl flex items-center justify-center">
-                    <Calendar className="text-emerald-500" size={22} />
-                  </div>
-                  <h3 className="text-xl font-bold text-zinc-900">상담 확정 정보</h3>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  <div className="bg-white/60 p-4 rounded-2xl border border-white">
-                    <p className="text-xs font-bold text-emerald-600/70 uppercase tracking-wider mb-2 text-center">확정 일시</p>
-                    <p className="text-zinc-900 font-bold text-center">{data.confirmed?.datetime || "미정 (대기 중)"}</p>
-                  </div>
-                  <div className="bg-white/60 p-4 rounded-2xl border border-white">
-                    <p className="text-xs font-bold text-emerald-600/70 uppercase tracking-wider mb-2 text-center">상담 장소</p>
-                    <p className="text-zinc-900 font-bold text-center">
-                      {data.confirmed?.location === 'center' ? '청년센터' : (data.confirmed?.location || "미정")}
-                    </p>
-                  </div>
-                  <div className="bg-white/60 p-4 rounded-2xl border border-white">
-                    <p className="text-xs font-bold text-emerald-600/70 uppercase tracking-wider mb-2 text-center">상담 방식</p>
-                    <p className="text-zinc-900 font-bold text-center">
-                      {data.confirmed?.method === 'online' ? '💻 온라인' :
-                       data.confirmed?.method === 'offline' ? '🤝 오프라인' :
-                       data.confirmed?.method === 'phone' ? '📞 전화' : (data.confirmed?.method || "미정")}
-                    </p>
+                    <div>
+                      <p className="font-bold text-emerald-700/70 text-[10px] uppercase">현재 수혜 정책</p>
+                      <p className="font-medium text-emerald-900 truncate">{data.benefited_policy || "없음"}</p>
+                    </div>
+                    <div className="col-span-3 pt-1">
+                      <p className="font-bold text-zinc-400 text-[10px] uppercase mb-1">주요 관심 분야</p>
+                      <div className="flex flex-wrap gap-1">
+                        {renderArrayField(data.interest_areas)}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
