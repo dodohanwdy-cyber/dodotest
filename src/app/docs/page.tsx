@@ -2,6 +2,7 @@ import React from 'react';
 import { getAllDocs } from '@/lib/docs';
 import Link from 'next/link';
 import { FileText, ArrowRight, ShieldCheck, BookOpen, Settings, Database, Activity } from 'lucide-react';
+import UITagBadge from '@/components/common/UITagBadge';
 
 export const metadata = {
   title: '기술 문서 센터 | 도도한 안심 상담',
@@ -35,9 +36,12 @@ export default function DocsListPage() {
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold mb-4 uppercase tracking-wider">
             Internal Documentation Center
           </div>
-          <h1 className="text-4xl font-black text-zinc-900 mb-4 tracking-tight">
-            기술 문서 센터
-          </h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-4xl font-black text-zinc-900 tracking-tight">
+              기술 문서 센터
+            </h1>
+            <UITagBadge id="P-301" label="기술 문서 센터" />
+          </div>
           <p className="text-zinc-500 text-lg leading-relaxed">
             도도한 안심 상담 서비스의 개발 가이드, 기획서 및 보안 점검 이력을 관리합니다.<br />
             모든 문서는 깃허브 실시간 데이터와 동기화됩니다.

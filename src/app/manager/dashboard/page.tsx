@@ -500,12 +500,15 @@ export default function ManagerDashboard() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setShowAlarmPopup(false)}></div>
           <div className="bg-white rounded-[2rem] p-8 max-w-md w-full relative z-10 shadow-2xl animate-in zoom-in-95 duration-200">
-            <button 
-              onClick={() => setShowAlarmPopup(false)}
-              className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
-            >
-              <X size={20} />
-            </button>
+            <div className="absolute top-6 right-6 flex items-center gap-2">
+              <UITagBadge type="modal" id="M-03" label="알림 메시지 발송 모달" />
+              <button 
+                onClick={() => setShowAlarmPopup(false)}
+                className="p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
             
             <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mb-5 shadow-inner">
               <Bell size={24} />
@@ -583,6 +586,9 @@ export default function ManagerDashboard() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setShowNoSchedulePopup(false)}></div>
           <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full relative z-10 shadow-2xl animate-in zoom-in-95 duration-200 text-center">
+            <div className="flex justify-end mb-2">
+              <UITagBadge type="modal" id="M-08" label="미배정 안내 모달" />
+            </div>
             <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mx-auto mb-5 shadow-inner">
               <AlertCircle size={24} />
             </div>

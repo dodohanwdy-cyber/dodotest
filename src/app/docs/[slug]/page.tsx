@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Clock, Share2, Printer, ChevronRight } from 'lucide-react';
+import UITagBadge from '@/components/common/UITagBadge';
 
 export default function DocDetailPage() {
   const params = useParams();
@@ -64,6 +65,7 @@ export default function DocDetailPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <UITagBadge id="P-301-D" label="문서 상세" />
             <button 
               onClick={handlePrint}
               className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors"

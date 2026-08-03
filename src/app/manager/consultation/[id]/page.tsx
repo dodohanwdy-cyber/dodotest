@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
+import UITagBadge from "@/components/common/UITagBadge";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ConsultationPage() {
@@ -671,6 +672,7 @@ export default function ConsultationPage() {
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-bold text-zinc-900">{data?.name || data?.user_name || "내담자"}님 상담</h1>
               <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase tracking-wider">LIVE</span>
+              <UITagBadge id="P-102" label="상담 실시간 진행" />
             </div>
             <p className="text-xs text-zinc-500">{data?.email || "이메일 정보 없음"}</p>
           </div>
@@ -1232,14 +1234,17 @@ export default function ConsultationPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6 backdrop-blur-sm">
           <div className="bg-white rounded-3xl w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
-              <div>
-                <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2">
-                  <Sparkles size={20} className="text-primary" />
-                  상담 STT 최종 교정 및 전송
-                </h2>
-                <p className="text-xs font-bold text-zinc-500 mt-1">
-                  AI가 백그라운드에서 녹음된 오디오를 분석하여 화자를 분리하고 내용을 교정한 결과입니다.
-                </p>
+              <div className="flex items-center justify-between w-full">
+                <div>
+                  <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2">
+                    <Sparkles size={20} className="text-primary" />
+                    상담 STT 최종 교정 및 전송
+                  </h2>
+                  <p className="text-xs font-bold text-zinc-500 mt-1">
+                    AI가 백그라운드에서 녹음된 오디오를 분석하여 화자를 분리하고 내용을 교정한 결과입니다.
+                  </p>
+                </div>
+                <UITagBadge type="modal" id="M-04" label="STT 전사 및 교정 모달" />
               </div>
               {isAnalyzingAudio && (
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full">
