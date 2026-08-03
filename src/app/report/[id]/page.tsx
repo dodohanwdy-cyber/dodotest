@@ -11,7 +11,19 @@ import {
   Heart,
   AlertCircle,
   FileText,
+  Calendar,
+  Clock,
+  MapPin,
+  User,
+  ChevronLeft,
+  ChevronRight,
+  Share2,
+  Award,
+  ArrowUpRight,
+  Lightbulb,
+  HeartHandshake
 } from "lucide-react";
+import UITagBadge from "@/components/common/UITagBadge";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
 
@@ -142,7 +154,10 @@ export default function ClientReportPage() {
       {/* 상단 헤더 & 네비게이션 */}
       <div className="bg-white px-6 pt-10 pb-4 sticky top-0 z-50 border-b border-zinc-100 shadow-sm">
         <div className="max-w-md mx-auto">
-          <p className="text-zinc-500 text-sm font-bold mb-1">안녕하세요, {reportData.user_name}님 👋</p>
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-zinc-500 text-sm font-bold">안녕하세요, {reportData.user_name}님 👋</p>
+            <UITagBadge id="P-203" label="내담자 전용 리포트" />
+          </div>
           <h1 className="text-2xl font-black text-zinc-900 leading-snug tracking-tight mb-6">
             상담 분석 리포트가<br/>준비되었어요
           </h1>

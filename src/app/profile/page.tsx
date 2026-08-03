@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
+import UITagBadge from '@/components/common/UITagBadge'
 import { useRouter } from 'next/navigation'
 
 export default function ProfilePage() {
@@ -70,7 +71,10 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded-2xl shadow-xl border border-zinc-100">
-      <h1 className="text-2xl font-bold mb-6 text-center">회원 정보 변경</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-zinc-900">회원 정보 변경</h1>
+        <UITagBadge id="P-302" label="마이 프로필 설정" />
+      </div>
       <form onSubmit={handleUpdate} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-zinc-700 mb-1">이메일 (변경 불가)</label>

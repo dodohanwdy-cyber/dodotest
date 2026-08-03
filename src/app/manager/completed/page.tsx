@@ -18,6 +18,8 @@ import {
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
 import Link from "next/link";
+import ConsultationDetailPopup from "@/components/manager/ConsultationDetailPopup";
+import UITagBadge from "@/components/common/UITagBadge";
 
 export default function CompletedConsultationsPage() {
   const { user, isLoading: isLoadingAuth } = useAuth();
@@ -156,6 +158,7 @@ export default function CompletedConsultationsPage() {
               <ChevronLeft size={24} />
             </Link>
             <h1 className="text-3xl font-bold text-slate-900">상담 완료 내역</h1>
+            <UITagBadge id="P-104" label="완료된 상담 내역" />
           </div>
           <p className="text-slate-500 ml-12">과거에 완료된 모든 상담 기록을 확인하고 관리할 수 있습니다.</p>
         </div>

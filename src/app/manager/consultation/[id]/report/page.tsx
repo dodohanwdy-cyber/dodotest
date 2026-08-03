@@ -32,6 +32,7 @@ import {
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
 import { supabase } from "@/lib/supabaseClient";
+import UITagBadge from "@/components/common/UITagBadge";
 
 export default function ReportPage() {
   const { id } = useParams();
@@ -630,6 +631,7 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
             <div>
               <h1 className="text-lg font-black text-zinc-900 flex items-center gap-2">
                 최종 상담 리포트 <span className="text-primary text-sm font-bold">#{baseData?.request_id?.slice(-6) || "REPORT"}</span>
+                <UITagBadge id="P-103" label="상담 완료 결과 리포트" />
               </h1>
               <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none mt-1">
                 Consultation Analysis Result

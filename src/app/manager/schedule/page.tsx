@@ -5,6 +5,7 @@ import { useState, Suspense } from "react";
 import { Calendar, Clock, Save, X, Info, Loader2 } from "lucide-react";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
+import UITagBadge from "@/components/common/UITagBadge";
 
 function ScheduleAdjustContent() {
   const searchParams = useSearchParams();
@@ -41,9 +42,12 @@ function ScheduleAdjustContent() {
     <div className="p-8 bg-zinc-50 min-h-screen">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-zinc-100">
-          <div>
-            <span className="text-[10px] font-black text-primary uppercase tracking-widest">Step 7. Schedule Adjustment</span>
-            <h1 className="text-2xl font-bold text-zinc-900 mt-1">상담 일정 조율</h1>
+          <div className="flex items-center gap-3">
+            <div>
+              <span className="text-[10px] font-black text-primary uppercase tracking-widest">Step 7. Schedule Adjustment</span>
+              <h1 className="text-2xl font-bold text-zinc-900 mt-1">상담 일정 조율</h1>
+            </div>
+            <UITagBadge id="P-105" label="상담 일정 조율" />
           </div>
           <button onClick={() => window.close()} className="p-2 text-zinc-400 hover:text-zinc-600 bg-zinc-100 rounded-xl">
             <X size={20} />
