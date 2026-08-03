@@ -631,7 +631,6 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
             <div>
               <h1 className="text-lg font-black text-zinc-900 flex items-center gap-2">
                 최종 상담 리포트 <span className="text-primary text-sm font-bold">#{baseData?.request_id?.slice(-6) || "REPORT"}</span>
-                <UITagBadge id="P-103" label="상담 완료 결과 리포트" />
               </h1>
               <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none mt-1">
                 Consultation Analysis Result
@@ -664,8 +663,9 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
               className="p-2.5 bg-zinc-50 hover:bg-rose-50 hover:text-rose-500 text-zinc-400 font-bold rounded-xl transition-all flex items-center shadow-sm border border-zinc-100"
               title="창 닫기"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
+            <UITagBadge id="P-103" label="상담 완료 결과 리포트" />
           </div>
         </div>
       </nav>
@@ -849,12 +849,15 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setShowResultModal(false)}></div>
           <div className="bg-white rounded-[2rem] p-8 max-w-2xl w-full relative z-10 shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]">
-            <button 
-              onClick={() => setShowResultModal(false)}
-              className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
-            >
-              <X size={20} />
-            </button>
+            <div className="absolute top-6 right-6 flex items-center gap-2">
+              <UITagBadge type="modal" id="M-09" label="내담자에게 리포트 전송 모달" />
+              <button 
+                onClick={() => setShowResultModal(false)}
+                className="p-2 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
             <h2 className="text-xl font-black text-zinc-900 mb-6 flex items-center gap-2">
               <Send className="text-primary" size={24} /> 내담자에게 리포트 전송
             </h2>

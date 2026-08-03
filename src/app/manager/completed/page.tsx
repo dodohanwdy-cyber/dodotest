@@ -158,7 +158,6 @@ export default function CompletedConsultationsPage() {
               <ChevronLeft size={24} />
             </Link>
             <h1 className="text-3xl font-bold text-slate-900">상담 완료 내역</h1>
-            <UITagBadge id="P-104" label="완료된 상담 내역" />
           </div>
           <p className="text-slate-500 ml-12">과거에 완료된 모든 상담 기록을 확인하고 관리할 수 있습니다.</p>
         </div>
@@ -173,6 +172,7 @@ export default function CompletedConsultationsPage() {
             <Loader2 size={18} className={isLoading ? "animate-spin" : ""} />
             <span className="text-sm">새로고침</span>
           </button>
+          <UITagBadge id="P-104" label="완료된 상담 내역" />
           <div className="relative w-full md:w-80">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 

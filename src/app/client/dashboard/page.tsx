@@ -146,13 +146,10 @@ export default function ClientDashboard() {
             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
             <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Logged In</span>
           </div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-black text-zinc-900 tracking-tight">반가워요, {user?.user_metadata?.full_name || "내담자"}님!</h1>
-            <UITagBadge id="P-202" label="마이 대시보드" />
-          </div>
+          <h1 className="text-3xl font-black text-zinc-900 tracking-tight">반가워요, {user?.user_metadata?.full_name || "내담자"}님!</h1>
           <p className="text-zinc-500 mt-2 font-medium">현재 진행 중인 상담 현황을 실시간으로 확인하실 수 있습니다.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           <button
             onClick={() => fetchApplications(true)}
             disabled={loading}
@@ -167,6 +164,7 @@ export default function ClientDashboard() {
           >
             <PlusCircle size={18} /> 새 상담 신청하기
           </Link>
+          <UITagBadge id="P-202" label="마이 대시보드" />
         </div>
       </div>
 
