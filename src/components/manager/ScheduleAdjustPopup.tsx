@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { X, Calendar, User, Award, Clock, CheckCircle, AlertCircle, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { Sparkles, Calendar, Clock, MapPin, CheckCircle, AlertCircle, X, ChevronLeft, ChevronRight, RefreshCw, Undo, Save, Info, User, Check, Flame } from 'lucide-react';
+import UITagBadge from '@/components/common/UITagBadge';
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
 
@@ -498,12 +499,15 @@ export default function ScheduleAdjustPopup({
                 </p>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="w-9 h-9 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90"
-            >
-              <X size={20} />
-            </button>
+            <div className="flex items-center gap-3">
+              <UITagBadge type="modal" id="M-02" label="일정 최적 조율" />
+              <button
+                onClick={onClose}
+                className="w-9 h-9 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90"
+              >
+                <X size={20} />
+              </button>
+            </div>
           </div>
         </div>
 

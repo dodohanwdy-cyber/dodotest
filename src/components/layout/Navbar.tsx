@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { LogOut, User, LayoutDashboard, FileText, PlusCircle } from "lucide-react";
+import { LogOut, User, LayoutDashboard, FileText, PlusCircle, Tag } from "lucide-react";
+import { useUITag } from "@/context/UITagContext";
 
 export default function Navbar() {
   const { user, userRole, logout, isLoading } = useAuth();
+  const { showTags, toggleTags } = useUITag();
 
 
 
@@ -25,6 +27,19 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-6">
+          {/* UI 식별 태그 토글 스위치 (피드백 용) */}
+          <button
+            onClick={toggleTags}
+            title="피드백용 UI 식별 태그 온/오프"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+              showTags 
+                ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm" 
+                : "bg-zinc-50 border-zinc-200 text-zinc-400 hover:text-zinc-600"
+            }`}
+          >
+            <Tag size={13} className={showTags ? "text-indigo-600" : "text-zinc-400"} />
+            <span>UI ID {showTags ? "ON" : "OFF"}</span>
+          </button>
 
 
           {isLoading ? (

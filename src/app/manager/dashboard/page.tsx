@@ -16,6 +16,7 @@ import {
 import ManagerCalendar from "@/components/manager/ManagerCalendar";
 import ScheduleAdjustPopup from "@/components/manager/ScheduleAdjustPopup";
 import ConsultationDetailPopup from "@/components/manager/ConsultationDetailPopup";
+import UITagBadge from "@/components/common/UITagBadge";
 import { postToWebhook } from "@/lib/api";
 import { WEBHOOK_URLS } from "@/config/webhooks";
 
@@ -295,7 +296,10 @@ export default function ManagerDashboard() {
       {/* 대시보드 헤더 */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-black text-zinc-900 mb-2">상담 접수 및 배정 관리</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-black text-zinc-900">상담 접수 및 배정 관리</h1>
+            <UITagBadge id="P-101" label="매니저 대시보드" />
+          </div>
           <p className="text-zinc-500">상담 일정을 관리하고 신청 현황을 확인하세요</p>
         </div>
         <div className="flex gap-3">

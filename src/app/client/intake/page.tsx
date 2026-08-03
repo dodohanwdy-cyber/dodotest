@@ -10,6 +10,7 @@ import { WEBHOOK_URLS } from "@/config/webhooks";
 import BasicInfoForm from "@/components/intake/BasicInfoForm";
 import ScheduleForm from "@/components/intake/ScheduleForm";
 import AIChatForm from "@/components/intake/AIChatForm";
+import UITagBadge from "@/components/common/UITagBadge";
 import ConsentForm from "@/components/intake/ConsentForm";
 import ReviewForm from "@/components/intake/ReviewForm";
 
@@ -439,9 +440,12 @@ function IntakeContent() {
 
       <div className="max-w-4xl mx-auto px-6 py-16 relative z-10">
         <div className="mb-12 space-y-6 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
-            <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-ping" />
-            <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Premium Policy Service</span>
+          <div className="flex items-center justify-between">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
+              <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-ping" />
+              <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Premium Policy Service</span>
+            </div>
+            <UITagBadge id="P-201" label="신청 챗봇" />
           </div>
           <div className="space-y-3">
             <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">

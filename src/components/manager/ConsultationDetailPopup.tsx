@@ -7,6 +7,7 @@ import { postToWebhook } from '@/lib/api';
 import { WEBHOOK_URLS } from '@/config/webhooks';
 import { supabase } from '@/lib/supabaseClient';
 import { ExternalLink } from 'lucide-react';
+import UITagBadge from '@/components/common/UITagBadge';
 
 // ─── 프론트엔드 예시 데이터 (외부 API 호출 없음) ────────────────────────────
 const EXAMPLE_AI_ANALYSIS = {
@@ -459,16 +460,21 @@ export default function ConsultationDetailPopup({
       <div className="bg-white rounded-[32px] shadow-2xl max-w-5xl w-full h-full max-h-[96vh] overflow-hidden border border-zinc-100 flex flex-col">
 
         <div className="bg-white px-8 py-5 flex items-center justify-between border-b border-zinc-100 shrink-0">
-          <div>
-            <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">상담 상세 정보</h2>
-            <p className="text-zinc-500 text-sm mt-1 font-medium">상담 준비를 위한 모든 데이터를 한눈에 확인하세요</p>
+          <div className="flex items-center gap-3">
+            <div>
+              <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">상담 상세 정보</h2>
+              <p className="text-zinc-500 text-sm mt-1 font-medium">상담 준비를 위한 모든 데이터를 한눈에 확인하세요</p>
+            </div>
           </div>
-          <button
-            onClick={onClose}
-            className="w-10 h-10 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90"
-          >
-            <X size={22} />
-          </button>
+          <div className="flex items-center gap-3">
+            <UITagBadge type="modal" id="M-01" label="상담 상세 정보" />
+            <button
+              onClick={onClose}
+              className="w-10 h-10 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90"
+            >
+              <X size={22} />
+            </button>
+          </div>
         </div>
 
         {/* 내용 */}
