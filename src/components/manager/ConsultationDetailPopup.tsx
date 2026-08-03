@@ -396,24 +396,24 @@ export default function ConsultationDetailPopup({
     if (renderableItems.length === 0) return null;
 
     return (
-      <div className="space-y-3">
-        <p className="text-sm font-bold text-indigo-900/70 uppercase tracking-wide">{sectionTitle}</p>
-        <div className="space-y-3">
+      <div className="space-y-2">
+        <p className="text-xs font-bold text-indigo-900/70 uppercase tracking-wide">{sectionTitle}</p>
+        <div className="space-y-2">
           {renderableItems.map((r) => (
             <div
               key={r.idx}
-              className="bg-indigo-50/40 rounded-xl p-4 border border-indigo-100/60 hover:border-indigo-200 transition-colors"
+              className="bg-indigo-50/30 rounded-xl p-3 border border-indigo-100/50 hover:border-indigo-200 transition-colors"
             >
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold">
+              <div className="flex items-start gap-2.5">
+                <div className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5 text-[11px] font-bold">
                   {r.idx + 1}
                 </div>
-                <div className="space-y-1.5 flex-1 min-w-0">
-                  <h4 className="font-bold text-zinc-900 text-sm leading-snug">
+                <div className="space-y-1 flex-1 min-w-0">
+                  <h4 className="font-bold text-zinc-900 text-xs md:text-sm leading-snug">
                     {renderPolicyText(r.title)}
                   </h4>
                   {r.desc && (
-                    <div className="text-zinc-600 text-sm leading-relaxed whitespace-pre-wrap">
+                    <div className="text-zinc-600 text-xs md:text-sm leading-relaxed whitespace-pre-wrap">
                       {renderPolicyText(r.desc)}
                     </div>
                   )}
@@ -692,7 +692,7 @@ export default function ConsultationDetailPopup({
                       ) : prepareStatus === 'error' ? (
                         <><AlertCircle size={15} /> 오류 발생</>
                       ) : (
-                        <><Zap size={15} /> 바로 준비하기</>
+                        <><Zap size={15} /> 다시 준비하기</>
                       )}
                     </button>
 
@@ -777,49 +777,52 @@ export default function ConsultationDetailPopup({
                   ) : (
                     <>
                       {/* 상담 가이드 */}
-                      <div className="space-y-3 lg:col-span-2 mt-4">
-                        <div className="flex items-center gap-2.5 px-1">
-                          <Lightbulb size={20} className="text-amber-500" />
-                          <p className="font-bold text-zinc-800">추천 상담 가이드라인</p>
+                      <div className="space-y-2 lg:col-span-2 mt-2">
+                        <div className="flex items-center gap-2 px-1">
+                          <Lightbulb size={16} className="text-amber-500" />
+                          <p className="font-bold text-zinc-800 text-sm">추천 상담 가이드라인</p>
                         </div>
-                        <div className="bg-white p-6 rounded-[28px] border border-amber-100 shadow-sm leading-relaxed">
+                        <div className="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm leading-relaxed text-xs md:text-sm">
                           {renderJsonField(aiAnalysis?.consultation_guide)}
                         </div>
                       </div>
 
-                      {/* 정책 로드맵 및 추천 */}
-                      <div className="space-y-3 lg:col-span-2">
-                        <div className="flex items-center gap-2.5 px-1">
-                          <Route size={20} className="text-indigo-400" />
-                          <p className="font-bold text-zinc-800">맞춤 정책 로드맵 &amp; 추천</p>
+                      {/* 정책 로드맵 및 추천 (2열 그리드 배치로 공간 절약) */}
+                      <div className="space-y-2 lg:col-span-2">
+                        <div className="flex items-center gap-2 px-1">
+                          <Route size={16} className="text-indigo-400" />
+                          <p className="font-bold text-zinc-800 text-sm">맞춤 정책 로드맵 &amp; 추천</p>
                         </div>
-                        <div className="bg-white p-6 rounded-[28px] border border-indigo-50 shadow-sm space-y-6">
-                          <div className={`space-y-8 transition-all duration-500 ${isPreparing ? 'blur-sm opacity-50' : 'blur-0 opacity-100'}`}>
-                            {(() => {
-                              const roadmap = aiAnalysis?.policy_roadmap;
-                              const result = renderPolicyList(roadmap, "정책 로드맵");
-                              if (!result) {
-                                return (
-                                  <p className="text-sm text-zinc-400 italic">
-                                    {showExample ? '예시 데이터 로드 중...' : '정책 로드맵 정보가 없습니다.'}
-                                  </p>
-                                );
-                              }
-                              return result;
-                            })()}
-                            <div className="border-t border-zinc-100" />
-                            {(() => {
-                              const policies = aiAnalysis?.recommended_policies;
-                              const result = renderPolicyList(policies, "추천 정책 리스트");
-                              if (!result) {
-                                return (
-                                  <p className="text-sm text-zinc-400 italic">
-                                    {showExample ? '예시 데이터 로드 중...' : '추천 정책 정보가 없습니다.'}
-                                  </p>
-                                );
-                              }
-                              return result;
-                            })()}
+                        <div className="bg-white p-4 rounded-2xl border border-indigo-50 shadow-sm">
+                          <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-500 ${isPreparing ? 'blur-sm opacity-50' : 'blur-0 opacity-100'}`}>
+                            <div>
+                              {(() => {
+                                const roadmap = aiAnalysis?.policy_roadmap;
+                                const result = renderPolicyList(roadmap, "정책 로드맵");
+                                if (!result) {
+                                  return (
+                                    <p className="text-xs text-zinc-400 italic py-2">
+                                      {showExample ? '예시 데이터 로드 중...' : '정책 로드맵 정보가 없습니다.'}
+                                    </p>
+                                  );
+                                }
+                                return result;
+                              })()}
+                            </div>
+                            <div>
+                              {(() => {
+                                const policies = aiAnalysis?.recommended_policies;
+                                const result = renderPolicyList(policies, "추천 정책 리스트");
+                                if (!result) {
+                                  return (
+                                    <p className="text-xs text-zinc-400 italic py-2">
+                                      {showExample ? '예시 데이터 로드 중...' : '추천 정책 정보가 없습니다.'}
+                                    </p>
+                                  );
+                                }
+                                return result;
+                              })()}
+                            </div>
                           </div>
                         </div>
                       </div>
