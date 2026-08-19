@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { LogOut, User, LayoutDashboard, FileText, PlusCircle, Tag } from "lucide-react";
 import { useUITag } from "@/context/UITagContext";
 import OpclLogoSymbol from "@/components/common/OpclLogoSymbol";
+import RotatingBrandText from "@/components/common/RotatingBrandText";
 
 export default function Navbar() {
   const { user, userRole, logout, isLoading } = useAuth();
@@ -15,12 +16,12 @@ export default function Navbar() {
   return (
     <nav className="global-navbar sticky top-0 z-50 w-full glass border-b border-slate-200/60 px-3 sm:px-6 py-1.5 sm:py-2.5">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-        {/* 1. 좌측 로고: ㅇㄱㄷㄱ 4방향 심볼 + '열고닫기ON' 일체형 워드마크 */}
+        {/* 1. 좌측 로고: ㅇㄱㄷㄱ 4방향 심볼 + '열고닫기' 5단계 롤링 워드마크 */}
         <Link href="/" className="flex items-center gap-2 group transition-transform active:scale-95 shrink-0">
           <OpclLogoSymbol size={30} variant="grid" className="sm:w-[32px] sm:h-[32px]" />
-          <span className="text-sm sm:text-[15px] font-black tracking-[-0.04em] leading-none select-none flex items-center">
+          <span className="text-sm sm:text-[15px] font-black tracking-[-0.04em] leading-none select-none flex items-center gap-1">
             <span className="text-slate-900 group-hover:text-blue-950 transition-colors">열고닫기</span>
-            <span className="text-primary font-black ml-0.5 tracking-tight font-sans">ON</span>
+            <RotatingBrandText />
           </span>
         </Link>
 
