@@ -454,33 +454,33 @@ export default function ConsultationDetailPopup({
   };
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[99999] p-4 sm:p-8 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-[32px] shadow-2xl max-w-5xl w-full h-full max-h-[96vh] overflow-hidden border border-zinc-100 flex flex-col">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[99999] p-2 sm:p-8 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl sm:rounded-[32px] shadow-2xl max-w-5xl w-full h-full max-h-[98vh] sm:max-h-[96vh] overflow-hidden border border-zinc-100 flex flex-col">
 
-        <div className="bg-white px-8 py-5 flex items-center justify-between border-b border-zinc-100 shrink-0">
-          <div className="flex items-center gap-3">
-            <div>
-              <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">상담 상세 정보</h2>
-              <p className="text-zinc-500 text-sm mt-1 font-medium">상담 준비를 위한 모든 데이터를 한눈에 확인하세요</p>
+        <div className="bg-white px-4 py-3 sm:px-8 sm:py-5 flex items-center justify-between border-b border-zinc-100 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-2xl font-bold text-zinc-900 tracking-tight truncate">상담 상세 정보</h2>
+              <p className="text-zinc-500 text-[11px] sm:text-sm mt-0.5 font-medium truncate">상담 준비를 위한 모든 핵심 데이터</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <UITagBadge type="modal" id="M-01" label="상담 상세 정보" />
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <UITagBadge type="modal" id="M-01" label="상세 정보" />
             <button
               onClick={onClose}
-              className="w-10 h-10 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90"
+              className="w-8 h-8 sm:w-10 sm:h-10 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90"
             >
-              <X size={22} />
+              <X size={18} />
             </button>
           </div>
         </div>
 
         {/* 내용 */}
-        <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-[#fafafa]">
+        <div className="flex-1 p-3.5 sm:p-8 overflow-y-auto custom-scrollbar bg-[#fafafa]">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-12 h-12 border-[3px] border-blue-500 border-t-transparent rounded-full animate-spin mb-5" />
-              <p className="text-zinc-400 font-medium">정보를 안전하게 불러오는 중입니다</p>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 border-[3px] border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-zinc-400 font-medium text-xs sm:text-sm">정보를 안전하게 불러오는 중입니다</p>
             </div>
           ) : data ? (
             <div className="space-y-8">

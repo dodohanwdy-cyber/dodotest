@@ -314,36 +314,42 @@ export default function ManagerDashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-3.5 sm:px-6 py-3.5 sm:py-6 space-y-4 sm:space-y-6">
+    <div className="max-w-7xl mx-auto px-3.5 sm:px-6 py-3.5 sm:py-6 space-y-4 sm:space-y-6 overflow-x-hidden">
       {/* 대시보드 공통 헤더 */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2 sm:mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-4 mb-2 sm:mb-4">
         <div className="w-full sm:w-auto">
-          <div className="flex items-center justify-between sm:justify-start gap-2 mb-0.5">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-zinc-900 break-keep">상담 접수 및 배정 관리</h1>
-            <div className="sm:hidden">
-              <UITagBadge id="P-101" label="매니저 대시보드" />
+          <div className="flex items-center justify-between gap-2 mb-0.5">
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-black text-zinc-900 break-keep">상담 접수 및 배정 관리</h1>
+            <div className="sm:hidden shrink-0">
+              <UITagBadge id="P-101" label="매니저" />
             </div>
           </div>
-          <p className="text-zinc-500 text-xs sm:text-sm">상담 일정을 관리하고 신청 현황을 실시간으로 확인하세요</p>
+          <p className="text-zinc-500 text-[11px] sm:text-sm">실시간 상담 접수 및 일정 관리</p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto shrink-0">
+        
+        {/* 모바일 5열 그리드 / 데스크톱 플렉스: 360px 모바일 화면에서도 100% 핏 */}
+        <div className="grid grid-cols-5 gap-1.5 sm:flex sm:items-center sm:gap-2.5 w-full sm:w-auto shrink-0">
           <button
             onClick={() => fetchDashboard()}
             disabled={isLoading}
-            className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 bg-white text-zinc-700 border border-zinc-200 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:border-primary/30 transition-all shadow-sm disabled:opacity-50 whitespace-nowrap"
+            className="col-span-1 sm:flex-none px-2 sm:px-4 py-2 bg-white text-zinc-700 border border-zinc-200 rounded-xl font-bold text-xs flex items-center justify-center gap-1 hover:border-primary/30 transition-all shadow-sm disabled:opacity-50"
+            title="새로고침"
           >
-            <Clock size={13} className={isLoading ? "animate-spin" : ""} /> 새로고침
+            <Clock size={13} className={isLoading ? "animate-spin" : ""} />
+            <span className="hidden sm:inline">새로고침</span>
           </button>
           <button
             onClick={handleOpenAlarmPopup}
             disabled={confirmedAppointments.length === 0}
-            className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 bg-white text-primary border border-primary/40 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-blue-50/50 transition-all shadow-sm disabled:opacity-50 whitespace-nowrap"
+            className="col-span-1 sm:flex-none px-2 sm:px-4 py-2 bg-white text-primary border border-primary/40 rounded-xl font-bold text-xs flex items-center justify-center gap-1 hover:bg-blue-50/50 transition-all shadow-sm disabled:opacity-50"
+            title="알람 보내기"
           >
-            알람 보내기 <Bell size={13} />
+            <Bell size={13} />
+            <span className="hidden sm:inline">알람</span>
           </button>
           <button
             onClick={handleOpenAdjustPopup}
-            className="flex-1 sm:flex-none px-3.5 sm:px-5 py-1.5 sm:py-2 bg-primary text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:shadow-md transition-all shadow-md whitespace-nowrap"
+            className="col-span-3 sm:flex-none px-3 sm:px-5 py-2 bg-primary text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1 hover:shadow-md transition-all shadow-md whitespace-nowrap"
           >
             일정 조율하기 <ExternalLink size={13} />
           </button>

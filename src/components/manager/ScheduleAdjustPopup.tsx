@@ -422,6 +422,7 @@ export default function ScheduleAdjustPopup({
       if (resetResponse?.error || resetResponse?.success === false) {
         throw new Error('초기화 요청에 실패했습니다.');
       }
+
       const result = resetResponse;
 
       hideToast(toastId);
@@ -440,6 +441,32 @@ export default function ScheduleAdjustPopup({
       console.error("[ScheduleAdjustPopup] 초기화 중 오류:", error);
       showToast('초기화 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
     }
+  };
+
+  // 직접 시간 배정 헬퍼 (모바일 전용 원터치 배정)
+  const handleDirectAssign = (requestId: string, timeString: string) => {
+    // 1. 이미 해당 시간에 배정된 다른 상담이 있는지 확인
+    const conflictId = Object.keys(assignments).find(
+      id => id !== requestId && assignments[id] === timeString
+    );
+
+    if (conflictId) {
+      const conflictReq = analyzedList.find(r => r.request_id === conflictId);
+      showToast(`⚠️ 해당 시간은 이미 ${conflictReq?.name || '다른 신청자'}에게 배정되어 있습니다.`, 'error');
+      return;
+    }
+
+    // 2. 취소 목록에 있었다면 제거
+    setCanceledList(prev => prev.filter(id => id !== requestId));
+
+    // 3. 배정 설정
+    setAssignments(prev => ({
+      ...prev,
+      [requestId]: timeString
+    }));
+
+    const req = analyzedList.find(r => r.request_id === requestId);
+    showToast(`✓ ${req?.name || '신청자'} 일정이 ${timeString}으로 배정되었습니다.`, 'success');
   };
 
   // 가중치 점수에 따른 색상
@@ -477,43 +504,150 @@ export default function ScheduleAdjustPopup({
   if (!isOpen || !mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/60 z-[99999] py-4 px-8 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-[1600px] h-full max-h-[96vh] rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
-        {/* 헤더 - 여백 최적화 */}
-        <div className="px-6 py-2.5 border-b border-zinc-100 bg-white shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-9 h-9 bg-blue-50/50 rounded-xl flex items-center justify-center">
-                <Calendar className="text-blue-500" size={20} />
+    <div className="fixed inset-0 bg-black/60 z-[99999] p-2 sm:py-4 sm:px-8 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white w-full max-w-[1600px] h-full max-h-[98vh] sm:max-h-[96vh] rounded-2xl sm:rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
+        {/* 헤더 - 모바일 & 데스크톱 여백 최적화 */}
+        <div className="px-3.5 sm:px-6 py-2.5 sm:py-3 border-b border-zinc-100 bg-white shrink-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-50/50 rounded-xl flex items-center justify-center shrink-0">
+                <Calendar className="text-blue-500" size={18} />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">일정 최적 조율</h2>
-                  <span className="px-2.5 py-0.5 bg-blue-50 text-blue-500 text-[11px] font-bold rounded-full border border-blue-100/50 uppercase tracking-wider">Smart Mode</span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-base sm:text-2xl font-bold text-zinc-900 tracking-tight truncate">일정 최적 조율</h2>
+                  <span className="px-2 py-0.5 bg-blue-50 text-blue-500 text-[10px] sm:text-[11px] font-bold rounded-full border border-blue-100/50 uppercase tracking-wider shrink-0">Smart Mode</span>
                 </div>
-                <p className="text-zinc-500 text-sm mt-1 font-medium">
-                  가장 매칭률이 높은 시간을 AI가 추천해 드립니다 
-                  <span className="text-blue-500 font-bold ml-2">
-                    ({Object.keys(assignments).length}/{analyzedList.length}건 배정 완료)
+                <p className="text-zinc-500 text-[11px] sm:text-sm font-medium truncate">
+                  AI 추천 배정: 
+                  <span className="text-blue-600 font-bold ml-1">
+                    {Object.keys(assignments).length}/{analyzedList.length}건 완료
                   </span>
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <UITagBadge type="modal" id="M-02" label="일정 최적 조율" />
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+              <UITagBadge type="modal" id="M-02" label="일정 조율" />
               <button
                 onClick={onClose}
-                className="w-9 h-9 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90"
+                className="w-8 h-8 sm:w-9 sm:h-9 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* 본문 */}
-        <div className="flex-1 overflow-hidden p-4 bg-[#fafafa]">
-          <div className="grid grid-cols-12 gap-5 h-full">
+        {/* ========================================================================= */}
+        {/* 📱 모바일 전용 뷰: 원터치 추천 시간 슬롯 배정 카드 리스트 (`md:hidden`)  */}
+        {/* ========================================================================= */}
+        <div className="md:hidden flex-1 overflow-y-auto custom-scrollbar p-3 bg-[#fafafa] space-y-3">
+          <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-2.5 text-[11px] text-blue-800 font-medium">
+            💡 신청자의 희망 시간을 터치하면 즉시 해당 시간으로 배정됩니다.
+          </div>
+
+          <div className="space-y-3">
+            {analyzedList.map((req) => {
+              const isAssigned = !!assignments[req.request_id];
+              const isCanceled = canceledList.includes(req.request_id);
+              const assignedTime = assignments[req.request_id];
+
+              return (
+                <div 
+                  key={req.request_id} 
+                  className={`bg-white rounded-xl p-3 border shadow-sm space-y-2.5 transition-all ${
+                    isCanceled ? 'opacity-50 border-rose-200 bg-rose-50/20' :
+                    isAssigned ? 'border-indigo-200 ring-1 ring-indigo-50' : 
+                    'border-zinc-200/80'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                        req.weight_score >= 80 ? 'bg-rose-400' :
+                        req.weight_score >= 50 ? 'bg-amber-400' :
+                        'bg-emerald-400'
+                      }`} />
+                      <h4 className="font-black text-sm text-zinc-900 truncate">{req.name}</h4>
+                      <span className="text-[11px] text-zinc-400 shrink-0">
+                        {req.preferred_method === "online" ? "💻온라인" : req.preferred_method === "phone" ? "📞전화" : "🤝오프라인"}
+                      </span>
+                    </div>
+
+                    {isCanceled ? (
+                      <span className="px-2 py-0.5 bg-rose-50 text-rose-600 text-[10px] font-black rounded-md border border-rose-200 shrink-0">
+                        취소 대기
+                      </span>
+                    ) : isAssigned ? (
+                      <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-black rounded-md border border-indigo-200 shrink-0">
+                        배정 완료
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 bg-amber-50 text-amber-600 text-[10px] font-black rounded-md border border-amber-200 shrink-0">
+                        미배정
+                      </span>
+                    )}
+                  </div>
+
+                  {/* 현재 배정 상태 표시 및 해제 버튼 */}
+                  {isAssigned && !isCanceled && (
+                    <div className="bg-indigo-50/80 border border-indigo-100 rounded-lg p-2 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 text-xs text-indigo-950 font-bold truncate">
+                        <Clock size={13} className="text-indigo-600 shrink-0" />
+                        <span className="truncate">{assignedTime}</span>
+                      </div>
+                      <button
+                        onClick={() => handleRemoveAssignment(req.request_id)}
+                        className="text-[10px] font-black text-rose-500 bg-white px-2 py-1 rounded border border-rose-200 shrink-0 active:scale-95"
+                      >
+                        배정 해제
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 희망 순위 1, 2, 3 원터치 배정 버튼 그룹 */}
+                  {!isCanceled && (
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-zinc-400 uppercase">희망 시간 선택</p>
+                      <div className="grid grid-cols-1 gap-1">
+                        {req.options?.map((opt, optIdx) => {
+                          const isSelected = assignments[req.request_id] === opt.time;
+                          return (
+                            <button
+                              key={optIdx}
+                              onClick={() => handleDirectAssign(req.request_id, opt.time)}
+                              className={`w-full py-1.5 px-2.5 rounded-lg text-xs font-bold flex items-center justify-between transition-all ${
+                                isSelected 
+                                  ? 'bg-primary text-white shadow-sm' 
+                                  : 'bg-zinc-50 hover:bg-blue-50 border border-zinc-100 text-zinc-700 active:scale-[0.98]'
+                              }`}
+                            >
+                              <span className="flex items-center gap-1.5">
+                                <span className={`text-[10px] font-black px-1.5 py-0.2 rounded ${isSelected ? 'bg-white/20' : 'bg-zinc-200 text-zinc-600'}`}>
+                                  {opt.p}순위
+                                </span>
+                                <span>{opt.time}</span>
+                              </span>
+                              <span className="text-[10px]">
+                                {isSelected ? '선택됨 ✓' : '배정 ➔'}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* 🖥️ 데스크톱/PC 전용 뷰: 기존 드래그앤드롭 12열 캘린더 그리드 (`hidden md:flex`) */}
+        {/* ========================================================================= */}
+        <div className="hidden md:flex flex-1 overflow-hidden p-4 bg-[#fafafa]">
+          <div className="grid grid-cols-12 gap-5 h-full w-full">
             {/* 왼쪽: 캘린더 그리드 */}
             <div className="col-span-9 h-full flex flex-col">
               <div className="bg-white rounded-[24px] p-3 border border-zinc-200/60 shadow-sm flex-1 flex flex-col min-h-0">
@@ -817,11 +951,7 @@ export default function ScheduleAdjustPopup({
                         <span className="font-bold text-xs text-zinc-700 line-through decoration-rose-300">{request.name}</span>
                         <button 
                           onClick={() => {
-                            // 취소 대기에서 복구
                             setCanceledList(prev => prev.filter(id => id !== request.request_id));
-                            // 만약 확정(confirmed)이었던 사람이라면? 이미 assignments 없이도 기본 렌더링이 되므로 canceledList에서만 빼주면 제자리로 돌아감.
-                            // 만약 배정(assignments)했던 사람이 취소 대기로 갔던거라면? -> 우측 메뉴(unassigned)로 돌아가도록 하거나, 복구 로직을 짤 수 있지만, 
-                            // 현재 기획상 확정 일정이 아닌 이상 좌측 미배정 목록에서 다시 드래그 하는 것이 자연스러우므로 상태 변경만 수행.
                           }}
                           className="w-6 h-6 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded flex items-center justify-center transition-colors"
                           title="취소 대기 복구"
@@ -837,48 +967,45 @@ export default function ScheduleAdjustPopup({
           </div>
         </div>
 
-        {/* 푸터 - 여백 최적화 */}
-        <div className="px-6 py-4 bg-white border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-5">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-zinc-100 rounded-full"></div>
-              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">선택 가능</span>
+        {/* 푸터 - 모바일 & 데스크톱 여백 최적화 */}
+        <div className="px-3.5 sm:px-6 py-2.5 sm:py-3.5 bg-white border-t border-zinc-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-2.5 shrink-0">
+          <div className="hidden sm:flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>
+              <span className="text-[11px] font-bold text-blue-600">배정 완료</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-blue-600 rounded-full shadow-sm shadow-blue-300"></div>
-              <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">배정 대기</span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 bg-indigo-800 rounded-full"></div>
+              <span className="text-[11px] font-bold text-indigo-700">기존 확정</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-indigo-800 rounded-full shadow-sm shadow-indigo-300"></div>
-              <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">확정됨</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-zinc-300 rounded-full opacity-50"></div>
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">상담 불가</span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 bg-rose-500 rounded-full"></div>
+              <span className="text-[11px] font-bold text-rose-500">취소 대기</span>
             </div>
           </div>
-          <div className="flex gap-2">
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => setShowResetConfirm(true)}
-              className="px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-xl text-sm font-bold transition-all duration-200 shadow-sm"
+              className="px-3 sm:px-4 py-2 sm:py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0"
             >
               전체 초기화
             </button>
             <button
               onClick={onClose}
-              className="px-5 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-xl text-sm font-bold transition-all duration-200 active:scale-95 ml-2"
+              className="px-3 sm:px-4 py-2 sm:py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0"
             >
               닫기
             </button>
             <button
               onClick={handleConfirm}
               disabled={Object.keys(assignments).length === 0 && canceledList.length === 0}
-              className="px-8 py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:hover:bg-zinc-200 text-white rounded-xl text-sm font-bold border-none transition-all duration-200 active:scale-95 shadow-lg shadow-zinc-200 ml-2"
+              className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:text-zinc-400 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 whitespace-nowrap"
             >
               변경사항 확정하기 
               {(Object.keys(assignments).length > 0 || canceledList.length > 0) && (
                 <span className="ml-1 opacity-80 font-normal">
-                  (배정 {Object.keys(assignments).length}건 / 취소 {canceledList.length}건)
+                  ({Object.keys(assignments).length}건)
                 </span>
               )}
             </button>
