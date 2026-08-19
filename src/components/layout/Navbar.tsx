@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { LogOut, User, LayoutDashboard, FileText, PlusCircle, Tag } from "lucide-react";
 import { useUITag } from "@/context/UITagContext";
+import OpclLogoSymbol from "@/components/common/OpclLogoSymbol";
 
 export default function Navbar() {
   const { user, userRole, logout, isLoading } = useAuth();
@@ -14,11 +15,9 @@ export default function Navbar() {
   return (
     <nav className="global-navbar sticky top-0 z-50 w-full glass border-b border-slate-200/60 px-3 sm:px-6 py-1.5 sm:py-2.5">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-        {/* 1. 좌측 로고: 미니멀 심볼 + 브랜드명 */}
+        {/* 1. 좌측 로고: ㅇㄱㄷㄱ 4방향 심볼 + 브랜드명 */}
         <Link href="/" className="flex items-center gap-2 group transition-transform active:scale-95 shrink-0">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-lg sm:rounded-xl flex items-center justify-center text-xs sm:text-sm text-white font-black shadow-sm shadow-blue-100">
-            열
-          </div>
+          <OpclLogoSymbol size={30} variant="grid" className="sm:w-[32px] sm:h-[32px]" />
           <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight leading-none">
             열고닫기
           </h3>
