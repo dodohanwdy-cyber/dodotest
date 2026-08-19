@@ -1,15 +1,65 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
 
+/* ============================================================
+   [로컬 탑재 5대 상업용 무료 폰트 라이브러리 - 법적 안전성 100%]
+   ============================================================ */
+
+/* 1. 그리운 프롬솔 (DearFromsol) - 포근한 감성 손글씨 */
 @font-face {
   font-family: 'DearFromsol';
-  src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/2607161334@griun-fromsol-rg/griun-fromsol-rg/Griun_Fromsol-Rg.woff2') format('woff2');
-  font-weight: 400;
+  src: url('/fonts/Griun_Fromsol-Rg.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 2. SUIT (수트) - 공공기관/B2B 테크 헤드라인 1위 */
+@font-face {
+  font-family: 'SUIT';
+  src: url('/fonts/SUIT-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 3. 카페24 써라운드 (Cafe24Ssurround) - 모서리가 둥근 볼드 고딕 */
+@font-face {
+  font-family: 'Cafe24Ssurround';
+  src: url('/fonts/Cafe24Ssurround.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 4. 마루 부리 (MaruBuri) - 네이버 공공 명조 (보고서/진단서 1위) */
+@font-face {
+  font-family: 'MaruBuri';
+  src: url('/fonts/MaruBuri.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 5. 지마켓 산스 (GmarketSans) - 직관적인 볼드 타이틀 */
+@font-face {
+  font-family: 'GmarketSans';
+  src: url('/fonts/GmarketSansBold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
   font-display: swap;
 }
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .font-fromsol { font-family: 'DearFromsol', sans-serif; }
+  .font-suit { font-family: 'SUIT', sans-serif; }
+  .font-cafe24 { font-family: 'Cafe24Ssurround', sans-serif; }
+  .font-maruburi { font-family: 'MaruBuri', serif; }
+  .font-gmarket { font-family: 'GmarketSans', sans-serif; }
+}
 
 :root {
   --font-pretendard: "Pretendard Variable", "Pretendard", -apple-system, "BlinkMacSystemFont", "system-ui", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
