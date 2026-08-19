@@ -20,25 +20,29 @@ export default function RotatingBrandText({ className = "" }: RotatingBrandTextP
   const [isSliding, setIsSliding] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const interval = setInterval(() => {
       const targetNext = (currentIdx + 1) % ROTATION_ITEMS.length;
       setNextIdx(targetNext);
       setIsSliding(true);
 
-      // 슬라이드 애니메이션(450ms) 완료 후 상태 고정
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setCurrentIdx(targetNext);
         setIsSliding(false);
-      }, 450);
-    }, 2600); // 2.6초마다 1개씩 단독 롤링
+      }, 450); // CSS 애니메이션 시간과 정확히 일치
 
-    return () => clearInterval(timer);
+      return () => clearTimeout(timer);
+    }, 2800); // 2.8초 동안 완벽히 고정되었다가 부드럽게 전환
+
+    return () => clearInterval(interval);
   }, [currentIdx]);
 
-  const renderContent = (item: typeof ROTATION_ITEMS[0]) => {
+  const currentItem = ROTATION_ITEMS[currentIdx];
+  const nextItem = ROTATION_ITEMS[nextIdx];
+
+  const renderItem = (item: typeof ROTATION_ITEMS[0]) => {
     if (item.type === "on") {
       return (
-        <span className="text-primary font-black font-sans text-sm sm:text-base md:text-[17px] tracking-tight leading-none">
+        <span className="text-primary font-black font-sans text-lg sm:text-xl md:text-[22px] tracking-tight leading-none">
           {item.text}
         </span>
       );
@@ -49,44 +53,40 @@ export default function RotatingBrandText({ className = "" }: RotatingBrandTextP
           style={{
             fontFamily: '"Pretendard Var", "Noto Serif KR", "Apple SD Gothic Neo", "Songti SC", "Malgun Gothic", serif',
           }}
-          className="text-indigo-600 font-black text-sm sm:text-base md:text-[17px] leading-none select-none tracking-tight"
+          className="text-indigo-600 font-black text-lg sm:text-xl md:text-[22px] leading-none select-none tracking-tight"
         >
           {item.text}
         </span>
       );
     }
     return (
-      <span className="text-sm sm:text-base md:text-[16px] leading-none select-none">
+      <span className="text-base sm:text-lg md:text-[20px] leading-none select-none">
         {item.emoji}
       </span>
     );
   };
 
-  const currentItem = ROTATION_ITEMS[currentIdx];
-  const nextItem = ROTATION_ITEMS[nextIdx];
-
   return (
     <span
-      className={`inline-block relative h-5 sm:h-6 w-[22px] sm:w-[24px] overflow-hidden select-none align-middle ${className}`}
+      className={`inline-flex items-center justify-center relative h-7 sm:h-8 w-6 sm:w-7 md:w-8 overflow-hidden select-none align-middle ${className}`}
       title={currentItem.label}
     >
-      {/* 1. 현재 아이템: 슬라이딩 시 위로 나감 */}
-      <span
-        className={`absolute inset-0 flex items-center justify-center transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          isSliding ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"
-        }`}
-      >
-        {renderContent(currentItem)}
-      </span>
-
-      {/* 2. 다음 아이템: 아래에서 위로 진입 */}
-      <span
-        className={`absolute inset-0 flex items-center justify-center transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          isSliding ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
-        }`}
-      >
-        {renderContent(nextItem)}
-      </span>
+      {!isSliding ? (
+        // 1. 고정 상태: 미동도 없이 완벽한 제자리 고정
+        <span className="flex items-center justify-center w-full h-full">
+          {renderItem(currentItem)}
+        </span>
+      ) : (
+        // 2. 롤링 전환 상태: 위로 밀려나가고 아래에서 쑥 올라옴
+        <div className="absolute inset-0 flex flex-col w-full h-full animate-roller-push">
+          <span className="flex items-center justify-center w-full h-full shrink-0">
+            {renderItem(currentItem)}
+          </span>
+          <span className="flex items-center justify-center w-full h-full shrink-0">
+            {renderItem(nextItem)}
+          </span>
+        </div>
+      )}
     </span>
   );
 }

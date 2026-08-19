@@ -87,6 +87,19 @@ body.hide-global-navbar .global-navbar {
   50% { transform: translateY(-4px); }
 }
 
+@keyframes roller-push {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+.animate-roller-push {
+  animation: roller-push 450ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @keyframes progress-stripe {
   from { background-position: 24px 0; }
   to { background-position: 0 0; }
