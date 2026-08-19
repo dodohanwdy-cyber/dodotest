@@ -139,10 +139,10 @@ export default function ClientDashboard() {
   }, [user]);
 
   return (
-    <div className="max-w-6xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6 md:py-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-6 mb-4 sm:mb-6">
+    <div className="max-w-6xl mx-auto px-3.5 sm:px-6 py-3 sm:py-5">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 sm:gap-4 mb-3 sm:mb-4">
         <div className="animate-in fade-in slide-in-from-left duration-700 w-full sm:w-auto">
-          <div className="flex items-center justify-between gap-2 mb-1">
+          <div className="flex items-center justify-between gap-2 mb-0.5">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
               <span className="text-[10px] sm:text-xs font-bold text-emerald-600 uppercase tracking-widest">Logged In</span>
@@ -151,21 +151,21 @@ export default function ClientDashboard() {
               <UITagBadge id="P-202" label="마이 대시보드" />
             </div>
           </div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-zinc-900 tracking-tight break-keep">반가워요, {user?.user_metadata?.full_name || "내담자"}님! 👋</h1>
-          <p className="text-zinc-500 mt-0.5 font-medium text-xs sm:text-sm break-keep">진행 중인 상담 현황을 실시간으로 확인하세요.</p>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-black text-zinc-900 tracking-tight break-keep">반가워요, {user?.user_metadata?.full_name || "내담자"}님! 👋</h1>
+          <p className="text-zinc-500 font-medium text-xs sm:text-sm break-keep">진행 중인 상담 현황을 실시간으로 확인하세요.</p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
+        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto shrink-0">
           <button
             onClick={() => fetchApplications(true)}
             disabled={loading}
-            className="flex-1 sm:flex-none bg-white border border-zinc-200 text-zinc-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:border-primary/30 transition-all text-xs sm:text-sm disabled:opacity-50 shadow-sm shrink-0 whitespace-nowrap"
+            className="flex-1 sm:flex-none bg-white border border-zinc-200 text-zinc-700 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:border-primary/30 transition-all text-xs sm:text-sm disabled:opacity-50 shadow-sm shrink-0 whitespace-nowrap"
           >
             <Clock size={13} className={loading ? "animate-spin" : ""} />
             새로고침
           </button>
           <Link 
             href="/client/intake"
-            className="flex-1 sm:flex-none bg-primary text-white px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center gap-1.5 btn-interactive shadow-md shadow-indigo-100 text-xs sm:text-sm shrink-0 whitespace-nowrap"
+            className="flex-1 sm:flex-none bg-primary text-white px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center gap-1.5 btn-interactive shadow-md shadow-indigo-100 text-xs sm:text-sm shrink-0 whitespace-nowrap"
           >
             <PlusCircle size={14} /> 새 상담 신청
           </Link>
@@ -177,26 +177,26 @@ export default function ClientDashboard() {
 
       {/* 일정 확정 알림 배너 */}
       {!loading && applications.some(app => app.status === 'confirmed') && (
-        <div className="mb-4 sm:mb-6 animate-in slide-in-from-top duration-500">
-          <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-indigo-700 rounded-xl sm:rounded-2xl md:rounded-[2rem] p-3.5 sm:p-5 md:p-6 shadow-md shadow-blue-100/50 group">
+        <div className="mb-3 sm:mb-4 animate-in slide-in-from-top duration-500">
+          <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-indigo-700 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm shadow-blue-100/50 group">
             <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/20 transition-colors" />
-            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5">
-              <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner shrink-0">
-                  <Calendar size={20} className="sm:w-7 sm:h-7" />
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4">
+              <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner shrink-0">
+                  <Calendar size={18} className="sm:w-5 sm:h-5" />
                 </div>
                 <div className="text-white text-left">
-                  <h2 className="text-sm sm:text-lg font-black tracking-tight mb-0.5 break-keep">상담 일정이 확정되었어요! 📅</h2>
-                  <p className="text-blue-50/80 font-bold text-[11px] sm:text-xs md:text-sm break-keep">배정된 전문 상담사와의 상담 일정을 확인해 보세요.</p>
+                  <h2 className="text-xs sm:text-base font-black tracking-tight mb-0.5 break-keep">상담 일정이 확정되었어요! 📅</h2>
+                  <p className="text-blue-50/80 font-bold text-[10px] sm:text-xs break-keep">배정된 전문 상담사와의 상담 일정을 확인해 보세요.</p>
                 </div>
               </div>
               <button 
                 onClick={() => {
                   window.scrollTo({ top: document.getElementById('my-applications')?.offsetTop, behavior: 'smooth' });
                 }}
-                className="w-full sm:w-auto bg-white text-indigo-700 px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-black text-xs sm:text-sm shadow-sm hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap"
+                className="w-full sm:w-auto bg-white text-indigo-700 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-black text-xs shadow-sm hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap"
               >
-                일정 확인하기 <ArrowRight size={14} />
+                일정 확인하기 <ArrowRight size={13} />
               </button>
             </div>
           </div>
@@ -205,17 +205,17 @@ export default function ClientDashboard() {
 
       {/* 상담 완료 알림 배너 */}
       {!loading && applications.some(app => app.status === 'analyzed') && (
-        <div className="mb-4 sm:mb-6 animate-in slide-in-from-top duration-500">
-          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl sm:rounded-2xl md:rounded-[2rem] p-3.5 sm:p-5 md:p-6 shadow-md shadow-emerald-100/50 group">
+        <div className="mb-3 sm:mb-4 animate-in slide-in-from-top duration-500">
+          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm shadow-emerald-100/50 group">
             <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/20 transition-colors" />
-            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5">
-              <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner shrink-0">
-                  <Sparkles size={20} className="sm:w-7 sm:h-7" />
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4">
+              <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner shrink-0">
+                  <Sparkles size={18} className="sm:w-5 sm:h-5" />
                 </div>
                 <div className="text-white text-left">
-                  <h2 className="text-sm sm:text-lg font-black tracking-tight mb-0.5 break-keep">맞춤 상담 리포트가 도착했어요! 🎉</h2>
-                  <p className="text-emerald-50/80 font-bold text-[11px] sm:text-xs md:text-sm break-keep">AI 분석과 추천 정책이 포함된 결과 리포트를 확인해 보세요.</p>
+                  <h2 className="text-xs sm:text-base font-black tracking-tight mb-0.5 break-keep">맞춤 상담 리포트가 도착했어요! 🎉</h2>
+                  <p className="text-emerald-50/80 font-bold text-[10px] sm:text-xs break-keep">AI 분석과 추천 정책이 포함된 결과 리포트를 확인해 보세요.</p>
                 </div>
               </div>
               <button 
@@ -225,42 +225,42 @@ export default function ClientDashboard() {
                     window.open(`/report/${firstAnalyzed.request_id || firstAnalyzed.id}`, '_blank');
                   }
                 }}
-                className="w-full sm:w-auto bg-white text-emerald-700 px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-black text-xs sm:text-sm shadow-sm hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap"
+                className="w-full sm:w-auto bg-white text-emerald-700 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-black text-xs shadow-sm hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap"
               >
-                리포트 확인하기 <ArrowRight size={14} />
+                리포트 확인하기 <ArrowRight size={13} />
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 md:gap-8" id="my-applications">
-        <div className="md:col-span-7 lg:col-span-8 space-y-4 sm:space-y-6">
-          <h2 className="text-base sm:text-lg font-black text-zinc-900 flex items-center gap-2 mb-2 sm:mb-4">
-            <FileText size={18} className="text-primary" /> 나의 상담 리스트
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 sm:gap-5 md:gap-6" id="my-applications">
+        <div className="md:col-span-7 lg:col-span-8 space-y-3 sm:space-y-4">
+          <h2 className="text-sm sm:text-base font-black text-zinc-900 flex items-center gap-2 mb-1.5 sm:mb-2.5">
+            <FileText size={16} className="text-primary" /> 나의 상담 리스트
           </h2>
           
           {loading ? (
-            <div className="card-premium p-16 text-center space-y-4">
-              <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto" />
-              <p className="text-zinc-500 font-bold">정보를 안전하게 불러오는 중입니다...</p>
+            <div className="card-premium p-10 text-center space-y-3">
+              <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto" />
+              <p className="text-zinc-500 font-bold text-xs sm:text-sm">정보를 안전하게 불러오는 중입니다...</p>
             </div>
           ) : error ? (
-            <div className="card-premium p-12 text-center space-y-4 bg-rose-50/50 border-rose-100 animate-in zoom-in-95 duration-300">
-              <AlertCircle className="w-12 h-12 text-rose-400 mx-auto" />
+            <div className="card-premium p-8 text-center space-y-3 bg-rose-50/50 border-rose-100 animate-in zoom-in-95 duration-300">
+              <AlertCircle className="w-8 h-8 text-rose-400 mx-auto" />
               <div>
-                <p className="text-rose-900 font-bold mb-2 text-lg">기록을 불러올 수 없습니다</p>
-                <p className="text-rose-600 font-medium">{error}</p>
+                <p className="text-rose-900 font-bold mb-1 text-base">기록을 불러올 수 없습니다</p>
+                <p className="text-rose-600 font-medium text-xs">{error}</p>
                 <button 
                    onClick={() => fetchApplications(true)}
-                   className="mt-6 px-6 py-2.5 bg-rose-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-rose-200"
+                   className="mt-4 px-4 py-2 bg-rose-600 text-white rounded-xl font-bold text-xs shadow-md shadow-rose-200"
                 >
                    다시 시도하기
                 </button>
               </div>
             </div>
           ) : applications.filter(app => app.status !== 'canceled').length > 0 ? (
-            <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="space-y-3.5 animate-in fade-in slide-in-from-bottom-4 duration-700">
               {applications.filter(app => app.status !== 'canceled').map((app) => {
                 const isAnalyzed = app.status === 'analyzed';
                 const isCanceled = app.status === 'canceled';
@@ -280,19 +280,19 @@ export default function ClientDashboard() {
                     onMouseLeave={() => setActiveStep(null)}
                     onClick={() => { if (canResume) window.location.href = `/client/intake?id=${requestId}`; }}
                     className={`card-premium p-0 overflow-hidden border-2 transition-all group ${
-                      isAnalyzed ? 'border-indigo-100 shadow-indigo-100/50 shadow-xl' :
-                      canResume ? 'hover:border-primary/30 hover:shadow-lg cursor-pointer' :
+                      isAnalyzed ? 'border-indigo-100 shadow-indigo-100/50 shadow-md' :
+                      canResume ? 'hover:border-primary/30 hover:shadow-md cursor-pointer' :
                       'hover:border-rose-100 hover:shadow-sm'
                     }`}
                   >
-                    <div className="p-4 sm:p-7">
-                      <div className="flex justify-between items-start gap-2 mb-3 sm:mb-4">
-                        <div className="space-y-1">
+                    <div className="p-3.5 sm:p-5">
+                      <div className="flex justify-between items-start gap-2 mb-2 sm:mb-3">
+                        <div className="space-y-0.5">
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] font-bold text-zinc-400 font-mono tracking-tight">{new Date(app.created_at || Date.now()).toLocaleDateString()}</span>
                           </div>
-                          <h3 className={`font-black text-base sm:text-xl tracking-tight break-keep ${isCanceled ? 'text-zinc-400 line-through' : 'text-zinc-900'}`}>
-                            {app.name || '내담자'} <span className="text-zinc-400 font-bold text-xs sm:text-sm ml-0.5">({app.age}세, {(() => {
+                          <h3 className={`font-black text-sm sm:text-lg tracking-tight break-keep ${isCanceled ? 'text-zinc-400 line-through' : 'text-zinc-900'}`}>
+                            {app.name || '내담자'} <span className="text-zinc-400 font-bold text-xs ml-0.5">({app.age}세, {(() => {
                               const g = (app.gender || app.Gender || "").toString().toLowerCase().trim();
                               if (g === "male" || g === "남성" || g === "남") return "남성";
                               if (g === "female" || g === "여성" || g === "여") return "여성";
@@ -300,11 +300,11 @@ export default function ClientDashboard() {
                             })()})</span>
                           </h3>
                         </div>
-                        <div className={`px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-[11px] font-black shrink-0 ${
+                        <div className={`px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-black shrink-0 ${
                           isCanceled ? 'bg-rose-50 text-rose-500 border border-rose-100' :
                           isAnalyzed ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm animate-bounce-subtle' :
-                          app.status === 'confirmed' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100' :
-                          (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-100' :
+                          app.status === 'confirmed' ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-100' :
+                          (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-100' :
                           (app.status && app.status.includes('step')) ? 'bg-orange-50 text-orange-600 border border-orange-200 animate-pulse-subtle' :
                           'bg-indigo-50 text-primary border border-indigo-100'
                         }`}>
@@ -322,19 +322,19 @@ export default function ClientDashboard() {
 
                       {/* 확정된 상담 시간 표시 (Step 2 연동 확인용) */}
                       {app.status === 'confirmed' && (app.confirmed_datetime || app.confirmed_time) && (
-                        <div className="mb-3 sm:mb-4 bg-indigo-50/50 border border-indigo-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2.5 sm:gap-3">
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-lg sm:rounded-xl flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
-                              <Calendar size={16} className="sm:w-5 sm:h-5" />
+                        <div className="mb-2.5 sm:mb-3 bg-indigo-50/50 border border-indigo-100 rounded-xl p-2.5 sm:p-3 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-lg flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
+                              <Calendar size={14} className="sm:w-4 sm:h-4" />
                             </div>
                             <div>
-                              <p className="text-[10px] sm:text-[11px] font-bold text-indigo-400 uppercase tracking-wider">확정 일시</p>
+                              <p className="text-[9px] sm:text-[10px] font-bold text-indigo-400 uppercase tracking-wider">확정 일시</p>
                               <p className="text-xs sm:text-sm font-black text-indigo-900 break-keep">{app.confirmed_datetime || app.confirmed_time}</p>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
-                             <p className="text-[10px] sm:text-[11px] font-bold text-indigo-400 uppercase tracking-wider">방식</p>
-                             <p className="text-xs sm:text-sm font-black text-indigo-900">
+                             <p className="text-[9px] sm:text-[10px] font-bold text-indigo-400 uppercase tracking-wider">방식</p>
+                             <p className="text-xs font-black text-indigo-900">
                                {app.confirmed_method === 'online' ? '💻온라인' : 
                                 app.confirmed_method === 'offline' ? '🤝오프라인' : 
                                 app.confirmed_method === 'phone' ? '📞전화' : 
@@ -344,59 +344,59 @@ export default function ClientDashboard() {
                         </div>
                       )}
                       
-                      <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
-                        <div className="flex items-center gap-1.5 text-zinc-600 bg-zinc-50 px-2.5 py-1 rounded-lg sm:rounded-xl border border-zinc-100/50 text-[11px] sm:text-xs font-bold">
-                          <MapPin size={12} className="text-zinc-400" /> 
+                      <div className="flex flex-wrap gap-1.5 mb-3 sm:mb-4">
+                        <div className="flex items-center gap-1 text-zinc-600 bg-zinc-50 px-2 py-0.5 rounded-lg border border-zinc-100/50 text-[10px] sm:text-[11px] font-bold">
+                          <MapPin size={11} className="text-zinc-400" /> 
                           <span className="leading-none">{app.location ? (typeof app.location === 'object' ? app.location.regional : app.location) : '지역 정보 없음'}</span>
                         </div>
-                        <div className="flex items-center gap-1.5 text-zinc-600 bg-zinc-50 px-2.5 py-1 rounded-lg sm:rounded-xl border border-zinc-100/50 text-[11px] sm:text-xs font-bold">
-                          <Briefcase size={12} className="text-zinc-400" /> 
+                        <div className="flex items-center gap-1 text-zinc-600 bg-zinc-50 px-2 py-0.5 rounded-lg border border-zinc-100/50 text-[10px] sm:text-[11px] font-bold">
+                          <Briefcase size={11} className="text-zinc-400" /> 
                           <span className="leading-none">{app.job_status || '미입력'}</span>
                         </div>
                       </div>
 
                       {/* [디자인 개선] 신청 미완료 시 진행률 프로그레스 바 표시 */}
                       {!isAnalyzed && app.status !== 'confirmed' && !['pending', 'final_submitted', 'submitted'].includes(app.status) && (
-                        <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-orange-50/50 rounded-xl sm:rounded-2xl border border-orange-100">
-                          <div className="flex justify-between items-center mb-1.5">
-                            <span className="text-[10px] sm:text-[11px] font-black text-orange-600 flex items-center gap-1">
-                              <AlertCircle size={12} /> 신청 미완료
+                        <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-orange-50/50 rounded-xl border border-orange-100">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-[10px] font-black text-orange-600 flex items-center gap-1">
+                              <AlertCircle size={11} /> 신청 미완료
                             </span>
-                            <span className="text-[10px] sm:text-[11px] font-black text-orange-600">
+                            <span className="text-[10px] font-black text-orange-600">
                               {app.status === 'step1' ? '20%' : app.status === 'step2' ? '40%' : app.status === 'step3' ? '60%' : '80%'} 완료
                             </span>
                           </div>
-                          <div className="w-full h-1.5 sm:h-2 bg-white rounded-full overflow-hidden border border-orange-100 shadow-inner">
+                          <div className="w-full h-1.5 bg-white rounded-full overflow-hidden border border-orange-100 shadow-inner">
                             <div 
                               className="h-full bg-orange-400 transition-all duration-1000"
                               style={{ width: app.status === 'step1' ? '20%' : app.status === 'step2' ? '40%' : app.status === 'step3' ? '60%' : '80%' }}
                             />
                           </div>
-                          <p className="text-[9px] sm:text-[10px] text-orange-400 mt-1.5 font-bold text-center">아래 '이어하기'를 눌러 신청을 완료해 주세요!</p>
+                          <p className="text-[9px] text-orange-400 mt-1 font-bold text-center">아래 '이어하기'를 눌러 신청을 완료해 주세요!</p>
                         </div>
                       )}
 
                       {/* 희망 상담 시간 표시 (검토 중일 때) */}
                       {!isAnalyzed && app.status !== 'confirmed' && (app.request_time_1 || app.request_time_2 || app.request_time_3) && (
-                        <div className="mb-3 sm:mb-4 bg-zinc-50 border border-zinc-100 border-dashed rounded-xl sm:rounded-2xl p-3 sm:p-4">
-                          <p className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                        <div className="mb-2.5 sm:mb-3 bg-zinc-50 border border-zinc-100 border-dashed rounded-xl p-2.5 sm:p-3">
+                          <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                             <Clock size={10} /> 희망 상담 일시
                           </p>
-                          <div className="space-y-1">
+                          <div className="space-y-0.5">
                             {app.request_time_1 && (
-                              <div className="flex items-center justify-between text-[10px] sm:text-[11px]">
+                              <div className="flex items-center justify-between text-[10px]">
                                 <span className="text-zinc-500">1순위</span>
                                 <span className="font-bold text-zinc-700">{app.request_time_1}</span>
                               </div>
                             )}
                             {app.request_time_2 && (
-                              <div className="flex items-center justify-between text-[10px] sm:text-[11px]">
+                              <div className="flex items-center justify-between text-[10px]">
                                 <span className="text-zinc-500">2순위</span>
                                 <span className="font-bold text-zinc-700">{app.request_time_2}</span>
                               </div>
                             )}
                             {app.request_time_3 && (
-                              <div className="flex items-center justify-between text-[10px] sm:text-[11px]">
+                              <div className="flex items-center justify-between text-[10px]">
                                 <span className="text-zinc-500">3순위</span>
                                 <span className="font-bold text-zinc-700">{app.request_time_3}</span>
                               </div>
@@ -410,53 +410,53 @@ export default function ClientDashboard() {
                           href={`/report/${requestId}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-full flex items-center justify-between p-3.5 sm:p-5 bg-emerald-600 text-white rounded-xl sm:rounded-[24px] group/btn hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100 active:scale-[0.98]"
+                          className="w-full flex items-center justify-between p-3 sm:p-4 bg-emerald-600 text-white rounded-xl group/btn hover:bg-emerald-700 transition-all shadow-sm shadow-emerald-100 active:scale-[0.98]"
                         >
-                          <div className="flex items-center gap-3 sm:gap-4">
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0">
-                              <Sparkles size={16} className="sm:w-5 sm:h-5" />
+                          <div className="flex items-center gap-2.5 sm:gap-3">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
+                              <Sparkles size={14} className="sm:w-4 sm:h-4" />
                             </div>
                             <div className="text-left">
                               <h4 className="font-black text-xs sm:text-sm leading-tight break-keep">상담 분석 리포트 확인</h4>
-                              <p className="text-[9px] sm:text-[10px] text-emerald-100 font-bold opacity-80 mt-0.5 break-keep">나만을 위한 맞춤형 결과가 준비되었습니다.</p>
+                              <p className="text-[9px] text-emerald-100 font-bold opacity-80 mt-0.5 break-keep">나만을 위한 맞춤형 결과가 준비되었습니다.</p>
                             </div>
                           </div>
-                          <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform shrink-0" />
+                          <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform shrink-0" />
                         </Link>
                       ) : (
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-zinc-50/80 rounded-xl sm:rounded-2xl border border-zinc-100 border-dashed gap-2.5">
-                          <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:p-3 bg-zinc-50/80 rounded-xl border border-zinc-100 border-dashed gap-2">
+                          <div className="flex items-center gap-1.5">
                             {app.status === 'confirmed' ? (
-                              <Clock size={14} className="text-indigo-400 shrink-0" />
+                              <Clock size={13} className="text-indigo-400 shrink-0" />
                             ) : (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? (
-                              <CheckCircle size={14} className="text-emerald-500 shrink-0" />
+                              <CheckCircle size={13} className="text-emerald-500 shrink-0" />
                             ) : (
-                              <Loader2 size={14} className="text-zinc-400 animate-spin shrink-0" />
+                              <Loader2 size={13} className="text-zinc-400 animate-spin shrink-0" />
                             )}
-                            <span className="text-[11px] sm:text-xs font-bold text-zinc-500 break-keep">
+                            <span className="text-[10px] sm:text-xs font-bold text-zinc-500 break-keep">
                               {app.status === 'confirmed' ? '정해진 시간에 상담을 시작합니다.' : 
                                (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? 
                                '상담 신청이 완료되었습니다.' : 
                                '상담 신청을 진행 중입니다.'}
                             </span>
                           </div>
-                          <div className="flex items-center justify-end gap-2 sm:gap-3">
+                          <div className="flex items-center justify-end gap-1.5 sm:gap-2">
                             {app.status === 'confirmed' ? (
-                              <span className="text-[10px] sm:text-[11px] font-black text-indigo-500 bg-indigo-50 px-3 py-1.5 rounded-lg flex items-center gap-1 border border-indigo-100/50 cursor-default">
-                                <MessageSquare size={12} /> 상담 대기
+                              <span className="text-[10px] font-black text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-lg flex items-center gap-1 border border-indigo-100/50 cursor-default">
+                                <MessageSquare size={11} /> 상담 대기
                               </span>
                             ) : canResume ? (
                               <Link 
                                 href={`/client/intake?id=${requestId}`}
-                                className="text-[10px] sm:text-[11px] font-black text-primary bg-primary/10 px-2.5 py-1.5 rounded-lg flex items-center gap-1 hover:bg-primary/20 transition-colors shrink-0"
+                                className="text-[10px] font-black text-primary bg-primary/10 px-2.5 py-1 rounded-lg flex items-center gap-1 hover:bg-primary/20 transition-colors shrink-0"
                               >
-                                {app.status === 'pending' ? '수정하기' : '이어하기'} <ArrowRight size={12} />
+                                {app.status === 'pending' ? '수정하기' : '이어하기'} <ArrowRight size={11} />
                               </Link>
                             ) : null}
                             {!isCanceled && (
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleCancelApplication(requestId, e); }}
-                                className="text-[10px] sm:text-[11px] font-black text-rose-500 hover:text-rose-600 transition-colors shrink-0"
+                                className="text-[10px] font-black text-rose-500 hover:text-rose-600 transition-colors shrink-0 px-1"
                               >
                                 취소
                               </button>
@@ -470,19 +470,19 @@ export default function ClientDashboard() {
               })}
             </div>
           ) : (
-            <div className="card-premium p-16 text-center space-y-6 bg-zinc-50/30 border-dashed border-2 animate-in fade-in duration-700">
-              <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto shadow-sm text-zinc-200">
-                <FileText size={40} />
+            <div className="card-premium p-10 text-center space-y-4 bg-zinc-50/30 border-dashed border-2 animate-in fade-in duration-700">
+              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-sm text-zinc-200">
+                <FileText size={28} />
               </div>
               <div>
-                <p className="text-zinc-900 font-black text-lg">아직 신청 내역이 없습니다</p>
-                <p className="text-zinc-400 text-sm mt-1 font-medium">새로운 상담 신청을 통해 맞춤 솔루션을 받아보세요.</p>
+                <p className="text-zinc-900 font-black text-base">아직 신청 내역이 없습니다</p>
+                <p className="text-zinc-400 text-xs mt-0.5 font-medium">새로운 상담 신청을 통해 맞춤 솔루션을 받아보세요.</p>
               </div>
               <Link 
                 href="/client/intake"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-zinc-900 text-white rounded-2xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-zinc-200"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-zinc-900 text-white rounded-xl font-bold text-xs hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-zinc-200"
               >
-                <PlusCircle size={20} /> 첫 상담 신청하기
+                <PlusCircle size={15} /> 첫 상담 신청하기
               </Link>
             </div>
           )}
