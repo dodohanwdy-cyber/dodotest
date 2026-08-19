@@ -141,30 +141,35 @@ export default function ClientDashboard() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <div className="animate-in fade-in slide-in-from-left duration-700">
-          <div className="flex items-center gap-2 mb-1.5">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[10px] sm:text-xs font-bold text-emerald-600 uppercase tracking-widest">Logged In</span>
+        <div className="animate-in fade-in slide-in-from-left duration-700 w-full sm:w-auto">
+          <div className="flex items-center justify-between gap-2 mb-1.5">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-[10px] sm:text-xs font-bold text-emerald-600 uppercase tracking-widest">Logged In</span>
+            </div>
+            <div className="sm:hidden">
+              <UITagBadge id="P-202" label="마이 대시보드" />
+            </div>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 tracking-tight break-keep">반가워요, {user?.user_metadata?.full_name || "내담자"}님! 👋</h1>
           <p className="text-zinc-500 mt-1 font-medium text-xs sm:text-sm break-keep">진행 중인 상담 현황을 실시간으로 확인하세요.</p>
         </div>
-        <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 items-center w-full sm:w-auto">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
           <button
             onClick={() => fetchApplications(true)}
             disabled={loading}
-            className="flex-1 sm:flex-initial bg-white border border-zinc-200 text-zinc-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:border-primary/30 transition-all text-xs sm:text-sm disabled:opacity-50 shadow-sm shrink-0"
+            className="flex-1 sm:flex-none bg-white border border-zinc-200 text-zinc-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:border-primary/30 transition-all text-xs sm:text-sm disabled:opacity-50 shadow-sm shrink-0 whitespace-nowrap"
           >
             <Clock size={14} className={loading ? "animate-spin" : ""} />
             새로고침
           </button>
           <Link 
             href="/client/intake"
-            className="flex-1 sm:flex-initial bg-primary text-white px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center gap-1.5 btn-interactive shadow-md shadow-indigo-100 text-xs sm:text-sm shrink-0"
+            className="flex-1 sm:flex-none bg-primary text-white px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center gap-1.5 btn-interactive shadow-md shadow-indigo-100 text-xs sm:text-sm shrink-0 whitespace-nowrap"
           >
-            <PlusCircle size={16} /> 새 상담 신청
+            <PlusCircle size={15} /> 새 상담 신청
           </Link>
-          <div className="hidden sm:block">
+          <div className="hidden sm:block shrink-0">
             <UITagBadge id="P-202" label="마이 대시보드" />
           </div>
         </div>

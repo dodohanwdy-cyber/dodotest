@@ -149,38 +149,45 @@ export default function CompletedConsultationsPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12 space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <Link href="/manager/dashboard" className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
-              <ChevronLeft size={24} />
-            </Link>
-            <h1 className="text-3xl font-bold text-slate-900">상담 완료 내역</h1>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6">
+        <div className="space-y-1 w-full md:w-auto">
+          <div className="flex items-center justify-between md:justify-start gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Link href="/manager/dashboard" className="p-1.5 sm:p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
+                <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
+              </Link>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">상담 완료 내역</h1>
+            </div>
+            <div className="md:hidden">
+              <UITagBadge id="P-104" label="완료된 상담 내역" />
+            </div>
           </div>
-          <p className="text-slate-500 ml-12">과거에 완료된 모든 상담 기록을 확인하고 관리할 수 있습니다.</p>
+          <p className="text-xs sm:text-sm text-slate-500 ml-8 sm:ml-11">과거에 완료된 모든 상담 기록을 확인하고 관리할 수 있습니다.</p>
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto shrink-0">
           <button
             onClick={handleRefresh}
             disabled={isLoading}
-            className="flex-none flex items-center gap-2 px-4 py-3 bg-white text-slate-600 font-bold border border-slate-200 rounded-2xl hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm"
+            className="flex-none flex items-center gap-1.5 px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white text-slate-600 font-bold border border-slate-200 rounded-xl sm:rounded-2xl hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm text-xs sm:text-sm whitespace-nowrap"
             title="분석 상태 다시 불러오기"
           >
-            <Loader2 size={18} className={isLoading ? "animate-spin" : ""} />
-            <span className="text-sm">새로고침</span>
+            <Loader2 size={16} className={isLoading ? "animate-spin" : ""} />
+            <span>새로고침</span>
           </button>
-          <UITagBadge id="P-104" label="완료된 상담 내역" />
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <div className="hidden md:block shrink-0">
+            <UITagBadge id="P-104" label="완료된 상담 내역" />
+          </div>
+          <div className="relative flex-1 md:w-80">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input 
               type="text" 
-              placeholder="이름 또는 이메일로 검색"
+              placeholder="이름 또는 이메일 검색"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm shadow-sm"
+              className="w-full pl-9 pr-3.5 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-xs sm:text-sm shadow-sm"
             />
           </div>
         </div>

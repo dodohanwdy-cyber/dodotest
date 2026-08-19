@@ -292,28 +292,35 @@ export default function ManagerDashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12 space-y-6 sm:space-y-8">
       {/* 대시보드 헤더 */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-black text-zinc-900 mb-2">상담 접수 및 배정 관리</h1>
-          <p className="text-zinc-500">상담 일정을 관리하고 신청 현황을 확인하세요</p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+        <div className="w-full sm:w-auto">
+          <div className="flex items-center justify-between sm:justify-start gap-2 mb-1">
+            <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 break-keep">상담 접수 및 배정 관리</h1>
+            <div className="sm:hidden">
+              <UITagBadge id="P-101" label="매니저 대시보드" />
+            </div>
+          </div>
+          <p className="text-zinc-500 text-xs sm:text-sm">상담 일정을 관리하고 신청 현황을 확인하세요</p>
         </div>
-        <div className="flex gap-3 items-center">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
           <button
             onClick={handleOpenAlarmPopup}
             disabled={confirmedAppointments.length === 0}
-            className="px-6 py-3 bg-white text-primary border border-primary rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-blue-50/50 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 sm:flex-none px-3.5 sm:px-6 py-2.5 sm:py-3 bg-white text-primary border border-primary rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-blue-50/50 transition-all shadow-sm disabled:opacity-50 whitespace-nowrap"
           >
-            알람 보내기 <Bell size={16} />
+            알람 보내기 <Bell size={15} />
           </button>
           <button
             onClick={handleOpenAdjustPopup}
-            className="px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm flex items-center gap-2 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all shadow-md"
+            className="flex-1 sm:flex-none px-3.5 sm:px-6 py-2.5 sm:py-3 bg-primary text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:shadow-md transition-all shadow-md whitespace-nowrap"
           >
-            일정 조율하기 <ExternalLink size={16} />
+            일정 조율하기 <ExternalLink size={15} />
           </button>
-          <UITagBadge id="P-101" label="매니저 대시보드" />
+          <div className="hidden sm:block shrink-0">
+            <UITagBadge id="P-101" label="매니저 대시보드" />
+          </div>
         </div>
       </div>
 
