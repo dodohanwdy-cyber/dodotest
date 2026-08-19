@@ -8,7 +8,7 @@ import { ToastProvider } from "@/context/ToastContext";
 import { UITagProvider } from "@/context/UITagContext";
 
 export const metadata: Metadata = {
-  title: "열고닫기 - AI 기반 청년정책 맞춤 상담",
+  title: "열고닫기 ON - AI 기반 청년정책 맞춤 상담",
   description: "내일의 고민을 오늘의 정책으로, AI 분석을 통해 가장 필요한 정책 수혜로 연결합니다.",
 };
 
