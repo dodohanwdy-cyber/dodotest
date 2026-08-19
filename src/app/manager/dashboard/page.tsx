@@ -283,6 +283,28 @@ export default function ManagerDashboard() {
       }));
   }, [confirmedAppointments]);
 
+  // 오늘 날짜 문자열 (YYYY-MM-DD)
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
+
+  // 오늘 예정된 확정 상담 목록
+  const todayAppointments = useMemo(() => {
+    return confirmedAppointments.filter((apt) => {
+      const aptDate = apt.confirmed_datetime?.split(" ")[0];
+      return aptDate === todayStr;
+    });
+  }, [confirmedAppointments, todayStr]);
+
+  // 내일 이후 다가오는 확정 상담 목록
+  const upcomingAppointments = useMemo(() => {
+    return confirmedAppointments.filter((apt) => {
+      const aptDate = apt.confirmed_datetime?.split(" ")[0];
+      return aptDate && aptDate > todayStr;
+    });
+  }, [confirmedAppointments, todayStr]);
+
   const handleOpenAdjustPopup = () => {
     if (combinedList.length === 0) {
       setShowNoSchedulePopup(true);
@@ -292,31 +314,38 @@ export default function ManagerDashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12 space-y-6 sm:space-y-8">
-      {/* 대시보드 헤더 */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+    <div className="max-w-7xl mx-auto px-3.5 sm:px-6 py-3.5 sm:py-6 space-y-4 sm:space-y-6">
+      {/* 대시보드 공통 헤더 */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2 sm:mb-4">
         <div className="w-full sm:w-auto">
-          <div className="flex items-center justify-between sm:justify-start gap-2 mb-1">
-            <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 break-keep">상담 접수 및 배정 관리</h1>
+          <div className="flex items-center justify-between sm:justify-start gap-2 mb-0.5">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-zinc-900 break-keep">상담 접수 및 배정 관리</h1>
             <div className="sm:hidden">
               <UITagBadge id="P-101" label="매니저 대시보드" />
             </div>
           </div>
-          <p className="text-zinc-500 text-xs sm:text-sm">상담 일정을 관리하고 신청 현황을 확인하세요</p>
+          <p className="text-zinc-500 text-xs sm:text-sm">상담 일정을 관리하고 신청 현황을 실시간으로 확인하세요</p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
+        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto shrink-0">
+          <button
+            onClick={() => fetchDashboard()}
+            disabled={isLoading}
+            className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 bg-white text-zinc-700 border border-zinc-200 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:border-primary/30 transition-all shadow-sm disabled:opacity-50 whitespace-nowrap"
+          >
+            <Clock size={13} className={isLoading ? "animate-spin" : ""} /> 새로고침
+          </button>
           <button
             onClick={handleOpenAlarmPopup}
             disabled={confirmedAppointments.length === 0}
-            className="flex-1 sm:flex-none px-3.5 sm:px-6 py-2.5 sm:py-3 bg-white text-primary border border-primary rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-blue-50/50 transition-all shadow-sm disabled:opacity-50 whitespace-nowrap"
+            className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 bg-white text-primary border border-primary/40 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-blue-50/50 transition-all shadow-sm disabled:opacity-50 whitespace-nowrap"
           >
-            알람 보내기 <Bell size={15} />
+            알람 보내기 <Bell size={13} />
           </button>
           <button
             onClick={handleOpenAdjustPopup}
-            className="flex-1 sm:flex-none px-3.5 sm:px-6 py-2.5 sm:py-3 bg-primary text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:shadow-md transition-all shadow-md whitespace-nowrap"
+            className="flex-1 sm:flex-none px-3.5 sm:px-5 py-1.5 sm:py-2 bg-primary text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:shadow-md transition-all shadow-md whitespace-nowrap"
           >
-            일정 조율하기 <ExternalLink size={15} />
+            일정 조율하기 <ExternalLink size={13} />
           </button>
           <div className="hidden sm:block shrink-0">
             <UITagBadge id="P-101" label="매니저 대시보드" />
@@ -324,181 +353,289 @@ export default function ManagerDashboard() {
         </div>
       </div>
 
-      {/* 캘린더 영역 */}
-      <div className="mb-8">
-        <ManagerCalendar
-          calendarEvents={[...(data?.calendar_events ?? []), ...confirmedCalendarEvents]}
-          onEventClick={() => {}}
-        />
-      </div>
+      {/* ========================================================================= */}
+      {/* 📱 모바일 전용 뷰: [아이디어 1] 오늘의 상담 퀵-패스 (Mobile Quick-Pass)     */}
+      {/* ========================================================================= */}
+      <div className="md:hidden space-y-4">
+        {/* 상단 퀵 통계 칩 */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-blue-50/80 border border-blue-100 rounded-xl p-2.5 text-center">
+            <p className="text-[10px] font-bold text-blue-600">오늘 확정</p>
+            <p className="text-lg font-black text-blue-900 mt-0.5">{todayAppointments.length}건</p>
+          </div>
+          <div className="bg-amber-50/80 border border-amber-100 rounded-xl p-2.5 text-center">
+            <p className="text-[10px] font-bold text-amber-600">미배정/조율</p>
+            <p className="text-lg font-black text-amber-900 mt-0.5">{data?.pending_count || combinedList.length}건</p>
+          </div>
+          <div className="bg-indigo-50/80 border border-indigo-100 rounded-xl p-2.5 text-center">
+            <p className="text-[10px] font-bold text-indigo-600">다가오는 일정</p>
+            <p className="text-lg font-black text-indigo-900 mt-0.5">{upcomingAppointments.length}건</p>
+          </div>
+        </div>
 
-      {/* 상담 예정 목록 */}
-      {confirmedAppointments.length > 0 && (
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-zinc-100">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-                <CheckCircle2 className="text-green-600" size={24} />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-zinc-900">상담 예정</h2>
-                <p className="text-sm text-zinc-500">확정된 상담 일정 {confirmedAppointments.length}건</p>
-              </div>
-            </div>
-
-            {/* 날짜 네비게이션 */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => {
-                  const d = new Date(selectedDate);
-                  d.setDate(d.getDate() - 1);
-                  setSelectedDate(d);
-                }}
-                className="w-10 h-10 bg-zinc-100 hover:bg-zinc-200 rounded-xl flex items-center justify-center transition-all"
-              >
-                ◀
-              </button>
-              <div className="text-center min-w-[200px]">
-                <p className="text-lg font-bold text-zinc-900">
-                  {selectedDate.toLocaleDateString("ko-KR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    weekday: "short",
-                  })}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  const d = new Date(selectedDate);
-                  d.setDate(d.getDate() + 1);
-                  setSelectedDate(d);
-                }}
-                className="w-10 h-10 bg-zinc-100 hover:bg-zinc-200 rounded-xl flex items-center justify-center transition-all"
-              >
-                ▶
-              </button>
-            </div>
+        {/* 1. 오늘의 상담 타임라인 */}
+        <div className="bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-black text-zinc-900 flex items-center gap-1.5">
+              <Calendar size={16} className="text-primary" /> 오늘 예정 상담 ({todayAppointments.length}건)
+            </h2>
+            <span className="text-[10px] font-bold text-zinc-400 font-mono">{todayStr}</span>
           </div>
 
-          {/* 선택된 날짜의 상담 목록 */}
-          {(() => {
-            const selectedDateStr = selectedDate.toISOString().split("T")[0];
-            const filtered = confirmedAppointments.filter((apt) => {
-              const aptDate = apt.confirmed_datetime?.split(" ")[0];
-              return aptDate === selectedDateStr;
-            });
-
-            if (filtered.length === 0) {
-              return (
-                <div className="text-center py-12">
-                  <Calendar className="mx-auto text-zinc-300 mb-3" size={48} />
-                  <p className="text-zinc-400">이 날짜에 예정된 상담이 없습니다.</p>
-                </div>
-              );
-            }
-
-            return (
-              <div className="space-y-3">
-                {filtered.map((appointment) => (
-                  <div
-                    key={appointment.request_id}
-                    className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-100 hover:shadow-md transition-all"
-                  >
+          {todayAppointments.length > 0 ? (
+            <div className="space-y-2.5">
+              {todayAppointments.map((apt) => {
+                const timeOnly = apt.confirmed_datetime?.split(" ")[1] || apt.confirmed_datetime || "시간 미정";
+                return (
+                  <div key={apt.request_id} className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-2">
                     <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-3">
-                          <h3 className="font-bold text-xl text-zinc-900">{appointment.name}</h3>
-                          <span className="text-sm text-zinc-500">
-                            {appointment.age}세 · {(() => {
-                              const g = (appointment.gender || appointment.Gender || "").toString().toLowerCase().trim();
-                              if (g === "male" || g === "남성" || g === "남") return "남성";
-                              if (g === "female" || g === "여성" || g === "여") return "여성";
-                              return g || "성별미정";
-                            })()}
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-2 py-0.5 bg-primary text-white text-[10px] font-black rounded-md">
+                            {timeOnly}
                           </span>
-                          <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
-                            {appointment.job_status}
-                          </span>
+                          <h3 className="font-black text-sm text-zinc-900">{apt.name}</h3>
+                          <span className="text-[11px] text-zinc-500">({apt.age}세)</span>
                         </div>
+                        <p className="text-[11px] text-zinc-500 mt-1">
+                          방식: <strong className="text-zinc-700">{apt.confirmed_method === "online" ? "💻 온라인" : apt.confirmed_method === "offline" ? "🤝 오프라인" : apt.confirmed_method === "phone" ? "📞 전화" : (apt.confirmed_method || "대면")}</strong>
+                          {apt.confirmed_location && <span className="ml-1 text-zinc-400">({apt.confirmed_location})</span>}
+                        </p>
+                      </div>
+                      <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-black rounded-full">
+                        확정
+                      </span>
+                    </div>
 
-                        <div className="space-y-2 mb-3">
-                          <div className="flex items-center gap-2">
-                            <Clock size={18} className="text-blue-600" />
-                            <span className="font-bold text-lg text-zinc-900">{appointment.confirmed_datetime}</span>
+                    <div className="flex items-center gap-2 pt-1 border-t border-zinc-100">
+                      {apt.phone ? (
+                        <a
+                          href={`tel:${apt.phone}`}
+                          className="flex-1 py-1.5 bg-emerald-600 text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-all"
+                        >
+                          전화걸기
+                        </a>
+                      ) : (
+                        <div className="flex-1 py-1.5 bg-zinc-100 text-zinc-400 rounded-lg font-bold text-xs text-center">
+                          연락처 없음
+                        </div>
+                      )}
+                      <button
+                        onClick={() => handleViewDetail(apt.request_id, apt.email)}
+                        className="flex-1 py-1.5 bg-white border border-zinc-200 text-zinc-700 rounded-lg font-bold text-xs flex items-center justify-center gap-1 hover:bg-slate-50 active:scale-95 transition-all"
+                      >
+                        상세보기 <ExternalLink size={12} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="py-6 text-center bg-zinc-50/50 rounded-xl border border-dashed border-zinc-200">
+              <p className="text-xs font-bold text-zinc-500">오늘 예정된 상담이 없습니다 ☕</p>
+              <p className="text-[11px] text-zinc-400 mt-0.5">새로운 일정 조율이나 접수 현황을 확인해 보세요.</p>
+            </div>
+          )}
+        </div>
+
+        {/* 2. 다가오는 상담 퀵-리스트 */}
+        {upcomingAppointments.length > 0 && (
+          <div className="bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm space-y-2.5">
+            <h2 className="text-sm font-black text-zinc-900 flex items-center gap-1.5">
+              <Clock size={16} className="text-indigo-600" /> 다가오는 상담 일정
+            </h2>
+            <div className="divide-y divide-zinc-100">
+              {upcomingAppointments.slice(0, 4).map((apt) => (
+                <div key={apt.request_id} className="py-2 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-black text-zinc-800">{apt.name} <span className="text-[10px] font-normal text-zinc-400">({apt.age}세)</span></p>
+                    <p className="text-[10px] text-zinc-500 font-mono mt-0.5">{apt.confirmed_datetime}</p>
+                  </div>
+                  <button
+                    onClick={() => handleViewDetail(apt.request_id, apt.email)}
+                    className="text-[11px] font-bold text-primary hover:underline px-2 py-1"
+                  >
+                    상세보기 ➔
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 🖥️ 데스크톱/PC 전용 뷰: 풀 캘린더 & 종합 일정 관리                       */}
+      {/* ========================================================================= */}
+      <div className="hidden md:block space-y-6">
+        {/* 캘린더 영역 */}
+        <div>
+          <ManagerCalendar
+            calendarEvents={[...(data?.calendar_events ?? []), ...confirmedCalendarEvents]}
+            onEventClick={() => {}}
+          />
+        </div>
+
+        {/* 상담 예정 목록 */}
+        {confirmedAppointments.length > 0 ? (
+          <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-zinc-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
+                  <CheckCircle2 className="text-green-600" size={20} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-zinc-900">상담 예정 목록</h2>
+                  <p className="text-xs text-zinc-500">확정된 상담 일정 {confirmedAppointments.length}건</p>
+                </div>
+              </div>
+
+              {/* 날짜 네비게이션 */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    const d = new Date(selectedDate);
+                    d.setDate(d.getDate() - 1);
+                    setSelectedDate(d);
+                  }}
+                  className="w-8 h-8 bg-zinc-100 hover:bg-zinc-200 rounded-lg flex items-center justify-center transition-all text-xs"
+                >
+                  ◀
+                </button>
+                <div className="text-center min-w-[160px]">
+                  <p className="text-sm font-bold text-zinc-900">
+                    {selectedDate.toLocaleDateString("ko-KR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      weekday: "short",
+                    })}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const d = new Date(selectedDate);
+                    d.setDate(d.getDate() + 1);
+                    setSelectedDate(d);
+                  }}
+                  className="w-8 h-8 bg-zinc-100 hover:bg-zinc-200 rounded-lg flex items-center justify-center transition-all text-xs"
+                >
+                  ▶
+                </button>
+              </div>
+            </div>
+
+            {/* 선택된 날짜의 상담 목록 */}
+            {(() => {
+              const selectedDateStr = selectedDate.toISOString().split("T")[0];
+              const filtered = confirmedAppointments.filter((apt) => {
+                const aptDate = apt.confirmed_datetime?.split(" ")[0];
+                return aptDate === selectedDateStr;
+              });
+
+              if (filtered.length === 0) {
+                return (
+                  <div className="text-center py-8">
+                    <Calendar className="mx-auto text-zinc-300 mb-2" size={36} />
+                    <p className="text-zinc-400 text-xs">이 날짜에 예정된 상담이 없습니다.</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-2.5">
+                  {filtered.map((appointment) => (
+                    <div
+                      key={appointment.request_id}
+                      className="bg-gradient-to-r from-blue-50/70 to-indigo-50/70 rounded-xl p-4 border border-blue-100 hover:shadow-sm transition-all"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2.5 mb-2">
+                            <h3 className="font-bold text-base text-zinc-900">{appointment.name}</h3>
+                            <span className="text-xs text-zinc-500">
+                              {appointment.age}세 · {(() => {
+                                const g = (appointment.gender || appointment.Gender || "").toString().toLowerCase().trim();
+                                if (g === "male" || g === "남성" || g === "남") return "남성";
+                                if (g === "female" || g === "여성" || g === "여") return "여성";
+                                return g || "성별미정";
+                              })()}
+                            </span>
+                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full">
+                              {appointment.job_status || "미입력"}
+                            </span>
                           </div>
-                          <div className="flex items-center gap-4 text-sm">
-                            <div className="flex items-center gap-2">
-                              <span className="text-zinc-500">방식:</span>
-                              <span className="font-semibold text-zinc-800">
-                                {appointment.confirmed_method === "online"
-                                  ? "온라인"
-                                  : appointment.confirmed_method === "offline"
-                                  ? "오프라인"
-                                  : appointment.confirmed_method === "phone"
-                                  ? "전화"
-                                  : appointment.confirmed_method}
-                              </span>
+
+                          <div className="space-y-1 mb-2">
+                            <div className="flex items-center gap-1.5">
+                              <Clock size={14} className="text-blue-600" />
+                              <span className="font-bold text-sm text-zinc-900">{appointment.confirmed_datetime}</span>
                             </div>
-                            {appointment.confirmed_location && (
-                              <>
-                                <span className="text-zinc-300">|</span>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-zinc-500">장소:</span>
-                                  <span className="font-semibold text-zinc-800">
-                                    {appointment.confirmed_location === "center"
-                                      ? "센터"
-                                      : appointment.confirmed_location}
-                                  </span>
-                                </div>
-                              </>
-                            )}
+                            <div className="flex items-center gap-3 text-xs">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-zinc-500">방식:</span>
+                                <span className="font-semibold text-zinc-800">
+                                  {appointment.confirmed_method === "online"
+                                    ? "💻 온라인"
+                                    : appointment.confirmed_method === "offline"
+                                    ? "🤝 오프라인"
+                                    : appointment.confirmed_method === "phone"
+                                    ? "📞 전화"
+                                    : appointment.confirmed_method}
+                                </span>
+                              </div>
+                              {appointment.confirmed_location && (
+                                <>
+                                  <span className="text-zinc-300">|</span>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-zinc-500">장소:</span>
+                                    <span className="font-semibold text-zinc-800">
+                                      {appointment.confirmed_location}
+                                    </span>
+                                  </div>
+                                </>
+                              )}
+                            </div>
                           </div>
-                        </div>
 
-                        {Array.isArray(appointment.interest_areas) && appointment.interest_areas.length > 0 && (
-                          <div>
-                            <p className="text-xs text-zinc-500 mb-2">관심 분야</p>
+                          {Array.isArray(appointment.interest_areas) && appointment.interest_areas.length > 0 && (
                             <div className="flex flex-wrap gap-1">
                               {appointment.interest_areas.map((area: string, idx: number) => (
                                 <span
                                   key={idx}
-                                  className="inline-block px-2 py-1 bg-white text-blue-700 text-xs font-medium rounded-lg border border-blue-200"
+                                  className="inline-block px-1.5 py-0.5 bg-white text-blue-700 text-[10px] font-medium rounded border border-blue-200"
                                 >
                                   {area}
                                 </span>
                               ))}
                             </div>
-                          </div>
-                        )}
-                      </div>
+                          )}
+                        </div>
 
-                      <div className="ml-6">
-                        <button
-                          onClick={() => handleViewDetail(appointment.request_id, appointment.email)}
-                          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-md hover:shadow-lg"
-                        >
-                          상세보기
-                          <ExternalLink size={16} />
-                        </button>
+                        <div className="ml-4">
+                          <button
+                            onClick={() => handleViewDetail(appointment.request_id, appointment.email)}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                          >
+                            상세보기 <ExternalLink size={13} />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
-        </div>
-      )}
-
-      {/* 데이터 없을 때 안내 */}
-      {!isLoading && confirmedAppointments.length === 0 && (
-        <div className="bg-white rounded-3xl p-12 shadow-sm border border-dashed border-zinc-200 text-center">
-          <AlertCircle className="mx-auto text-zinc-300 mb-3" size={48} />
-          <p className="text-zinc-400 font-medium">확정된 상담 일정이 없습니다.</p>
-          <p className="text-zinc-300 text-sm mt-1">일정 조율을 통해<br />상담을 확정해 주세요.</p>
-        </div>
-      )}
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        ) : !isLoading ? (
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-dashed border-zinc-200 text-center">
+            <AlertCircle className="mx-auto text-zinc-300 mb-2" size={36} />
+            <p className="text-zinc-500 font-bold text-sm">확정된 상담 일정이 없습니다.</p>
+            <p className="text-zinc-400 text-xs mt-0.5">상단 '일정 조율하기'를 통해 상담을 확정해 주세요.</p>
+          </div>
+        ) : null}
+      </div>
 
       {/* 알림 발송 모달 */}
       {showAlarmPopup && (
