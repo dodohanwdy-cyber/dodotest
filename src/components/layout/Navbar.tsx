@@ -16,10 +16,10 @@ export default function Navbar() {
   return (
     <nav className="global-navbar sticky top-0 z-50 w-full glass border-b border-slate-200/60 px-3 sm:px-6 py-1.5 sm:py-2.5">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-        {/* 1. 좌측 로고: ㅇㄱㄷㄱ 4방향 심볼 + '열고닫기' 5단계 롤링 워드마크 */}
+        {/* 1. 좌측 로고: ㅇㄱㄷㄱ 4방향 심볼 + '열고닫기' 5단계 롤러 릴 심볼 */}
         <Link href="/" className="flex items-center gap-2 group transition-transform active:scale-95 shrink-0">
           <OpclLogoSymbol size={32} variant="grid" className="sm:w-[36px] sm:h-[36px]" />
-          <span className="text-base sm:text-lg md:text-[19px] font-black tracking-[-0.04em] leading-none select-none flex items-center gap-1.5">
+          <span className="text-base sm:text-lg md:text-[19px] font-black tracking-[-0.04em] leading-none select-none flex items-center gap-1">
             <span className="text-slate-900 group-hover:text-blue-950 transition-colors">열고닫기</span>
             <RotatingBrandText />
           </span>
