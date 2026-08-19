@@ -438,27 +438,27 @@ function IntakeContent() {
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]" />
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-16 relative z-10">
-        <div className="mb-6 sm:mb-12 space-y-3 sm:space-y-6 text-center md:text-left">
+      <div className="max-w-4xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6 md:py-8 relative z-10">
+        <div className="mb-4 sm:mb-8 space-y-2 sm:space-y-4 text-center md:text-left">
           <div className="flex items-center justify-between">
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-full bg-white border border-slate-200 shadow-sm">
-              <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-ping" />
-              <span className="text-[10px] sm:text-[11px] font-black text-slate-500 uppercase tracking-widest">Youth Policy Match</span>
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
+              <span className="flex h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-blue-500 animate-ping" />
+              <span className="text-[9px] sm:text-[11px] font-black text-slate-500 uppercase tracking-widest">Youth Policy Match</span>
             </div>
             <UITagBadge id="P-201" label="신청 챗봇" />
           </div>
-          <div className="space-y-1.5 sm:space-y-3">
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.2] break-keep">
+          <div className="space-y-1 sm:space-y-2">
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-[1.2] break-keep">
               나에게 꼭 맞는 <span className="text-primary underline decoration-accent decoration-4 sm:decoration-8 underline-offset-4">청년정책</span> 찾기
             </h1>
-            <p className="text-xs sm:text-base md:text-lg text-slate-500 font-bold max-w-2xl break-keep">
+            <p className="text-[11px] sm:text-sm md:text-base text-slate-500 font-bold max-w-2xl break-keep">
               AI가 내게 필요한 정책과 일정을 빠르게 찾아드려요.
             </p>
           </div>
           
           {/* 고도화된 프로그레스 바 */}
-          <div className="pt-3 sm:pt-6">
-             <div className="flex justify-between items-end mb-2">
+          <div className="pt-2 sm:pt-4">
+             <div className="flex justify-between items-end mb-1.5">
                 <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Progress</span>
                 <span className="text-xs sm:text-sm font-black text-primary flex items-center gap-1">
                    <span className="animate-pulse w-1.5 h-1.5 bg-primary rounded-full" />

@@ -139,10 +139,10 @@ export default function ClientDashboard() {
   }, [user]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
+    <div className="max-w-6xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6 md:py-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-6 mb-4 sm:mb-6">
         <div className="animate-in fade-in slide-in-from-left duration-700 w-full sm:w-auto">
-          <div className="flex items-center justify-between gap-2 mb-1.5">
+          <div className="flex items-center justify-between gap-2 mb-1">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
               <span className="text-[10px] sm:text-xs font-bold text-emerald-600 uppercase tracking-widest">Logged In</span>
@@ -151,23 +151,23 @@ export default function ClientDashboard() {
               <UITagBadge id="P-202" label="마이 대시보드" />
             </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 tracking-tight break-keep">반가워요, {user?.user_metadata?.full_name || "내담자"}님! 👋</h1>
-          <p className="text-zinc-500 mt-1 font-medium text-xs sm:text-sm break-keep">진행 중인 상담 현황을 실시간으로 확인하세요.</p>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-zinc-900 tracking-tight break-keep">반가워요, {user?.user_metadata?.full_name || "내담자"}님! 👋</h1>
+          <p className="text-zinc-500 mt-0.5 font-medium text-xs sm:text-sm break-keep">진행 중인 상담 현황을 실시간으로 확인하세요.</p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
           <button
             onClick={() => fetchApplications(true)}
             disabled={loading}
-            className="flex-1 sm:flex-none bg-white border border-zinc-200 text-zinc-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:border-primary/30 transition-all text-xs sm:text-sm disabled:opacity-50 shadow-sm shrink-0 whitespace-nowrap"
+            className="flex-1 sm:flex-none bg-white border border-zinc-200 text-zinc-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:border-primary/30 transition-all text-xs sm:text-sm disabled:opacity-50 shadow-sm shrink-0 whitespace-nowrap"
           >
-            <Clock size={14} className={loading ? "animate-spin" : ""} />
+            <Clock size={13} className={loading ? "animate-spin" : ""} />
             새로고침
           </button>
           <Link 
             href="/client/intake"
-            className="flex-1 sm:flex-none bg-primary text-white px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center gap-1.5 btn-interactive shadow-md shadow-indigo-100 text-xs sm:text-sm shrink-0 whitespace-nowrap"
+            className="flex-1 sm:flex-none bg-primary text-white px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center gap-1.5 btn-interactive shadow-md shadow-indigo-100 text-xs sm:text-sm shrink-0 whitespace-nowrap"
           >
-            <PlusCircle size={15} /> 새 상담 신청
+            <PlusCircle size={14} /> 새 상담 신청
           </Link>
           <div className="hidden sm:block shrink-0">
             <UITagBadge id="P-202" label="마이 대시보드" />
@@ -177,26 +177,26 @@ export default function ClientDashboard() {
 
       {/* 일정 확정 알림 배너 */}
       {!loading && applications.some(app => app.status === 'confirmed') && (
-        <div className="mb-6 sm:mb-10 animate-in slide-in-from-top duration-500">
-          <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-indigo-700 rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-8 shadow-lg shadow-blue-100/50 group">
+        <div className="mb-4 sm:mb-6 animate-in slide-in-from-top duration-500">
+          <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-indigo-700 rounded-xl sm:rounded-2xl md:rounded-[2rem] p-3.5 sm:p-5 md:p-6 shadow-md shadow-blue-100/50 group">
             <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/20 transition-colors" />
-            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
-              <div className="flex items-center gap-3 sm:gap-5 w-full sm:w-auto">
-                <div className="w-11 h-11 sm:w-16 sm:h-16 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner shrink-0">
-                  <Calendar size={22} className="sm:w-8 sm:h-8" />
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5">
+              <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner shrink-0">
+                  <Calendar size={20} className="sm:w-7 sm:h-7" />
                 </div>
                 <div className="text-white text-left">
-                  <h2 className="text-base sm:text-xl font-black tracking-tight mb-0.5 break-keep">상담 일정이 확정되었어요! 📅</h2>
-                  <p className="text-blue-50/80 font-bold text-xs sm:text-sm break-keep">배정된 전문 상담사와의 상담 일정을 확인해 보세요.</p>
+                  <h2 className="text-sm sm:text-lg font-black tracking-tight mb-0.5 break-keep">상담 일정이 확정되었어요! 📅</h2>
+                  <p className="text-blue-50/80 font-bold text-[11px] sm:text-xs md:text-sm break-keep">배정된 전문 상담사와의 상담 일정을 확인해 보세요.</p>
                 </div>
               </div>
               <button 
                 onClick={() => {
                   window.scrollTo({ top: document.getElementById('my-applications')?.offsetTop, behavior: 'smooth' });
                 }}
-                className="w-full sm:w-auto bg-white text-indigo-700 px-5 sm:px-8 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0"
+                className="w-full sm:w-auto bg-white text-indigo-700 px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-black text-xs sm:text-sm shadow-sm hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap"
               >
-                일정 확인하기 <ArrowRight size={16} />
+                일정 확인하기 <ArrowRight size={14} />
               </button>
             </div>
           </div>
@@ -205,17 +205,17 @@ export default function ClientDashboard() {
 
       {/* 상담 완료 알림 배너 */}
       {!loading && applications.some(app => app.status === 'analyzed') && (
-        <div className="mb-6 sm:mb-10 animate-in slide-in-from-top duration-500">
-          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-8 shadow-lg shadow-emerald-100/50 group">
+        <div className="mb-4 sm:mb-6 animate-in slide-in-from-top duration-500">
+          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl sm:rounded-2xl md:rounded-[2rem] p-3.5 sm:p-5 md:p-6 shadow-md shadow-emerald-100/50 group">
             <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/20 transition-colors" />
-            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
-              <div className="flex items-center gap-3 sm:gap-5 w-full sm:w-auto">
-                <div className="w-11 h-11 sm:w-16 sm:h-16 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner shrink-0">
-                  <Sparkles size={22} className="sm:w-8 sm:h-8" />
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5">
+              <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner shrink-0">
+                  <Sparkles size={20} className="sm:w-7 sm:h-7" />
                 </div>
                 <div className="text-white text-left">
-                  <h2 className="text-base sm:text-xl font-black tracking-tight mb-0.5 break-keep">맞춤 상담 리포트가 도착했어요! 🎉</h2>
-                  <p className="text-emerald-50/80 font-bold text-xs sm:text-sm break-keep">AI 분석과 추천 정책이 포함된 결과 리포트를 확인해 보세요.</p>
+                  <h2 className="text-sm sm:text-lg font-black tracking-tight mb-0.5 break-keep">맞춤 상담 리포트가 도착했어요! 🎉</h2>
+                  <p className="text-emerald-50/80 font-bold text-[11px] sm:text-xs md:text-sm break-keep">AI 분석과 추천 정책이 포함된 결과 리포트를 확인해 보세요.</p>
                 </div>
               </div>
               <button 
@@ -225,19 +225,19 @@ export default function ClientDashboard() {
                     window.open(`/report/${firstAnalyzed.request_id || firstAnalyzed.id}`, '_blank');
                   }
                 }}
-                className="w-full sm:w-auto bg-white text-emerald-700 px-5 sm:px-8 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0"
+                className="w-full sm:w-auto bg-white text-emerald-700 px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-black text-xs sm:text-sm shadow-sm hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap"
               >
-                리포트 확인하기 <ArrowRight size={16} />
+                리포트 확인하기 <ArrowRight size={14} />
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-6 sm:gap-10" id="my-applications">
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2 mb-4">
-            <FileText size={20} className="text-primary" /> 나의 상담 리스트
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 md:gap-8" id="my-applications">
+        <div className="md:col-span-7 lg:col-span-8 space-y-4 sm:space-y-6">
+          <h2 className="text-base sm:text-lg font-black text-zinc-900 flex items-center gap-2 mb-2 sm:mb-4">
+            <FileText size={18} className="text-primary" /> 나의 상담 리스트
           </h2>
           
           {loading ? (
@@ -488,52 +488,83 @@ export default function ClientDashboard() {
           )}
         </div>
 
-        <div className="space-y-6 lg:sticky lg:top-8 self-start transition-all duration-300">
-          <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2 mb-4">
-            <AlertCircle size={20} className="text-primary" /> 현재 진행 단계
+        {/* 모바일 전용: 1줄 슬림 진행 단계 & 알림 바 */}
+        <div className="md:hidden space-y-3">
+          <div className="bg-white rounded-xl p-3.5 border border-zinc-100 shadow-sm space-y-2.5">
+            <div className="flex items-center justify-between text-xs font-black text-zinc-800">
+              <span className="flex items-center gap-1.5"><AlertCircle size={14} className="text-primary"/> 진행 단계 안내</span>
+              <span className="text-[10px] text-zinc-400 font-bold">1단계 ➔ 2단계 ➔ 3단계</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 text-center">
+              <div className={`p-2 rounded-lg text-[10px] font-black transition-all ${activeStep === 1 ? 'bg-primary text-white shadow-sm' : 'bg-primary/5 text-primary'}`}>
+                1. AI 분석
+              </div>
+              <div className={`p-2 rounded-lg text-[10px] font-black transition-all ${activeStep === 2 ? 'bg-indigo-600 text-white shadow-sm' : 'bg-indigo-50 text-indigo-600'}`}>
+                2. 전문가 준비
+              </div>
+              <div className={`p-2 rounded-lg text-[10px] font-black transition-all ${activeStep === 3 ? 'bg-indigo-500 text-white shadow-sm' : 'bg-indigo-50/50 text-indigo-500'}`}>
+                3. 리포트 발급
+              </div>
+            </div>
+            {/* 1줄 슬림 Tip & 도움말 통합 바 */}
+            <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-500">
+              <span className="truncate text-blue-700 font-bold flex items-center gap-1">
+                <span>💡</span> 1시간 전 취소 가능
+              </span>
+              <a href="https://vibe-coding.notion.site" target="_blank" rel="noopener noreferrer" className="text-primary font-bold hover:underline shrink-0 ml-2">
+                문의하기 ➔
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* 태블릿 및 데스크톱 전용 사이드바 */}
+        <div className="hidden md:block md:col-span-5 lg:col-span-4 space-y-4 md:space-y-6 md:sticky md:top-6 self-start transition-all duration-300">
+          <h2 className="text-base sm:text-lg font-black text-zinc-900 flex items-center gap-2 mb-2 sm:mb-4">
+            <AlertCircle size={18} className="text-primary" /> 현재 진행 단계
           </h2>
           
-          <div className={`card-premium p-7 space-y-8 bg-gradient-to-br from-white to-zinc-50/80 shadow-sm border-zinc-100 transition-all duration-500`}>
-            <div className={`relative pl-12 transition-all duration-300 ${activeStep === 1 ? 'opacity-100 translate-x-1' : activeStep !== null ? 'opacity-30 grayscale' : 'opacity-100'}`}>
-              <div className={`absolute left-0 top-0 w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all ${activeStep === 1 ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/20' : 'bg-primary/10 text-primary'}`}>1</div>
+          <div className="card-premium p-4 md:p-6 space-y-5 md:space-y-6 bg-gradient-to-br from-white to-zinc-50/80 shadow-sm border-zinc-100">
+            <div className={`relative pl-10 transition-all duration-300 ${activeStep === 1 ? 'opacity-100 translate-x-1' : activeStep !== null ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+              <div className={`absolute left-0 top-0 w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs transition-all ${activeStep === 1 ? 'bg-primary text-white scale-110 shadow-md shadow-primary/20' : 'bg-primary/10 text-primary'}`}>1</div>
               <div>
-                <h4 className={`text-sm font-black tracking-tight transition-colors ${activeStep === 1 ? 'text-primary' : 'text-zinc-900'}`}>AI 전사 및 감정 분석</h4>
-                <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">대화 내용을 바탕으로 AI가 신청 동기와 심리 상태를 다각도로 분석합니다.</p>
+                <h4 className={`text-xs sm:text-sm font-black tracking-tight transition-colors ${activeStep === 1 ? 'text-primary' : 'text-zinc-900'}`}>AI 전사 및 감정 분석</h4>
+                <p className="text-[10px] sm:text-[11px] text-zinc-500 mt-0.5 font-medium leading-relaxed break-keep">대화 내용을 바탕으로 AI가 신청 동기와 심리 상태를 다각도로 분석합니다.</p>
               </div>
             </div>
             
-            <div className={`relative pl-12 transition-all duration-300 ${activeStep === 2 ? 'opacity-100 translate-x-1' : activeStep !== null ? 'opacity-30 grayscale' : 'opacity-100'}`}>
-              <div className={`absolute left-0 top-0 w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all ${activeStep === 2 ? 'bg-indigo-400 text-white scale-110 shadow-lg shadow-indigo-400/20' : 'bg-indigo-50 text-indigo-400'}`}>2</div>
+            <div className={`relative pl-10 transition-all duration-300 ${activeStep === 2 ? 'opacity-100 translate-x-1' : activeStep !== null ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+              <div className={`absolute left-0 top-0 w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs transition-all ${activeStep === 2 ? 'bg-indigo-500 text-white scale-110 shadow-md shadow-indigo-400/20' : 'bg-indigo-50 text-indigo-500'}`}>2</div>
               <div>
-                <h4 className={`text-sm font-black tracking-tight transition-colors ${activeStep === 2 ? 'text-indigo-600' : 'text-zinc-900'}`}>전문 상담사의 진심 어린 준비</h4>
-                <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">내담자님의 상황에 실질적인 도움을 드릴 수 있도록, 전문가가 들려주신 고민을 세밀하게 분석하며 정성을 다해 상담을 설계 중입니다.</p>
+                <h4 className={`text-xs sm:text-sm font-black tracking-tight transition-colors ${activeStep === 2 ? 'text-indigo-600' : 'text-zinc-900'}`}>전문 상담사의 진심 어린 준비</h4>
+                <p className="text-[10px] sm:text-[11px] text-zinc-500 mt-0.5 font-medium leading-relaxed break-keep">전문가가 고민을 세밀하게 분석하며 맞춤 상담을 설계 중입니다.</p>
               </div>
             </div>
  
-            <div className={`relative pl-12 transition-all duration-300 ${activeStep === 3 ? 'opacity-100 translate-x-1' : activeStep !== null ? 'opacity-30 grayscale' : 'opacity-100'}`}>
-              <div className={`absolute left-0 top-0 w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all ${activeStep === 3 ? 'bg-indigo-300 text-white scale-110 shadow-lg shadow-indigo-300/20' : 'bg-indigo-50 text-indigo-300'}`}>3</div>
+            <div className={`relative pl-10 transition-all duration-300 ${activeStep === 3 ? 'opacity-100 translate-x-1' : activeStep !== null ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+              <div className={`absolute left-0 top-0 w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs transition-all ${activeStep === 3 ? 'bg-indigo-400 text-white scale-110 shadow-md shadow-indigo-300/20' : 'bg-indigo-50 text-indigo-400'}`}>3</div>
               <div>
-                <h4 className={`text-sm font-black tracking-tight transition-colors ${activeStep === 3 ? 'text-indigo-500' : 'text-zinc-900'}`}>상담 리포트 발급</h4>
-                <p className="text-[11px] text-zinc-500 mt-1 font-medium leading-relaxed">진행한 상담을 바탕으로 신청자님에게 맞는 정보를 정리했습니다.</p>
+                <h4 className={`text-xs sm:text-sm font-black tracking-tight transition-colors ${activeStep === 3 ? 'text-indigo-500' : 'text-zinc-900'}`}>상담 리포트 발급</h4>
+                <p className="text-[10px] sm:text-[11px] text-zinc-500 mt-0.5 font-medium leading-relaxed break-keep">진행한 상담을 바탕으로 신청자님에게 맞는 정책 정보를 정리했습니다.</p>
               </div>
             </div>
 
-            <div className="pt-6 border-t border-zinc-100/80">
-              <a href="https://vibe-coding.notion.site" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-5 rounded-2xl bg-white border border-zinc-200 hover:border-primary/40 transition-all group shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:text-primary transition-colors">
-                    <MessageSquare size={16} />
+            <div className="pt-4 border-t border-zinc-100">
+              <a href="https://vibe-coding.notion.site" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3.5 rounded-xl bg-white border border-zinc-200 hover:border-primary/40 transition-all group shadow-sm">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:text-primary transition-colors">
+                    <MessageSquare size={14} />
                   </div>
                   <span className="text-xs font-black text-zinc-700">도움말 및 문의하기</span>
                 </div>
-                <ChevronRight size={14} className="text-zinc-300 group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
+                <ChevronRight size={13} className="text-zinc-300 group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
               </a>
             </div>
           </div>
           
-          <div className="p-6 bg-blue-50/40 rounded-[2rem] border border-blue-100/50">
-            <h4 className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2 px-1">Tip</h4>
-            <p className="text-[11px] text-blue-700 font-semibold leading-relaxed px-1">
+          <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100/60">
+            <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Tip</h4>
+            <p className="text-[11px] text-blue-700 font-semibold leading-relaxed break-keep">
               상담 한 시간 전까지 취소 가능하며, 긴급 문의는 채널톡을 이용해 주세요.
             </p>
           </div>
