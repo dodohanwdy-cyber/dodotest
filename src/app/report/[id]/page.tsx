@@ -150,25 +150,25 @@ export default function ClientReportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] pb-16 sm:pb-24 font-sans">
       {/* 상단 헤더 & 네비게이션 */}
-      <div className="bg-white px-6 pt-10 pb-4 sticky top-0 z-50 border-b border-zinc-100 shadow-sm">
+      <div className="bg-white px-4 sm:px-6 pt-6 sm:pt-10 pb-3 sm:pb-4 sticky top-0 z-50 border-b border-zinc-100 shadow-sm">
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-zinc-500 text-sm font-bold">안녕하세요, {reportData.user_name}님 👋</p>
-            <UITagBadge id="P-203" label="내담자 전용 리포트" />
+            <p className="text-zinc-500 text-xs sm:text-sm font-bold truncate">안녕하세요, {reportData.user_name}님 👋</p>
+            <UITagBadge id="P-203" label="전용 리포트" />
           </div>
-          <h1 className="text-2xl font-black text-zinc-900 leading-snug tracking-tight mb-6">
-            상담 분석 리포트가<br/>준비되었어요
+          <h1 className="text-xl sm:text-2xl font-black text-zinc-900 leading-snug tracking-tight mb-3 sm:mb-6 break-keep">
+            상담 분석 리포트
           </h1>
           
           {/* 슬라이드 탭 네비게이션 */}
-          <div className="flex gap-2 p-1 bg-zinc-100 rounded-2xl">
+          <div className="flex gap-1.5 p-1 bg-zinc-100 rounded-xl sm:rounded-2xl">
             {["진단 결과", "추천 정책", "실천 계획"].map((tab, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentSlide(idx)}
-                className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${
+                className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl transition-all ${
                   currentSlide === idx 
                     ? "bg-white text-primary shadow-sm" 
                     : "text-zinc-500 hover:text-zinc-700"
@@ -181,36 +181,34 @@ export default function ClientReportPage() {
         </div>
       </div>
 
-      <main className="max-w-md mx-auto px-6 py-8">
-        {/* 슬라이드 1: 진단 결과 & 상담사 메시지 (채팅 버블 UI) */}
+      <main className="max-w-md mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        {/* 슬라이드 1: 진단 결과 & 상담사 메시지 */}
         {currentSlide === 0 && (
-          <div className="space-y-8 animate-in slide-in-from-right-4 fade-in duration-300">
+          <div className="space-y-4 sm:space-y-8 animate-in slide-in-from-right-4 fade-in duration-300">
             {/* 핵심 요약 */}
             <section>
-              <h2 className="text-sm font-black text-zinc-400 mb-3 flex items-center gap-1.5 uppercase tracking-widest pl-1">
+              <h2 className="text-xs sm:text-sm font-black text-zinc-400 mb-2 sm:mb-3 flex items-center gap-1.5 uppercase tracking-widest pl-1">
                 <MessageCircle size={14} /> AI 분석 요약
               </h2>
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-zinc-100">
-                <p className="text-[15px] text-zinc-700 leading-relaxed font-medium">
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-zinc-100">
+                <p className="text-xs sm:text-[15px] text-zinc-700 leading-relaxed font-medium break-keep">
                   {renderFormattedText(reportData.main_issue)}
                 </p>
               </div>
             </section>
 
-            {/* 상담사 메시지 (채팅 UI) */}
-            <section className="pt-2">
-              <h2 className="text-sm font-black text-zinc-400 mb-4 flex items-center gap-1.5 uppercase tracking-widest pl-1">
+            {/* 상담사 메시지 */}
+            <section className="pt-1 sm:pt-2">
+              <h2 className="text-xs sm:text-sm font-black text-zinc-400 mb-2 sm:mb-4 flex items-center gap-1.5 uppercase tracking-widest pl-1">
                 <Heart size={14} className="text-rose-400" /> 상담사의 메시지
               </h2>
-              <div className="flex gap-3">
-                {/* 프로필 이미지 아이콘 */}
-                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 border-2 border-white shadow-sm shadow-indigo-100 mt-1">
-                  <span className="text-lg">👩‍💼</span>
+              <div className="flex gap-2.5 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 border-2 border-white shadow-sm shadow-indigo-100 mt-1">
+                  <span className="text-sm sm:text-lg">👩‍💼</span>
                 </div>
-                {/* 말풍선 */}
                 <div className="flex-1">
-                   <p className="text-xs font-bold text-zinc-500 mb-1.5 pl-1">열고닫기 담당자</p>
-                   <div className="bg-white text-[15px] text-zinc-800 leading-relaxed p-5 rounded-2xl rounded-tl-none shadow-sm border border-zinc-100 inline-block font-medium">
+                   <p className="text-[11px] sm:text-xs font-bold text-zinc-500 mb-1 pl-1">열고닫기 담당자</p>
+                   <div className="bg-white text-xs sm:text-[15px] text-zinc-800 leading-relaxed p-3.5 sm:p-5 rounded-2xl rounded-tl-none shadow-sm border border-zinc-100 inline-block font-medium break-keep">
                      {renderFormattedText(reportData.user_message)}
                    </div>
                 </div>
@@ -221,26 +219,26 @@ export default function ClientReportPage() {
 
         {/* 슬라이드 2: 추천 정책 */}
         {currentSlide === 1 && (
-          <div className="space-y-6 animate-in slide-in-from-right-4 fade-in duration-300">
-            <h2 className="text-sm font-black text-zinc-400 mb-2 flex items-center gap-1.5 uppercase tracking-widest pl-1">
+          <div className="space-y-3 sm:space-y-6 animate-in slide-in-from-right-4 fade-in duration-300">
+            <h2 className="text-xs sm:text-sm font-black text-zinc-400 mb-1.5 sm:mb-2 flex items-center gap-1.5 uppercase tracking-widest pl-1">
               <Target size={14} className="text-blue-500" /> 맞춤 추천 정책
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {reportData.policy_match.length > 0 ? (
                 reportData.policy_match.map((policy: string, idx: number) => (
                   <div
                     key={idx}
-                    className="flex items-start gap-4 p-5 rounded-3xl bg-white border border-blue-100/50 shadow-sm"
+                    className="flex items-start gap-3 sm:gap-4 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white border border-blue-100/50 shadow-sm"
                   >
-                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 mt-0.5">
-                      <CheckCircle2 size={16} className="text-blue-500" />
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 size={14} className="text-blue-500 sm:w-4 sm:h-4" />
                     </div>
-                    <span className="text-[15px] text-zinc-700 leading-snug font-medium pt-1.5">{renderFormattedText(policy)}</span>
+                    <span className="text-xs sm:text-[15px] text-zinc-700 leading-snug font-medium pt-1 break-keep">{renderFormattedText(policy)}</span>
                   </div>
                 ))
               ) : (
-                <div className="bg-white p-8 rounded-3xl text-center border border-zinc-100">
-                  <p className="text-sm text-zinc-400 font-bold">추천 정책을 찾지 못했습니다.</p>
+                <div className="bg-white p-6 sm:p-8 rounded-2xl sm:rounded-3xl text-center border border-zinc-100">
+                  <p className="text-xs sm:text-sm text-zinc-400 font-bold">추천 정책을 찾지 못했습니다.</p>
                 </div>
               )}
             </div>
@@ -249,11 +247,11 @@ export default function ClientReportPage() {
 
         {/* 슬라이드 3: 실천 계획 (체크리스트 UI) */}
         {currentSlide === 2 && (
-          <div className="space-y-6 animate-in slide-in-from-right-4 fade-in duration-300">
-             <h2 className="text-sm font-black text-zinc-400 mb-2 flex items-center gap-1.5 uppercase tracking-widest pl-1">
-               <Sparkles size={14} className="text-amber-500" /> 향후 실천 계획 (To-Do)
+          <div className="space-y-3 sm:space-y-6 animate-in slide-in-from-right-4 fade-in duration-300">
+             <h2 className="text-xs sm:text-sm font-black text-zinc-400 mb-1.5 sm:mb-2 flex items-center gap-1.5 uppercase tracking-widest pl-1">
+               <Sparkles size={14} className="text-amber-500" /> 실천 계획 (To-Do)
              </h2>
-             <div className="bg-white p-2 rounded-3xl border border-amber-100/50 shadow-sm">
+             <div className="bg-white p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl border border-amber-100/50 shadow-sm">
               {reportData.next_steps.length > 0 ? (
                 <div className="divide-y divide-zinc-50">
                   {reportData.next_steps.map((step: string, idx: number) => {
@@ -262,12 +260,12 @@ export default function ClientReportPage() {
                       <div
                         key={idx}
                         onClick={() => toggleCheck(idx)}
-                        className={`flex items-start gap-4 p-5 transition-all cursor-pointer select-none group ${isChecked ? 'opacity-50' : 'hover:bg-zinc-50/50 rounded-3xl'}`}
+                        className={`flex items-start gap-3 sm:gap-4 p-3.5 sm:p-5 transition-all cursor-pointer select-none group ${isChecked ? 'opacity-50' : 'hover:bg-zinc-50/50 rounded-2xl sm:rounded-3xl'}`}
                       >
-                        <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${isChecked ? 'bg-amber-400 border-amber-400 text-white' : 'border-zinc-200 bg-white group-hover:border-amber-400 text-transparent'}`}>
-                          <CheckCircle2 size={14} color="currentColor" strokeWidth={3} />
+                        <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg border sm:border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${isChecked ? 'bg-amber-400 border-amber-400 text-white' : 'border-zinc-200 bg-white group-hover:border-amber-400 text-transparent'}`}>
+                          <CheckCircle2 size={12} color="currentColor" strokeWidth={3} className="sm:w-3.5 sm:h-3.5" />
                         </div>
-                        <p className={`text-[15px] leading-relaxed transition-all ${isChecked ? 'text-zinc-400 line-through' : 'text-zinc-700 font-medium'}`}>
+                        <p className={`text-xs sm:text-[15px] leading-relaxed transition-all break-keep ${isChecked ? 'text-zinc-400 line-through' : 'text-zinc-700 font-medium'}`}>
                           {renderFormattedText(step)}
                         </p>
                       </div>
@@ -275,22 +273,22 @@ export default function ClientReportPage() {
                   })}
                 </div>
               ) : (
-                <p className="text-sm text-zinc-400 italic text-center py-8 font-bold">준비된 다음 단계가 없습니다.</p>
+                <p className="text-xs sm:text-sm text-zinc-400 italic text-center py-6 sm:py-8 font-bold">준비된 다음 단계가 없습니다.</p>
               )}
              </div>
           </div>
         )}
 
         {/* 하단 네비게이션 버튼 */}
-        <div className="mt-10 flex justify-between gap-3">
+        <div className="mt-6 sm:mt-10 flex justify-between gap-2.5 sm:gap-3">
           {currentSlide > 0 && (
-             <button onClick={() => setCurrentSlide(prev => prev - 1)} className="px-6 py-4 rounded-2xl font-bold text-zinc-500 bg-zinc-200/50 hover:bg-zinc-200 transition-colors">
+             <button onClick={() => setCurrentSlide(prev => prev - 1)} className="px-4 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm text-zinc-500 bg-zinc-200/50 hover:bg-zinc-200 transition-colors">
                이전
              </button>
           )}
           <button 
              onClick={() => currentSlide < 2 ? setCurrentSlide(prev => prev + 1) : window.close()} 
-             className="px-6 py-4 rounded-2xl font-bold text-white bg-primary hover:bg-blue-600 transition-colors flex-1 shadow-lg shadow-blue-100"
+             className="px-4 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm text-white bg-primary hover:bg-blue-600 transition-colors flex-1 shadow-md sm:shadow-lg shadow-blue-100"
           >
              {currentSlide < 2 ? "다음 보기" : "리포트 닫기"}
           </button>

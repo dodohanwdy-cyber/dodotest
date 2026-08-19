@@ -62,22 +62,22 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
   };
 
   return (
-    <div className="space-y-10 py-6">
-      <div className="grid md:grid-cols-2 gap-8">
+    <div className="space-y-6 sm:space-y-10 py-2 sm:py-6">
+      <div className="grid md:grid-cols-2 gap-4 sm:gap-8">
         {/* 기본 정보 */}
-        <div className="group space-y-4">
-          <label className="text-sm font-black text-slate-800 flex items-center gap-2 mb-2">
-            <span className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-              <User size={18} />
+        <div className="group space-y-2 sm:space-y-4">
+          <label className="text-xs sm:text-sm font-black text-slate-800 flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+            <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+              <User size={14} className="sm:w-[18px] sm:h-[18px]" />
             </span>
             기본 인적사항
           </label>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <div className="flex-[2] relative">
               <input 
                 type="text" 
                 placeholder="성함"
-                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 focus:bg-white focus:ring-4 focus:ring-blue-50 focus:border-primary outline-none transition-all text-sm font-bold placeholder:text-slate-300"
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl py-3 sm:py-4 px-3.5 sm:px-5 focus:bg-white focus:ring-2 sm:focus:ring-4 focus:ring-blue-50 focus:border-primary outline-none transition-all text-xs sm:text-sm font-bold placeholder:text-slate-300"
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
               />
@@ -86,22 +86,22 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
               <input 
                 type="number" 
                 placeholder="만 나이"
-                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 focus:bg-white focus:ring-4 focus:ring-blue-50 focus:border-primary outline-none transition-all text-sm font-bold placeholder:text-slate-300"
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl py-3 sm:py-4 px-3.5 sm:px-5 focus:bg-white focus:ring-2 sm:focus:ring-4 focus:ring-blue-50 focus:border-primary outline-none transition-all text-xs sm:text-sm font-bold placeholder:text-slate-300"
                 value={formData.age}
                 onChange={(e) => setFormData({...formData, age: e.target.value})}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">세</span>
+              <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-[10px] sm:text-xs font-bold text-slate-400">세</span>
             </div>
           </div>
         </div>
 
         {/* 성별 */}
-        <div className="space-y-4">
-          <label className="text-sm font-black text-slate-800 flex items-center gap-2 mb-2">
-             <span className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 font-bold">W/M</span>
+        <div className="space-y-2 sm:space-y-4">
+          <label className="text-xs sm:text-sm font-black text-slate-800 flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+             <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 font-bold text-xs">W/M</span>
              성별
           </label>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             {[
               { id: "male", label: "남성", icon: "👨‍💼" },
               { id: "female", label: "여성", icon: "👩‍💼" }
@@ -109,9 +109,9 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
               <button
                 key={g.id}
                 onClick={() => setFormData({...formData, gender: g.id})}
-                className={`flex-1 py-4 rounded-2xl text-sm font-bold border transition-all flex items-center justify-center gap-2 ${
+                className={`flex-1 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold border transition-all flex items-center justify-center gap-1.5 ${
                   formData.gender === g.id 
-                    ? "bg-primary text-white border-primary shadow-xl shadow-blue-100 scale-[1.02]" 
+                    ? "bg-primary text-white border-primary shadow-md sm:shadow-xl shadow-blue-100 scale-[1.01]" 
                     : "bg-white border-slate-200 text-slate-500 hover:border-blue-200"
                 }`}
               >
@@ -122,16 +122,16 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
         </div>
 
         {/* 거주지 */}
-        <div className="space-y-4 md:col-span-2">
-          <label className="text-sm font-black text-slate-800 flex items-center gap-2 mb-2">
-            <span className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary">
-              <MapPin size={18} />
+        <div className="space-y-2 sm:space-y-4 md:col-span-2">
+          <label className="text-xs sm:text-sm font-black text-slate-800 flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+            <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary">
+              <MapPin size={14} className="sm:w-[18px] sm:h-[18px]" />
             </span>
             활동 지역
           </label>
-          <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <select 
-              className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 outline-none text-sm font-bold text-slate-700 focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all cursor-pointer"
+              className="flex-1 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl py-3 sm:py-4 px-3.5 sm:px-5 outline-none text-xs sm:text-sm font-bold text-slate-700 focus:bg-white focus:ring-2 sm:focus:ring-4 focus:ring-blue-50 transition-all cursor-pointer"
               value={formData.regional_local_government}
               onChange={(e) => setFormData({...formData, regional_local_government: e.target.value})}
             >
@@ -139,8 +139,8 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
             </select>
             <input 
               type="text" 
-              placeholder="상세 지역 (예: 영등포구, 수원시 영통구 등)"
-              className="flex-[2] bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 outline-none text-sm font-bold placeholder:text-slate-300 focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all border-slate-100"
+              placeholder="상세 지역 (예: 마포구, 수원시 등)"
+              className="flex-[2] bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl py-3 sm:py-4 px-3.5 sm:px-5 outline-none text-xs sm:text-sm font-bold placeholder:text-slate-300 focus:bg-white focus:ring-2 sm:focus:ring-4 focus:ring-blue-50 transition-all border-slate-100"
               value={formData.basic_local_government}
               onChange={(e) => setFormData({...formData, basic_local_government: e.target.value})}
             />
@@ -148,15 +148,15 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
         </div>
 
         {/* 취업 상태 */}
-        <div className="space-y-4">
-          <label className="text-sm font-black text-slate-800 flex items-center gap-2 mb-2">
-            <span className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary">
-              <Briefcase size={18} />
+        <div className="space-y-2 sm:space-y-4">
+          <label className="text-xs sm:text-sm font-black text-slate-800 flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+            <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary">
+              <Briefcase size={14} className="sm:w-[18px] sm:h-[18px]" />
             </span>
             현재 상태
           </label>
           <select 
-            className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 outline-none text-sm font-bold text-slate-700 focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all cursor-pointer"
+            className="w-full bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl py-3 sm:py-4 px-3.5 sm:px-5 outline-none text-xs sm:text-sm font-bold text-slate-700 focus:bg-white focus:ring-2 sm:focus:ring-4 focus:ring-blue-50 transition-all cursor-pointer"
             value={formData.job_status}
             onChange={(e) => setFormData({...formData, job_status: e.target.value})}
           >
@@ -165,41 +165,40 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
         </div>
 
         {/* 소득 수준 */}
-        <div className="space-y-4 group">
-          <label className="text-sm font-black text-slate-800 flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary">
-                <Heart size={18} />
+        <div className="space-y-2 sm:space-y-4 group">
+          <label className="text-xs sm:text-sm font-black text-slate-800 flex items-center justify-between mb-1">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary">
+                <Heart size={14} className="sm:w-[18px] sm:h-[18px]" />
               </span>
               소득 구간 (월평균)
             </div>
           </label>
           
-          <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100 mb-2">
-            <div className="flex flex-col gap-3">
-              <div className="flex items-start gap-3">
-                <div className="p-1.5 bg-white rounded-lg shadow-sm">
-                  <Info size={14} className="text-blue-500" />
+          <div className="bg-slate-50/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-100 mb-1.5 sm:mb-2">
+            <div className="flex flex-col gap-2 sm:gap-3">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <div className="p-1 sm:p-1.5 bg-white rounded-md sm:rounded-lg shadow-sm shrink-0">
+                  <Info size={12} className="text-blue-500 sm:w-3.5 sm:h-3.5" />
                 </div>
-                <div className="space-y-1.5 flex-1">
-                  <p className="text-[11px] font-black text-slate-500 uppercase tracking-tighter">어떤 걸 골라야 할지 헷갈리시나요?</p>
-                  <p className="text-[10px] text-slate-400 font-bold leading-relaxed">
-                    청년 정책 지원 기준이 되는 소득 비율입니다. 정확한 소득이 헷갈리신다면 
-                    건강보험료 금액으로도 대략적인 확인이 가능합니다.
+                <div className="space-y-0.5 sm:space-y-1.5 flex-1">
+                  <p className="text-[10px] sm:text-[11px] font-black text-slate-500 uppercase tracking-tighter">정확한 소득이 헷갈리시나요?</p>
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold leading-relaxed break-keep">
+                    청년 정책 기준이 되는 소득 구간입니다. 건강보험료 금액으로도 대략 확인이 가능해요.
                   </p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowIncomeInfo(true)}
-                className="w-full text-[13px] font-black text-primary bg-blue-50/50 py-3 rounded-xl border border-blue-100 shadow-sm hover:bg-primary hover:text-white hover:border-primary hover:shadow-md transition-all flex items-center justify-center gap-2"
+                className="w-full text-xs sm:text-[13px] font-black text-primary bg-blue-50/50 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-blue-100 shadow-sm hover:bg-primary hover:text-white hover:border-primary transition-all flex items-center justify-center gap-1.5"
               >
-                💡 [필독] 나의 정확한 소득 구간 알아보기
+                💡 나의 소득 구간 알아보기
               </button>
             </div>
           </div>
 
           <select 
-            className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 outline-none text-sm font-bold text-slate-700 focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all cursor-pointer"
+            className="w-full bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl py-3 sm:py-4 px-3.5 sm:px-5 outline-none text-xs sm:text-sm font-bold text-slate-700 focus:bg-white focus:ring-2 sm:focus:ring-4 focus:ring-blue-50 transition-all cursor-pointer"
             value={formData.income_level}
             onChange={(e) => setFormData({...formData, income_level: e.target.value})}
           >
@@ -217,21 +216,21 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
       </div>
 
       {/* 관심 분야 (멀티 체크) */}
-      <div className="space-y-4">
-        <label className="text-sm font-black text-slate-800 flex items-center gap-2 mb-2">
-          <span className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary">
-            <Star size={18} />
+      <div className="space-y-2 sm:space-y-4">
+        <label className="text-xs sm:text-sm font-black text-slate-800 flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+          <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary">
+            <Star size={14} className="sm:w-[18px] sm:h-[18px]" />
           </span>
-          가장 알고 싶은 정책 (중복 가능)
+          가장 알고 싶은 정책 (중복 선택)
         </label>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           {interestAreas.map((area) => (
             <button
               key={area.label}
               onClick={() => toggleArrayItem("interest_areas", area.label)}
-              className={`px-5 py-3 rounded-2xl text-[13px] font-bold transition-all border flex items-center gap-2 ${
+              className={`px-3 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-[13px] font-bold transition-all border flex items-center gap-1.5 break-keep ${
                 formData.interest_areas.includes(area.label)
-                  ? "bg-primary border-primary text-white shadow-xl shadow-blue-100 scale-105"
+                  ? "bg-primary border-primary text-white shadow-md sm:shadow-xl shadow-blue-100 scale-[1.02]"
                   : "bg-white border-slate-200 text-slate-500 hover:border-primary/30"
               }`}
             >
@@ -242,22 +241,22 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
       </div>
 
       {/* 혜택 본 정책 (토글) */}
-      <div className="space-y-4">
+      <div className="space-y-2 sm:space-y-4">
         <button 
           onClick={() => setShowBenefitedInput(!showBenefitedInput)}
-          className="flex items-center gap-2 text-sm font-black text-slate-500 hover:text-primary transition-colors"
+          className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-slate-500 hover:text-primary transition-colors"
         >
           <span className={`transition-transform duration-300 ${showBenefitedInput ? "rotate-90" : ""}`}>
-            <ChevronRight size={18} />
+            <ChevronRight size={14} className="sm:w-[18px] sm:h-[18px]" />
           </span>
-          내가 혜택을 받았던 정책이 있다면 적어주세요 (선택)
+          이전에 혜택받은 청년정책이 있다면 적어주세요 (선택)
         </button>
         
         {showBenefitedInput && (
           <div className="animate-in fade-in slide-in-from-top-2 duration-300">
             <textarea 
-              placeholder="예: 청년수당 6개월 수급, 버팀목 전세자금 대출 이용 중 등"
-              className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 outline-none text-sm font-bold placeholder:text-slate-300 focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all min-h-[100px] resize-none"
+              placeholder="예: 청년수당 수급, 버팀목 전세자금 대출 이용 등"
+              className="w-full bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl py-3 sm:py-4 px-3.5 sm:px-5 outline-none text-xs sm:text-sm font-bold placeholder:text-slate-300 focus:bg-white focus:ring-2 sm:focus:ring-4 focus:ring-blue-50 transition-all min-h-[80px] sm:min-h-[100px] resize-none"
               value={formData.benefited_policy}
               onChange={(e) => setFormData({...formData, benefited_policy: e.target.value})}
             />
@@ -266,29 +265,29 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
       </div>
 
       {/* 특수 상황 (멀티 체크) */}
-      <div className="space-y-4 pt-4 border-t border-slate-50">
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-sm font-black text-slate-800">혹시 해당되시는 특별한 상황이 있나요?</label>
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-bold bg-slate-50 px-3 py-1.5 rounded-full">
-            <AlertCircle size={14} /> 선택 사항
+      <div className="space-y-2 sm:space-y-4 pt-2 sm:pt-4 border-t border-slate-50">
+        <div className="flex items-center justify-between mb-1 sm:mb-2">
+          <label className="text-xs sm:text-sm font-black text-slate-800">해당되는 특수 상황이 있나요?</label>
+          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-slate-400 font-bold bg-slate-50 px-2.5 py-1 rounded-full">
+            <AlertCircle size={12} /> 선택 사항
           </div>
         </div>
         
-        <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-5 mb-4">
-          <p className="text-xs text-amber-700 font-bold leading-relaxed flex gap-2">
+        <div className="bg-amber-50/50 border border-amber-100 rounded-xl sm:rounded-2xl p-3 sm:p-5 mb-2 sm:mb-4">
+          <p className="text-[11px] sm:text-xs text-amber-700 font-bold leading-relaxed flex gap-1.5 break-keep">
             <span>✨</span> 
-            <span>민감한 내용은 여기서 선택하지 않고, 나중에 <b>AI 채팅</b>에서 상담사에게만 더 자세히 말씀해 주셔도 괜찮아요.</span>
+            <span>민감한 내용은 여기서 고르지 않고, 나중에 <b>AI 대화</b>에서 말씀해 주셔도 괜찮아요.</span>
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2.5">
           {specialNotes.map((note) => (
             <button
               key={note}
               onClick={() => toggleArrayItem("special_notes", note)}
-              className={`px-4 py-3 rounded-xl text-xs font-bold transition-all border ${
+              className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all border ${
                 formData.special_notes.includes(note)
-                  ? "bg-slate-900 border-slate-900 text-white shadow-lg"
+                  ? "bg-slate-900 border-slate-900 text-white shadow-md"
                   : "bg-white border-slate-200 text-slate-500 hover:border-slate-400"
               }`}
             >
@@ -466,10 +465,10 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
               </div>
             </div>
 
-            <div className="mt-2 sticky bottom-0 pt-4 pb-2 bg-gradient-to-t from-white via-white to-transparent">
+            <div className="mt-2 sticky bottom-0 pt-3 pb-1 bg-gradient-to-t from-white via-white to-transparent">
               <button 
                 onClick={() => setShowIncomeInfo(false)}
-                className="w-full bg-slate-900 text-white rounded-2xl py-4 font-bold text-sm shadow-xl hover:bg-slate-800 active:scale-[0.98] transition-all"
+                className="w-full bg-slate-900 text-white rounded-xl sm:rounded-2xl py-3 sm:py-4 font-bold text-xs sm:text-sm shadow-md hover:bg-slate-800 active:scale-[0.98] transition-all"
               >
                 닫기
               </button>
@@ -478,7 +477,7 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
         </div>
       )}
 
-      <div className="pt-8 flex justify-end">
+      <div className="pt-4 sm:pt-8 flex justify-end">
         <button 
           onClick={() => {
             if (!formData.name || !formData.age) {
@@ -495,9 +494,9 @@ export default function BasicInfoForm({ data, onNext }: { data: any, onNext: (da
             }
             onNext(formData);
           }}
-          className="bg-primary text-white px-12 py-5 rounded-[1.5rem] font-black text-lg flex items-center gap-3 btn-interactive shadow-2xl shadow-blue-200 transition-all hover:translate-y-[-2px]"
+          className="w-full sm:w-auto bg-primary text-white px-6 sm:px-12 py-3.5 sm:py-5 rounded-xl sm:rounded-[1.5rem] font-bold sm:font-black text-sm sm:text-lg flex items-center justify-center gap-2 btn-interactive shadow-lg sm:shadow-2xl shadow-blue-200 transition-all hover:translate-y-[-2px]"
         >
-          기본 정보 저장 및 다음 단계 <ChevronRight size={22} />
+          기본 정보 저장 및 다음 단계 <ChevronRight size={18} className="sm:w-[22px] sm:h-[22px]" />
         </button>
       </div>
     </div>

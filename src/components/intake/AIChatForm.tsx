@@ -175,18 +175,18 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
   };
 
   return (
-    <div className="flex flex-col h-[550px] border border-zinc-100 rounded-3xl bg-zinc-50 overflow-hidden shadow-inner relative">
+    <div className="flex flex-col h-[460px] sm:h-[550px] border border-zinc-100 rounded-2xl sm:rounded-3xl bg-zinc-50 overflow-hidden shadow-inner relative">
       <div 
         ref={chatContainerRef} 
-        className="flex-1 overflow-y-auto p-6 space-y-4"
+        className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4"
       >
         {messages.map((msg, idx) => (
           msg.content && (
             <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[90%] p-4 rounded-2xl text-[15px] leading-relaxed tracking-tight ${
+              <div className={`max-w-[92%] sm:max-w-[90%] p-3 sm:p-4 rounded-xl sm:rounded-2xl text-xs sm:text-[15px] leading-relaxed tracking-tight ${
                 msg.role === "user" ? "bg-primary text-white rounded-br-none shadow-md" : "bg-white text-zinc-800 border border-zinc-100 rounded-bl-none shadow-sm"
               }`}>
-                {msg.role === "ai" && <div className="text-[10px] uppercase font-bold text-indigo-400 mb-1.5 flex items-center gap-1 leading-none"><Sparkles size={11}/> AI Counselor</div>}
+                {msg.role === "ai" && <div className="text-[9px] sm:text-[10px] uppercase font-bold text-indigo-400 mb-1 flex items-center gap-1 leading-none"><Sparkles size={10}/> AI Counselor</div>}
                 <div className="whitespace-pre-wrap break-keep">{renderFormattedText(msg.content)}</div>
               </div>
             </div>
@@ -195,13 +195,13 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         {isTyping && (
           <div className="flex justify-start animate-in fade-in slide-in-from-left-2 duration-300">
             <div className="max-w-[85%] space-y-2">
-              <div className="bg-white border-2 border-slate-100 p-4 rounded-2xl rounded-bl-none shadow-sm flex flex-col gap-2">
+              <div className="bg-white border sm:border-2 border-slate-100 p-3 sm:p-4 rounded-xl sm:rounded-2xl rounded-bl-none shadow-sm flex flex-col gap-1.5 sm:gap-2">
                 <div className="flex gap-1.5">
                   <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                   <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></span>
                   <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></span>
                 </div>
-                <div className="text-[11px] font-black text-primary/60 animate-pulse tracking-tight">
+                <div className="text-[10px] sm:text-[11px] font-black text-primary/60 animate-pulse tracking-tight">
                   {statusMessage}
                 </div>
               </div>
@@ -211,27 +211,27 @@ export default function AIChatForm({ intakeData, onComplete, onUpdate, isChatFin
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 bg-white border-t border-zinc-100">
-        <div className="flex gap-3 items-end w-full">
+      <div className="p-2.5 sm:p-4 bg-white border-t border-zinc-100">
+        <div className="flex gap-2 sm:gap-3 items-center w-full">
           <input
             type="text" value={input} onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder="편하게 말씀해 주세요..."
-            className="flex-1 px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-primary text-sm shadow-sm w-full"
+            className="flex-1 px-3.5 sm:px-5 py-2.5 sm:py-4 bg-white border border-slate-200 sm:border-2 rounded-xl sm:rounded-2xl focus:outline-none focus:border-primary text-xs sm:text-sm shadow-sm w-full"
           />
           <button
             onClick={handleSend} disabled={!input.trim() || isTyping}
-            className="px-6 py-4 bg-gradient-to-r from-blue-500 to-primary text-white rounded-2xl font-bold text-sm shadow-md"
+            className="px-4 sm:px-6 py-2.5 sm:py-4 bg-gradient-to-r from-blue-500 to-primary text-white rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm shadow-md shrink-0"
           >
-            {isTyping ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
+            {isTyping ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
           </button>
         </div>
       </div>
 
-      <div className="p-4 bg-white border-t border-zinc-100 flex justify-between items-center px-6">
-        <p className="text-[11px] text-zinc-400 font-medium flex items-center gap-1"><AlertCircle size={12}/> 대화가 충분하다면 상담 신청을 완료해 주세요.</p>
-        <button onClick={handleFinalSubmit} disabled={isSaving} className="bg-zinc-900 text-white px-6 py-2.5 rounded-xl text-xs font-bold">
-          {isSaving ? <Loader2 className="animate-spin" size={14} /> : "상담 신청 완료"}
+      <div className="p-2.5 sm:p-4 bg-white border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-center px-3.5 sm:px-6 gap-2 sm:gap-0">
+        <p className="text-[10px] sm:text-[11px] text-zinc-400 font-medium flex items-center gap-1 text-center sm:text-left"><AlertCircle size={12}/> 대화가 충분하다면 신청을 완료해 주세요.</p>
+        <button onClick={handleFinalSubmit} disabled={isSaving} className="w-full sm:w-auto bg-zinc-900 text-white px-5 sm:px-6 py-2.5 rounded-lg sm:rounded-xl text-xs font-bold shadow-sm">
+          {isSaving ? <Loader2 className="animate-spin" size={14} /> : "AI 진단 완료 및 다음 ➔"}
         </button>
       </div>
     </div>

@@ -440,30 +440,30 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
               </div>
 
               {/* 순위 블록 - 달력 아래로 이동 */}
-              <div className="space-y-3">
-                <label className="text-sm font-black text-slate-800">선택한 시간</label>
-                <div className="space-y-2">
-                  <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400 rounded-2xl p-4 flex items-center justify-between">
-                    <div className="text-sm font-black text-yellow-700 flex items-center gap-2">
-                      <span className="text-xl">🥇</span> 1순위 <span className="text-xs text-red-600">(필수)</span>
+              <div className="space-y-2 sm:space-y-3">
+                <label className="text-xs sm:text-sm font-black text-slate-800">선택한 희망 시간</label>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-300 sm:border-2 sm:border-yellow-400 rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex items-center justify-between">
+                    <div className="text-xs sm:text-sm font-black text-yellow-700 flex items-center gap-1.5">
+                      <span className="text-base sm:text-xl">🥇</span> 1순위 <span className="text-[10px] text-red-600">(필수)</span>
                     </div>
-                    <div className="text-sm font-black text-slate-800">
+                    <div className="text-xs sm:text-sm font-black text-slate-800">
                       {rank1 || <span className="text-slate-400">미선택</span>}
                     </div>
                   </div>
-                  <div className="bg-gradient-to-r from-blue-50 to-sky-50 border-2 border-blue-400 rounded-2xl p-4 flex items-center justify-between">
-                    <div className="text-sm font-black text-blue-700 flex items-center gap-2">
-                      <span className="text-xl">🥈</span> 2순위
+                  <div className="bg-gradient-to-r from-blue-50 to-sky-50 border border-blue-300 sm:border-2 sm:border-blue-400 rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex items-center justify-between">
+                    <div className="text-xs sm:text-sm font-black text-blue-700 flex items-center gap-1.5">
+                      <span className="text-base sm:text-xl">🥈</span> 2순위
                     </div>
-                    <div className="text-sm font-black text-slate-800">
+                    <div className="text-xs sm:text-sm font-black text-slate-800">
                       {rank2 || <span className="text-slate-400">미선택</span>}
                     </div>
                   </div>
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400 rounded-2xl p-4 flex items-center justify-between">
-                    <div className="text-sm font-black text-green-700 flex items-center gap-2">
-                      <span className="text-xl">🥉</span> 3순위
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 sm:border-2 sm:border-green-400 rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex items-center justify-between">
+                    <div className="text-xs sm:text-sm font-black text-green-700 flex items-center gap-1.5">
+                      <span className="text-base sm:text-xl">🥉</span> 3순위
                     </div>
-                    <div className="text-sm font-black text-slate-800">
+                    <div className="text-xs sm:text-sm font-black text-slate-800">
                       {rank3 || <span className="text-slate-400">미선택</span>}
                     </div>
                   </div>
@@ -472,29 +472,29 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
             </div>
 
             {/* 오른쪽: 시간 선택 - 높이 고정 */}
-            <div className="space-y-4 relative h-full flex flex-col">
-              <label className="text-sm font-black text-slate-800 flex items-center gap-2">
-                <Clock size={18} className="text-primary" /> 시간 선택
+            <div className="space-y-2 sm:space-y-4 relative h-full flex flex-col">
+              <label className="text-xs sm:text-sm font-black text-slate-800 flex items-center gap-1.5">
+                <Clock size={16} className="text-primary" /> 시간 선택
               </label>
               
               {/* 고정 높이 컨테이너 */}
-              <div className="flex-1 min-h-[600px]">
+              <div className="flex-1 min-h-[280px] sm:min-h-[500px]">
                 {!selectedDate ? (
-                  <div className="h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 rounded-3xl border-2 border-slate-200 p-8 text-center shadow-inner">
-                    <div className="space-y-3">
-                      <CalendarIcon size={48} className="text-slate-300 mx-auto" />
-                      <p className="text-sm text-slate-500 font-bold">왼쪽에서 날짜를 먼저 선택해 주세요</p>
+                  <div className="h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl sm:rounded-3xl border border-slate-200 p-6 sm:p-8 text-center shadow-inner">
+                    <div className="space-y-2 sm:space-y-3">
+                      <CalendarIcon size={36} className="text-slate-300 mx-auto sm:w-12 sm:h-12" />
+                      <p className="text-xs sm:text-sm text-slate-500 font-bold">왼쪽에서 날짜를 먼저 선택해 주세요</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-4 h-full flex flex-col">
-                    <div className="bg-gradient-to-r from-blue-500 to-primary text-white rounded-2xl p-4 shadow-lg">
-                      <div className="text-xs font-bold opacity-90 mb-1">선택한 날짜</div>
-                      <div className="text-lg font-black">{selectedDate}</div>
+                  <div className="space-y-3 sm:space-y-4 h-full flex flex-col">
+                    <div className="bg-gradient-to-r from-blue-500 to-primary text-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md">
+                      <div className="text-[10px] sm:text-xs font-bold opacity-90 mb-0.5">선택한 날짜</div>
+                      <div className="text-base sm:text-lg font-black">{selectedDate}</div>
                     </div>
                     
                     {/* 세로 목록 형태로 시간 표시 */}
-                    <div className="space-y-2 flex-1 overflow-y-auto">
+                    <div className="space-y-1.5 sm:space-y-2 flex-1 overflow-y-auto max-h-[350px] sm:max-h-[450px]">
                       {availableTimes.map((time, idx) => {
                         const isSelected = isTimeSelected(time);
                         const rank = getRankForTime(time);
@@ -505,27 +505,27 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
                             key={idx}
                             onClick={() => handleTimeClick(time)}
                             disabled={isBooked}
-                            className={`w-full py-4 px-5 rounded-2xl text-sm font-black transition-all border-2 flex items-center justify-between ${
+                            className={`w-full py-2.5 sm:py-3.5 px-3 sm:px-5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all border sm:border-2 flex items-center justify-between ${
                               isBooked
                                 ? "bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed"
                                 : isSelected
                                 ? rank === 1
-                                  ? "bg-gradient-to-r from-yellow-400 to-amber-500 border-yellow-600 text-white shadow-lg shadow-yellow-200"
+                                  ? "bg-gradient-to-r from-yellow-400 to-amber-500 border-yellow-600 text-white shadow-md shadow-yellow-200"
                                   : rank === 2
-                                  ? "bg-gradient-to-r from-blue-400 to-blue-600 border-blue-700 text-white shadow-lg shadow-blue-200"
-                                  : "bg-gradient-to-r from-green-400 to-emerald-600 border-green-700 text-white shadow-lg shadow-green-200"
-                                : "bg-white border-slate-200 text-slate-700 hover:border-primary hover:shadow-md"
+                                  ? "bg-gradient-to-r from-blue-400 to-blue-600 border-blue-700 text-white shadow-md shadow-blue-200"
+                                  : "bg-gradient-to-r from-green-400 to-emerald-600 border-green-700 text-white shadow-md shadow-green-200"
+                                : "bg-white border-slate-200 text-slate-700 hover:border-primary hover:shadow-sm"
                             }`}
                           >
-                            <div className="flex items-center gap-3">
-                              <Clock size={18} />
-                              <span className="text-base">{time}</span>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <Clock size={14} className="sm:w-[18px] sm:h-[18px]" />
+                              <span className="text-xs sm:text-base">{time}</span>
                             </div>
                             {isBooked && (
-                              <span className="text-xs text-slate-400 font-bold">예약됨</span>
+                              <span className="text-[10px] sm:text-xs text-slate-400 font-bold">예약됨</span>
                             )}
                             {!isBooked && rank && (
-                              <span className="text-sm font-black bg-white/30 px-3 py-1 rounded-full">
+                              <span className="text-[11px] sm:text-sm font-black bg-white/30 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
                                 {rank}순위
                               </span>
                             )}
@@ -539,41 +539,41 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
             </div>
           </div>
 
-          {/* 상담 방식 - 순서 변경: 오프라인/온라인/전화 */}
-          <div className="space-y-4">
-            <label className="text-sm font-black text-slate-800">상담 방식</label>
-            <div className="grid grid-cols-3 gap-4">
+          {/* 상담 방식 - 오프라인/온라인/전화 */}
+          <div className="space-y-2 sm:space-y-4">
+            <label className="text-xs sm:text-sm font-black text-slate-800">상담 방식</label>
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
               <button
                 onClick={() => setPreferredMethod("offline")}
-                className={`py-5 px-4 rounded-2xl text-sm font-black transition-all border-2 flex flex-col items-center gap-3 ${
+                className={`py-3 sm:py-5 px-2 sm:px-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all border sm:border-2 flex flex-col items-center gap-1.5 sm:gap-3 ${
                   preferredMethod === "offline"
-                    ? "bg-gradient-to-br from-primary to-blue-600 border-blue-700 text-white shadow-xl shadow-blue-200 scale-105"
-                    : "bg-white border-slate-200 text-slate-700 hover:border-primary hover:shadow-lg hover:scale-105"
+                    ? "bg-gradient-to-br from-primary to-blue-600 border-blue-700 text-white shadow-md sm:shadow-xl shadow-blue-200 scale-[1.02]"
+                    : "bg-white border-slate-200 text-slate-700 hover:border-primary"
                 }`}
               >
-                <MapPin size={24} />
+                <MapPin size={18} className="sm:w-6 sm:h-6" />
                 <span>오프라인</span>
               </button>
               <button
                 onClick={() => setPreferredMethod("online")}
-                className={`py-5 px-4 rounded-2xl text-sm font-black transition-all border-2 flex flex-col items-center gap-3 ${
+                className={`py-3 sm:py-5 px-2 sm:px-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all border sm:border-2 flex flex-col items-center gap-1.5 sm:gap-3 ${
                   preferredMethod === "online"
-                    ? "bg-gradient-to-br from-primary to-blue-600 border-blue-700 text-white shadow-xl shadow-blue-200 scale-105"
-                    : "bg-white border-slate-200 text-slate-700 hover:border-primary hover:shadow-lg hover:scale-105"
+                    ? "bg-gradient-to-br from-primary to-blue-600 border-blue-700 text-white shadow-md sm:shadow-xl shadow-blue-200 scale-[1.02]"
+                    : "bg-white border-slate-200 text-slate-700 hover:border-primary"
                 }`}
               >
-                <Video size={24} />
+                <Video size={18} className="sm:w-6 sm:h-6" />
                 <span>온라인</span>
               </button>
               <button
                 onClick={() => setPreferredMethod("phone")}
-                className={`py-5 px-4 rounded-2xl text-sm font-black transition-all border-2 flex flex-col items-center gap-3 ${
+                className={`py-3 sm:py-5 px-2 sm:px-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all border sm:border-2 flex flex-col items-center gap-1.5 sm:gap-3 ${
                   preferredMethod === "phone"
-                    ? "bg-gradient-to-br from-primary to-blue-600 border-blue-700 text-white shadow-xl shadow-blue-200 scale-105"
-                    : "bg-white border-slate-200 text-slate-700 hover:border-primary hover:shadow-lg hover:scale-105"
+                    ? "bg-gradient-to-br from-primary to-blue-600 border-blue-700 text-white shadow-md sm:shadow-xl shadow-blue-200 scale-[1.02]"
+                    : "bg-white border-slate-200 text-slate-700 hover:border-primary"
                 }`}
               >
-                <Phone size={24} />
+                <Phone size={18} className="sm:w-6 sm:h-6" />
                 <span>전화</span>
               </button>
             </div>
@@ -581,39 +581,39 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
 
           {/* 상담 장소 (오프라인 선택 시에만) */}
           {preferredMethod === "offline" && (
-            <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
-              <label className="text-sm font-black text-slate-800">상담 장소</label>
-              <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-4 animate-in slide-in-from-top-2 duration-300">
+              <label className="text-xs sm:text-sm font-black text-slate-800">상담 장소</label>
+              <div className="space-y-2 sm:space-y-3">
                 <button
                   onClick={() => setPreferredLocation("center")}
-                  className={`w-full py-5 px-5 rounded-2xl text-sm font-black transition-all border-2 flex items-center gap-4 ${
+                  className={`w-full py-3 sm:py-5 px-3.5 sm:px-5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all border sm:border-2 flex items-center gap-2.5 sm:gap-4 ${
                     preferredLocation === "center"
-                      ? "bg-gradient-to-r from-primary to-blue-600 border-blue-700 text-white shadow-xl shadow-blue-200"
-                      : "bg-white border-slate-200 text-slate-700 hover:border-primary hover:shadow-lg"
+                      ? "bg-gradient-to-r from-primary to-blue-600 border-blue-700 text-white shadow-md sm:shadow-xl shadow-blue-200"
+                      : "bg-white border-slate-200 text-slate-700 hover:border-primary"
                   }`}
                 >
-                  <Building2 size={24} />
-                  <span>센터</span>
+                  <Building2 size={18} className="sm:w-6 sm:h-6" />
+                  <span>청년센터</span>
                 </button>
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   <button
                     onClick={() => setPreferredLocation("custom")}
-                    className={`w-full py-5 px-5 rounded-2xl text-sm font-black transition-all border-2 flex items-center gap-4 ${
+                    className={`w-full py-3 sm:py-5 px-3.5 sm:px-5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-all border sm:border-2 flex items-center gap-2.5 sm:gap-4 ${
                       preferredLocation !== "center"
-                        ? "bg-gradient-to-r from-primary to-blue-600 border-blue-700 text-white shadow-xl shadow-blue-200"
-                        : "bg-white border-slate-200 text-slate-700 hover:border-primary hover:shadow-lg"
+                        ? "bg-gradient-to-r from-primary to-blue-600 border-blue-700 text-white shadow-md sm:shadow-xl shadow-blue-200"
+                        : "bg-white border-slate-200 text-slate-700 hover:border-primary"
                     }`}
                   >
-                    <MapPin size={24} />
+                    <MapPin size={18} className="sm:w-6 sm:h-6" />
                     <span>그 밖의 장소 (직접 입력)</span>
                   </button>
                   {preferredLocation !== "center" && (
                     <input
                       type="text"
-                      placeholder="상담 장소를 입력해 주세요"
+                      placeholder="희망 장소를 입력해 주세요"
                       value={customLocation}
                       onChange={(e) => setCustomLocation(e.target.value)}
-                      className="w-full bg-white border-2 border-slate-200 rounded-2xl py-4 px-5 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+                      className="w-full bg-white border border-slate-200 sm:border-2 rounded-xl sm:rounded-2xl py-3 sm:py-4 px-3.5 sm:px-5 text-xs sm:text-sm font-bold outline-none focus:ring-2 sm:focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
                     />
                   )}
                 </div>
@@ -623,43 +623,41 @@ export default function ScheduleForm({ data, onNext, onPrev, onShowToast }: Sche
         </>
       )}
 
-      <div className="pt-6 flex justify-between">
+      <div className="pt-4 sm:pt-6 flex flex-col-reverse sm:flex-row justify-between gap-2.5 sm:gap-4">
         <button 
           onClick={onPrev}
           disabled={isSubmitting}
-          className="text-slate-600 px-8 py-4 rounded-2xl font-black flex items-center gap-2 hover:bg-slate-100 transition-all border-2 border-transparent hover:border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto text-slate-600 px-5 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold sm:font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-slate-100 transition-all border border-slate-200 disabled:opacity-50"
         >
-          <ChevronLeft size={20} /> 이전으로
+          <ChevronLeft size={16} /> 이전으로
         </button>
-        <div className="relative group">
+        <div className="relative group w-full sm:w-auto">
           {/* 버튼 바로 위 전용 토스트 */}
           {toast && (
             <div 
               onClick={() => { setToast(""); setHasWarnedRank(false); }}
-              className="absolute bottom-full right-0 mb-4 z-[100] animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300 w-[360px] md:w-[400px] cursor-pointer"
+              className="absolute bottom-full right-0 mb-3 z-[100] animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300 w-full sm:w-[380px] cursor-pointer"
             >
-              <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-5 rounded-3xl shadow-2xl border-2 border-white flex items-center gap-4 hover:brightness-105 active:scale-95 transition-all">
-                <AlertCircle size={22} className="flex-shrink-0 animate-bounce" />
-                <span className="font-black text-[14px] leading-relaxed whitespace-pre-line break-keep">{toast}</span>
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-3 sm:px-6 sm:py-4 rounded-2xl shadow-xl border border-white flex items-center gap-2.5">
+                <AlertCircle size={18} className="flex-shrink-0 animate-bounce" />
+                <span className="font-bold text-xs sm:text-sm leading-relaxed whitespace-pre-line break-keep">{toast}</span>
               </div>
-              {/* 말풍선 꼬리 */}
-              <div className="absolute top-full right-16 -translate-x-1/2 -mt-1 border-[10px] border-transparent border-t-amber-500" />
             </div>
           )}
           
           <button 
             onClick={handleNext}
             disabled={!canProceed}
-            className="bg-gradient-to-r from-primary to-blue-600 text-white px-10 py-4 rounded-2xl font-black flex items-center gap-3 btn-interactive shadow-2xl shadow-blue-200 disabled:opacity-50 disabled:grayscale disabled:shadow-none disabled:cursor-not-allowed"
+            className="w-full sm:w-auto bg-gradient-to-r from-primary to-blue-600 text-white px-6 sm:px-10 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-bold sm:font-black text-xs sm:text-base flex items-center justify-center gap-2 btn-interactive shadow-lg sm:shadow-2xl shadow-blue-200 disabled:opacity-50 disabled:grayscale"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="animate-spin" size={20} />
+                <Loader2 className="animate-spin" size={16} />
                 전송 중...
               </>
             ) : (
               <>
-                예약 신청하고 AI와 대화 나누기 <ChevronRight size={20} />
+                예약 신청 후 AI 대화 시작 <ChevronRight size={16} />
               </>
             )}
           </button>

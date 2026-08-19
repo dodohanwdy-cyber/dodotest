@@ -139,57 +139,59 @@ export default function ClientDashboard() {
   }, [user]);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div className="animate-in fade-in slide-in-from-left duration-700">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1.5">
             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Logged In</span>
+            <span className="text-[10px] sm:text-xs font-bold text-emerald-600 uppercase tracking-widest">Logged In</span>
           </div>
-          <h1 className="text-3xl font-black text-zinc-900 tracking-tight">반가워요, {user?.user_metadata?.full_name || "내담자"}님!</h1>
-          <p className="text-zinc-500 mt-2 font-medium">현재 진행 중인 상담 현황을 실시간으로 확인하실 수 있습니다.</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 tracking-tight break-keep">반가워요, {user?.user_metadata?.full_name || "내담자"}님! 👋</h1>
+          <p className="text-zinc-500 mt-1 font-medium text-xs sm:text-sm break-keep">진행 중인 상담 현황을 실시간으로 확인하세요.</p>
         </div>
-        <div className="flex gap-3 items-center">
+        <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 items-center w-full sm:w-auto">
           <button
             onClick={() => fetchApplications(true)}
             disabled={loading}
-            className="bg-white border border-zinc-200 text-zinc-700 px-4 py-3 rounded-xl font-bold flex items-center gap-2 hover:border-primary/30 transition-all text-sm disabled:opacity-50 shadow-sm"
+            className="flex-1 sm:flex-initial bg-white border border-zinc-200 text-zinc-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 hover:border-primary/30 transition-all text-xs sm:text-sm disabled:opacity-50 shadow-sm shrink-0"
           >
-            <Clock size={16} className={loading ? "animate-spin" : ""} />
+            <Clock size={14} className={loading ? "animate-spin" : ""} />
             새로고침
           </button>
           <Link 
             href="/client/intake"
-            className="bg-primary text-white px-6 py-3.5 rounded-2xl font-bold flex items-center gap-2 btn-interactive shadow-lg shadow-indigo-100 text-sm"
+            className="flex-1 sm:flex-initial bg-primary text-white px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center gap-1.5 btn-interactive shadow-md shadow-indigo-100 text-xs sm:text-sm shrink-0"
           >
-            <PlusCircle size={18} /> 새 상담 신청하기
+            <PlusCircle size={16} /> 새 상담 신청
           </Link>
-          <UITagBadge id="P-202" label="마이 대시보드" />
+          <div className="hidden sm:block">
+            <UITagBadge id="P-202" label="마이 대시보드" />
+          </div>
         </div>
       </div>
 
       {/* 일정 확정 알림 배너 */}
       {!loading && applications.some(app => app.status === 'confirmed') && (
-        <div className="mb-10 animate-in slide-in-from-top duration-500">
-          <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-indigo-700 rounded-[2.5rem] p-8 shadow-xl shadow-blue-100/50 group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-white/20 transition-colors" />
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-5">
-                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner">
-                  <Calendar size={32} />
+        <div className="mb-6 sm:mb-10 animate-in slide-in-from-top duration-500">
+          <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-indigo-700 rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-8 shadow-lg shadow-blue-100/50 group">
+            <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/20 transition-colors" />
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+              <div className="flex items-center gap-3 sm:gap-5 w-full sm:w-auto">
+                <div className="w-11 h-11 sm:w-16 sm:h-16 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner shrink-0">
+                  <Calendar size={22} className="sm:w-8 sm:h-8" />
                 </div>
-                <div className="text-white text-center md:text-left">
-                  <h2 className="text-xl font-black tracking-tight mb-1">상담 일정이 확정되었습니다! 📅</h2>
-                  <p className="text-blue-50/80 font-bold text-sm">배정된 전문 상담사와의 상담 시간이 확정되었으니 안내를 확인해 주세요.</p>
+                <div className="text-white text-left">
+                  <h2 className="text-base sm:text-xl font-black tracking-tight mb-0.5 break-keep">상담 일정이 확정되었어요! 📅</h2>
+                  <p className="text-blue-50/80 font-bold text-xs sm:text-sm break-keep">배정된 전문 상담사와의 상담 일정을 확인해 보세요.</p>
                 </div>
               </div>
               <button 
                 onClick={() => {
                   window.scrollTo({ top: document.getElementById('my-applications')?.offsetTop, behavior: 'smooth' });
                 }}
-                className="bg-white text-indigo-700 px-8 py-4 rounded-2xl font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                className="w-full sm:w-auto bg-white text-indigo-700 px-5 sm:px-8 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0"
               >
-                일정 확인하기 <ArrowRight size={18} />
+                일정 확인하기 <ArrowRight size={16} />
               </button>
             </div>
           </div>
@@ -198,17 +200,17 @@ export default function ClientDashboard() {
 
       {/* 상담 완료 알림 배너 */}
       {!loading && applications.some(app => app.status === 'analyzed') && (
-        <div className="mb-10 animate-in slide-in-from-top duration-500">
-          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-600 rounded-[2.5rem] p-8 shadow-xl shadow-emerald-100/50 group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-white/20 transition-colors" />
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-5">
-                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner">
-                  <Sparkles size={32} />
+        <div className="mb-6 sm:mb-10 animate-in slide-in-from-top duration-500">
+          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-8 shadow-lg shadow-emerald-100/50 group">
+            <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/20 transition-colors" />
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+              <div className="flex items-center gap-3 sm:gap-5 w-full sm:w-auto">
+                <div className="w-11 h-11 sm:w-16 sm:h-16 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner shrink-0">
+                  <Sparkles size={22} className="sm:w-8 sm:h-8" />
                 </div>
-                <div className="text-white text-center md:text-left">
-                  <h2 className="text-xl font-black tracking-tight mb-1">상담 분석 리포트가 도착했습니다! 🎉</h2>
-                  <p className="text-emerald-50/80 font-bold text-sm">기다려주셔서 감사합니다. {user?.user_metadata?.full_name}님만을 위한 맞춤형 결과가 준비되었습니다.</p>
+                <div className="text-white text-left">
+                  <h2 className="text-base sm:text-xl font-black tracking-tight mb-0.5 break-keep">맞춤 상담 리포트가 도착했어요! 🎉</h2>
+                  <p className="text-emerald-50/80 font-bold text-xs sm:text-sm break-keep">AI 분석과 추천 정책이 포함된 결과 리포트를 확인해 보세요.</p>
                 </div>
               </div>
               <button 
@@ -218,16 +220,16 @@ export default function ClientDashboard() {
                     window.open(`/report/${firstAnalyzed.request_id || firstAnalyzed.id}`, '_blank');
                   }
                 }}
-                className="bg-white text-emerald-700 px-8 py-4 rounded-2xl font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                className="w-full sm:w-auto bg-white text-emerald-700 px-5 sm:px-8 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0"
               >
-                지금 리포트 확인하기 <ArrowRight size={18} />
+                리포트 확인하기 <ArrowRight size={16} />
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-10" id="my-applications">
+      <div className="grid lg:grid-cols-3 gap-6 sm:gap-10" id="my-applications">
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2 mb-4">
             <FileText size={20} className="text-primary" /> 나의 상담 리스트
@@ -278,14 +280,14 @@ export default function ClientDashboard() {
                       'hover:border-rose-100 hover:shadow-sm'
                     }`}
                   >
-                    <div className="p-7">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="space-y-1.5">
+                    <div className="p-4 sm:p-7">
+                      <div className="flex justify-between items-start gap-2 mb-3 sm:mb-4">
+                        <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] font-bold text-zinc-400 font-mono tracking-tight">{new Date(app.created_at || Date.now()).toLocaleDateString()}</span>
                           </div>
-                          <h3 className={`font-black text-xl tracking-tight ${isCanceled ? 'text-zinc-400 line-through' : 'text-zinc-900'}`}>
-                            {app.name || '내담자'} <span className="text-zinc-400 font-bold text-sm ml-1">({app.age}세, {(() => {
+                          <h3 className={`font-black text-base sm:text-xl tracking-tight break-keep ${isCanceled ? 'text-zinc-400 line-through' : 'text-zinc-900'}`}>
+                            {app.name || '내담자'} <span className="text-zinc-400 font-bold text-xs sm:text-sm ml-0.5">({app.age}세, {(() => {
                               const g = (app.gender || app.Gender || "").toString().toLowerCase().trim();
                               if (g === "male" || g === "남성" || g === "남") return "남성";
                               if (g === "female" || g === "여성" || g === "여") return "여성";
@@ -293,105 +295,105 @@ export default function ClientDashboard() {
                             })()})</span>
                           </h3>
                         </div>
-                        <div className={`px-4 py-1.5 rounded-full text-[11px] font-black ${
+                        <div className={`px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-[11px] font-black shrink-0 ${
                           isCanceled ? 'bg-rose-50 text-rose-500 border border-rose-100' :
                           isAnalyzed ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm animate-bounce-subtle' :
-                          app.status === 'confirmed' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' :
-                          (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' :
+                          app.status === 'confirmed' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100' :
+                          (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-100' :
                           (app.status && app.status.includes('step')) ? 'bg-orange-50 text-orange-600 border border-orange-200 animate-pulse-subtle' :
                           'bg-indigo-50 text-primary border border-indigo-100'
                         }`}>
                           {isCanceled ? '상담 취소됨' : 
                            isAnalyzed ? '상담 완료' : 
-                           app.status === 'confirmed' ? '일정 정해짐' : 
-                           (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? '신청 완료함' :
-                           (app.status === 'step1') ? '기초 정보 입력함' :
-                           (app.status === 'step2') ? '상담 일정 확인함' :
-                           (app.status === 'step3') ? 'AI 인터뷰 진행함' :
-                           (app.status === 'step4') ? '약관에 동의함' :
+                           app.status === 'confirmed' ? '일정 확정' : 
+                           (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? '신청 완료' :
+                           (app.status === 'step1') ? '1단계 작성중' :
+                           (app.status === 'step2') ? '2단계 작성중' :
+                           (app.status === 'step3') ? '3단계 작성중' :
+                           (app.status === 'step4') ? '4단계 작성중' :
                            '신청 작성중'}
                         </div>
                       </div>
 
                       {/* 확정된 상담 시간 표시 (Step 2 연동 확인용) */}
                       {app.status === 'confirmed' && (app.confirmed_datetime || app.confirmed_time) && (
-                        <div className="mb-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 shadow-sm">
-                              <Calendar size={20} />
+                        <div className="mb-3 sm:mb-4 bg-indigo-50/50 border border-indigo-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5 sm:gap-3">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-lg sm:rounded-xl flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
+                              <Calendar size={16} className="sm:w-5 sm:h-5" />
                             </div>
                             <div>
-                              <p className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider">확정된 상담 일시</p>
-                              <p className="text-sm font-black text-indigo-900">{app.confirmed_datetime || app.confirmed_time}</p>
+                              <p className="text-[10px] sm:text-[11px] font-bold text-indigo-400 uppercase tracking-wider">확정 일시</p>
+                              <p className="text-xs sm:text-sm font-black text-indigo-900 break-keep">{app.confirmed_datetime || app.confirmed_time}</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                             <p className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider">방식</p>
-                             <p className="text-sm font-black text-indigo-900">
-                               {app.confirmed_method === 'online' ? '온라인(비대면)' : 
-                                app.confirmed_method === 'offline' ? '오프라인(센터)' : 
-                                app.confirmed_method === 'phone' ? '전화 상담' : 
-                                (app.confirmed_method || '대면 상담')}
+                          <div className="text-right shrink-0">
+                             <p className="text-[10px] sm:text-[11px] font-bold text-indigo-400 uppercase tracking-wider">방식</p>
+                             <p className="text-xs sm:text-sm font-black text-indigo-900">
+                               {app.confirmed_method === 'online' ? '💻온라인' : 
+                                app.confirmed_method === 'offline' ? '🤝오프라인' : 
+                                app.confirmed_method === 'phone' ? '📞전화' : 
+                                (app.confirmed_method || '대면')}
                              </p>
                           </div>
                         </div>
                       )}
                       
-                      <div className="flex flex-wrap gap-3 mb-6">
-                        <div className="flex items-center gap-2 text-zinc-600 bg-zinc-50 px-3 py-1.5 rounded-xl border border-zinc-100/50">
-                          <MapPin size={14} className="text-zinc-400" /> 
-                          <span className="text-xs font-bold leading-none">{app.location ? (typeof app.location === 'object' ? app.location.regional : app.location) : '지역 정보 없음'}</span>
+                      <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
+                        <div className="flex items-center gap-1.5 text-zinc-600 bg-zinc-50 px-2.5 py-1 rounded-lg sm:rounded-xl border border-zinc-100/50 text-[11px] sm:text-xs font-bold">
+                          <MapPin size={12} className="text-zinc-400" /> 
+                          <span className="leading-none">{app.location ? (typeof app.location === 'object' ? app.location.regional : app.location) : '지역 정보 없음'}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-zinc-600 bg-zinc-50 px-3 py-1.5 rounded-xl border border-zinc-100/50">
-                          <Briefcase size={14} className="text-zinc-400" /> 
-                          <span className="text-xs font-bold leading-none">{app.job_status || '미입력'}</span>
+                        <div className="flex items-center gap-1.5 text-zinc-600 bg-zinc-50 px-2.5 py-1 rounded-lg sm:rounded-xl border border-zinc-100/50 text-[11px] sm:text-xs font-bold">
+                          <Briefcase size={12} className="text-zinc-400" /> 
+                          <span className="leading-none">{app.job_status || '미입력'}</span>
                         </div>
                       </div>
 
                       {/* [디자인 개선] 신청 미완료 시 진행률 프로그레스 바 표시 */}
                       {!isAnalyzed && app.status !== 'confirmed' && !['pending', 'final_submitted', 'submitted'].includes(app.status) && (
-                        <div className="mb-6 p-4 bg-orange-50/50 rounded-2xl border border-orange-100">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-[11px] font-black text-orange-600 flex items-center gap-1">
-                              <AlertCircle size={12} /> 최종 신청까지 단계가 남았습니다
+                        <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-orange-50/50 rounded-xl sm:rounded-2xl border border-orange-100">
+                          <div className="flex justify-between items-center mb-1.5">
+                            <span className="text-[10px] sm:text-[11px] font-black text-orange-600 flex items-center gap-1">
+                              <AlertCircle size={12} /> 신청 미완료
                             </span>
-                            <span className="text-[11px] font-black text-orange-600">
+                            <span className="text-[10px] sm:text-[11px] font-black text-orange-600">
                               {app.status === 'step1' ? '20%' : app.status === 'step2' ? '40%' : app.status === 'step3' ? '60%' : '80%'} 완료
                             </span>
                           </div>
-                          <div className="w-full h-2 bg-white rounded-full overflow-hidden border border-orange-100 shadow-inner">
+                          <div className="w-full h-1.5 sm:h-2 bg-white rounded-full overflow-hidden border border-orange-100 shadow-inner">
                             <div 
                               className="h-full bg-orange-400 transition-all duration-1000"
                               style={{ width: app.status === 'step1' ? '20%' : app.status === 'step2' ? '40%' : app.status === 'step3' ? '60%' : '80%' }}
                             />
                           </div>
-                          <p className="text-[10px] text-orange-400 mt-2 font-bold text-center">아래 '이어하기' 버튼을 눌러 신청을 완료해 주세요!</p>
+                          <p className="text-[9px] sm:text-[10px] text-orange-400 mt-1.5 font-bold text-center">아래 '이어하기'를 눌러 신청을 완료해 주세요!</p>
                         </div>
                       )}
 
                       {/* 희망 상담 시간 표시 (검토 중일 때) */}
                       {!isAnalyzed && app.status !== 'confirmed' && (app.request_time_1 || app.request_time_2 || app.request_time_3) && (
-                        <div className="mb-4 bg-zinc-50 border border-zinc-100 border-dashed rounded-2xl p-4">
-                          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                            <Clock size={10} /> 희망 상담 일시 (조율 대기중)
+                        <div className="mb-3 sm:mb-4 bg-zinc-50 border border-zinc-100 border-dashed rounded-xl sm:rounded-2xl p-3 sm:p-4">
+                          <p className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                            <Clock size={10} /> 희망 상담 일시
                           </p>
-                          <div className="space-y-1.5">
+                          <div className="space-y-1">
                             {app.request_time_1 && (
-                              <div className="flex items-center justify-between text-[11px]">
+                              <div className="flex items-center justify-between text-[10px] sm:text-[11px]">
                                 <span className="text-zinc-500">1순위</span>
-                                <span className="font-black text-zinc-700">{app.request_time_1}</span>
+                                <span className="font-bold text-zinc-700">{app.request_time_1}</span>
                               </div>
                             )}
                             {app.request_time_2 && (
-                              <div className="flex items-center justify-between text-[11px]">
+                              <div className="flex items-center justify-between text-[10px] sm:text-[11px]">
                                 <span className="text-zinc-500">2순위</span>
-                                <span className="font-black text-zinc-700">{app.request_time_2}</span>
+                                <span className="font-bold text-zinc-700">{app.request_time_2}</span>
                               </div>
                             )}
                             {app.request_time_3 && (
-                              <div className="flex items-center justify-between text-[11px]">
+                              <div className="flex items-center justify-between text-[10px] sm:text-[11px]">
                                 <span className="text-zinc-500">3순위</span>
-                                <span className="font-black text-zinc-700">{app.request_time_3}</span>
+                                <span className="font-bold text-zinc-700">{app.request_time_3}</span>
                               </div>
                             )}
                           </div>
@@ -403,55 +405,55 @@ export default function ClientDashboard() {
                           href={`/report/${requestId}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-full flex items-center justify-between p-5 bg-emerald-600 text-white rounded-[24px] group/btn hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 active:scale-[0.98]"
+                          className="w-full flex items-center justify-between p-3.5 sm:p-5 bg-emerald-600 text-white rounded-xl sm:rounded-[24px] group/btn hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100 active:scale-[0.98]"
                         >
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                              <Sparkles size={20} />
+                          <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0">
+                              <Sparkles size={16} className="sm:w-5 sm:h-5" />
                             </div>
                             <div className="text-left">
-                              <h4 className="font-black text-sm leading-tight">상담 분석 리포트 확인하기</h4>
-                              <p className="text-[10px] text-emerald-100 font-bold opacity-80 mt-0.5">나만을 위한 맞춤형 결과가 준비되었습니다.</p>
+                              <h4 className="font-black text-xs sm:text-sm leading-tight break-keep">상담 분석 리포트 확인</h4>
+                              <p className="text-[9px] sm:text-[10px] text-emerald-100 font-bold opacity-80 mt-0.5 break-keep">나만을 위한 맞춤형 결과가 준비되었습니다.</p>
                             </div>
                           </div>
-                          <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
+                          <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform shrink-0" />
                         </Link>
                       ) : (
-                        <div className="flex items-center justify-between p-4 bg-zinc-50/80 rounded-2xl border border-zinc-100 border-dashed">
-                          <div className="flex items-center gap-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-zinc-50/80 rounded-xl sm:rounded-2xl border border-zinc-100 border-dashed gap-2.5">
+                          <div className="flex items-center gap-2">
                             {app.status === 'confirmed' ? (
-                              <Clock size={16} className="text-indigo-400" />
+                              <Clock size={14} className="text-indigo-400 shrink-0" />
                             ) : (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? (
-                              <CheckCircle size={16} className="text-emerald-500" />
+                              <CheckCircle size={14} className="text-emerald-500 shrink-0" />
                             ) : (
-                              <Loader2 size={16} className="text-zinc-400 animate-spin" />
+                              <Loader2 size={14} className="text-zinc-400 animate-spin shrink-0" />
                             )}
-                            <span className="text-xs font-bold text-zinc-500">
-                              {app.status === 'confirmed' ? '상담 대기 중입니다. 정해진 시간에 상담을 시작합니다.' : 
+                            <span className="text-[11px] sm:text-xs font-bold text-zinc-500 break-keep">
+                              {app.status === 'confirmed' ? '정해진 시간에 상담을 시작합니다.' : 
                                (app.status === 'pending' || app.status === 'final_submitted' || app.status === 'submitted') ? 
-                               '상담 신청이 완료되었습니다. 수정이 필요하시면 \'수정하기\' 버튼을 눌러주세요.' : 
-                               '상담 신청을 진행 중입니다. 나머지 단계를 완료해 주세요.'}
+                               '상담 신청이 완료되었습니다.' : 
+                               '상담 신청을 진행 중입니다.'}
                             </span>
                           </div>
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-end gap-2 sm:gap-3">
                             {app.status === 'confirmed' ? (
-                              <span className="text-[11px] font-black text-indigo-500 bg-indigo-50 px-4 py-2 rounded-xl flex items-center gap-1 border border-indigo-100/50 cursor-default">
-                                <MessageSquare size={13} /> 상담 준비
+                              <span className="text-[10px] sm:text-[11px] font-black text-indigo-500 bg-indigo-50 px-3 py-1.5 rounded-lg flex items-center gap-1 border border-indigo-100/50 cursor-default">
+                                <MessageSquare size={12} /> 상담 대기
                               </span>
                             ) : canResume ? (
                               <Link 
                                 href={`/client/intake?id=${requestId}`}
-                                className="text-[11px] font-black text-primary bg-primary/10 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-primary/20 transition-colors"
+                                className="text-[10px] sm:text-[11px] font-black text-primary bg-primary/10 px-2.5 py-1.5 rounded-lg flex items-center gap-1 hover:bg-primary/20 transition-colors shrink-0"
                               >
-                                {app.status === 'pending' ? '수정하기' : '이어하기'} <ArrowRight size={13} />
+                                {app.status === 'pending' ? '수정하기' : '이어하기'} <ArrowRight size={12} />
                               </Link>
                             ) : null}
                             {!isCanceled && (
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleCancelApplication(requestId, e); }}
-                                className="text-[11px] font-black text-rose-500 hover:text-rose-600 transition-colors"
+                                className="text-[10px] sm:text-[11px] font-black text-rose-500 hover:text-rose-600 transition-colors shrink-0"
                               >
-                                신청 취소
+                                취소
                               </button>
                             )}
                           </div>
