@@ -6,62 +6,6 @@ interface RotatingBrandTextProps {
   className?: string;
 }
 
-// 어린이가 크레파스로 정성스럽게 꾹꾹 눌러쓴 듯한 몽글몽글하고 포근한 한글 '온' (SVG 벡터)
-function CrayonHandmadeOn() {
-  return (
-    <svg
-      viewBox="0 0 36 36"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-[20px] h-[20px] sm:w-[22px] sm:h-[22px] md:w-[24px] md:h-[24px] inline-block align-middle select-none"
-    >
-      <defs>
-        {/* 파스텔 블루에서 시작해 따뜻한 온기(소프트 코랄/핑크)로 스며드는 크레용 웜 그라데이션 */}
-        <linearGradient id="crayonWarmOnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#38bdf8" />
-          <stop offset="45%" stopColor="#818cf8" />
-          <stop offset="100%" stopColor="#f472b6" />
-        </linearGradient>
-      </defs>
-
-      {/* 1. 초성 'ㅇ' - 몽글몽글하고 둥근 크레파스 원형 */}
-      <circle
-        cx="18"
-        cy="10.5"
-        r="4.8"
-        stroke="url(#crayonWarmOnGradient)"
-        strokeWidth="3.2"
-        strokeLinecap="round"
-      />
-
-      {/* 2. 중성 'ㅗ' - 다정하게 받쳐주는 손글씨 기둥과 가로획 */}
-      {/* ㅗ 세로 기둥 */}
-      <path
-        d="M 18 15.5 V 19.5"
-        stroke="url(#crayonWarmOnGradient)"
-        strokeWidth="3.2"
-        strokeLinecap="round"
-      />
-      {/* ㅗ 가로 획 (부드럽게 둥근 모서리) */}
-      <path
-        d="M 8.5 20 H 27.5"
-        stroke="url(#crayonWarmOnGradient)"
-        strokeWidth="3.4"
-        strokeLinecap="round"
-      />
-
-      {/* 3. 종성 'ㄴ' - 포근하게 감싸 안아주는 둥근 니은 받침 */}
-      <path
-        d="M 11.5 24.5 V 28.5 Q 11.5 30 13 30 H 24.5"
-        stroke="url(#crayonWarmOnGradient)"
-        strokeWidth="3.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 // 8단계 교대 순환 (이모지/한글 '온' 사이마다 무조건 'ON' 삽입)
 const ROTATION_ITEMS = [
   { id: "on-1", label: "스마트 상담 ON", text: "ON", type: "on" },
@@ -69,7 +13,7 @@ const ROTATION_ITEMS = [
   { id: "on-2", label: "스마트 상담 ON", text: "ON", type: "on" },
   { id: "chat", label: "언제나 열려있는 온라인 상담 창구", emoji: "💬", type: "emoji" },
   { id: "on-3", label: "스마트 상담 ON", text: "ON", type: "on" },
-  { id: "on-korean", label: "청년을 품는 따뜻한 온기 (온)", type: "crayon-on" },
+  { id: "on-korean", label: "청년을 품는 따뜻한 온기 (온)", text: "온", type: "fromsol-on" },
   { id: "on-4", label: "스마트 상담 ON", text: "ON", type: "on" },
   { id: "heart", label: "청년을 향한 따뜻한 마음", emoji: "🧡", type: "emoji" },
 ];
@@ -107,8 +51,18 @@ export default function RotatingBrandText({ className = "" }: RotatingBrandTextP
         </span>
       );
     }
-    if (item.type === "crayon-on") {
-      return <CrayonHandmadeOn />;
+    if (item.type === "fromsol-on") {
+      return (
+        /* 눈누 '그리운 프롬솔' 서체 적용 + 파스텔 웜블루-핑크 온기 그라데이션 */
+        <span
+          style={{
+            fontFamily: '"DearFromsol", "Pretendard Var", sans-serif',
+          }}
+          className="text-2xl sm:text-[26px] md:text-[28px] font-normal leading-none select-none text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-500 to-pink-500 inline-block transform translate-y-[-1px]"
+        >
+          {item.text}
+        </span>
+      );
     }
     return (
       <span className="text-base sm:text-lg md:text-[20px] leading-none select-none">
@@ -119,7 +73,7 @@ export default function RotatingBrandText({ className = "" }: RotatingBrandTextP
 
   return (
     <span
-      className={`inline-flex items-center justify-center relative h-7 sm:h-8 w-6 sm:w-7 md:w-8 overflow-hidden select-none align-middle ${className}`}
+      className={`inline-flex items-center justify-center relative h-7 sm:h-8 w-7 sm:w-8 overflow-hidden select-none align-middle ${className}`}
       title={currentItem.label}
     >
       {!isSliding ? (
