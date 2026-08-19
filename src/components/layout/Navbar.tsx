@@ -18,8 +18,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
         {/* 1. 좌측 로고: ㅇㄱㄷㄱ 4방향 심볼 + '열고닫기' 5단계 롤링 워드마크 */}
         <Link href="/" className="flex items-center gap-2 group transition-transform active:scale-95 shrink-0">
-          <OpclLogoSymbol size={30} variant="grid" className="sm:w-[32px] sm:h-[32px]" />
-          <span className="text-sm sm:text-[15px] font-black tracking-[-0.04em] leading-none select-none flex items-center gap-1">
+          <OpclLogoSymbol size={32} variant="grid" className="sm:w-[36px] sm:h-[36px]" />
+          <span className="text-base sm:text-lg md:text-[19px] font-black tracking-[-0.04em] leading-none select-none flex items-center gap-1.5">
             <span className="text-slate-900 group-hover:text-blue-950 transition-colors">열고닫기</span>
             <RotatingBrandText />
           </span>

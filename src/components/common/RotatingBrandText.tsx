@@ -34,10 +34,10 @@ export default function RotatingBrandText({ className = "" }: RotatingBrandTextP
   const currentItem = ROTATION_ITEMS[currentIndex];
 
   return (
-    <span className={`inline-flex items-center h-5 sm:h-6 overflow-hidden select-none ${className}`}>
+    <span className={`inline-flex items-center h-6 sm:h-7 md:h-8 overflow-hidden select-none ${className}`}>
       <span
         title={currentItem.label}
-        className={`font-black tracking-tight font-sans transition-all duration-350 transform text-xs sm:text-[13px] inline-block ${
+        className={`font-black tracking-tight font-sans transition-all duration-350 transform text-sm sm:text-base md:text-[17px] leading-none inline-block ${
           currentItem.color
         } ${
           isTransitioning
