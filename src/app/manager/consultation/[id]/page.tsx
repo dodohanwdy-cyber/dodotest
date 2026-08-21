@@ -39,6 +39,7 @@ export default function ConsultationPage() {
   const [notes, setNotes] = useState("");
   const [showSTT, setShowSTT] = useState(true); // 실시간 STT 화면 표시 여부
   const [isSaving, setIsSaving] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"profile" | "guide" | "stt">("profile"); // 모바일 3단 탭 상태
   const { user, isLoading: isLoadingAuth } = useAuth();
   
   
@@ -660,26 +661,25 @@ export default function ConsultationPage() {
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col">
       {/* 상단 네비게이션 */}
-      <header className="bg-white border-b border-zinc-100 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-        <div className="flex items-center gap-4">
+      <header className="bg-white border-b border-zinc-100 px-3 sm:px-6 py-2.5 sm:py-4 flex justify-between items-center sticky top-0 z-20 shadow-sm">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button 
             onClick={() => router.back()}
-            className="p-2 hover:bg-zinc-50 rounded-lg text-zinc-400 transition-colors"
+            className="p-1.5 sm:p-2 hover:bg-zinc-50 rounded-lg text-zinc-400 transition-colors shrink-0"
           >
-            <ChevronRight className="rotate-180" size={20} />
+            <ChevronRight className="rotate-180" size={18} />
           </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-zinc-900">{data?.name || data?.user_name || "내담자"}님 상담</h1>
-              <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase tracking-wider">LIVE</span>
-              <UITagBadge id="P-102" label="상담 실시간 진행" />
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <h1 className="text-sm sm:text-lg font-bold text-zinc-900 truncate">{data?.name || data?.user_name || "내담자"}님</h1>
+              <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-[9px] sm:text-[10px] font-bold rounded-full uppercase tracking-wider">LIVE</span>
             </div>
-            <p className="text-xs text-zinc-500">{data?.email || "이메일 정보 없음"}</p>
+            <p className="text-[10px] sm:text-xs text-zinc-400 truncate">{data?.email || "상담 진행 중"}</p>
           </div>
         </div>
 
-        {/* 마이크 체크 및 명언 배너 (온/오프라인 공통) */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6">
+        {/* 데스크톱 마이크 체크 및 명언 배너 (xl 이상) */}
+        <div className="flex-1 hidden xl:flex flex-col items-center justify-center px-6">
            <div className="w-full max-w-2xl bg-white border border-zinc-100 rounded-2xl p-4 shadow-sm flex items-center gap-6">
               {/* 실시간 볼륨 미터 및 증폭 조절 */}
               <div className="flex items-center gap-6 border-r border-zinc-100 pr-6 shrink-0">
@@ -739,7 +739,8 @@ export default function ConsultationPage() {
            </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* 데스크톱 상단 버튼 (xl 이상) */}
+        <div className="hidden xl:flex items-center gap-3">
           <button 
             onClick={toggleRecording}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm ${
@@ -782,14 +783,58 @@ export default function ConsultationPage() {
             </div>
           )}
         </div>
+
+        {/* 모바일 상태 칩 (xl 미만) */}
+        <div className="flex xl:hidden items-center gap-2">
+          {isRecording ? (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-600 border border-rose-200 animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-rose-500" /> REC
+            </span>
+          ) : (
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-zinc-100 text-zinc-500">
+              대기
+            </span>
+          )}
+        </div>
       </header>
 
-      <main className="flex-1 flex overflow-hidden">
+      {/* 모바일 전용 3단 알약 탭 (xl 미만) */}
+      <div className="xl:hidden bg-white border-b border-zinc-200/80 px-3 py-1.5 sticky top-[53px] z-10 shadow-xs">
+        <div className="grid grid-cols-3 gap-1 bg-zinc-100 p-1 rounded-xl text-xs font-bold">
+          <button
+            onClick={() => setMobileTab("profile")}
+            className={`py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all ${
+              mobileTab === "profile" ? "bg-white text-primary shadow-xs font-black" : "text-zinc-500"
+            }`}
+          >
+            <User size={13} /> <span>내담자</span>
+          </button>
+          <button
+            onClick={() => setMobileTab("guide")}
+            className={`py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all ${
+              mobileTab === "guide" ? "bg-white text-primary shadow-xs font-black" : "text-zinc-500"
+            }`}
+          >
+            <Lightbulb size={13} /> <span>정책/가이드</span>
+          </button>
+          <button
+            onClick={() => setMobileTab("stt")}
+            className={`py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all ${
+              mobileTab === "stt" ? "bg-white text-primary shadow-xs font-black" : "text-zinc-500"
+            }`}
+          >
+            <Mic size={13} /> <span>STT/메모</span>
+            {isRecording && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />}
+          </button>
+        </div>
+      </div>
+
+      <main className="flex-1 flex flex-col xl:flex-row overflow-hidden relative">
         {/* 좌측: 내담자 상세 프로필 */}
-        <aside className="w-85 bg-white border-r border-zinc-100 overflow-y-auto hidden xl:block shadow-sm">
-          <div className="p-8 space-y-10">
+        <aside className={`w-full xl:w-85 bg-white border-r border-zinc-100 overflow-y-auto shadow-sm pb-24 xl:pb-0 ${mobileTab === 'profile' ? 'block' : 'hidden xl:block'}`}>
+          <div className="p-4 sm:p-8 space-y-6 sm:space-y-10">
             <section>
-              <h2 className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+              <h2 className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 sm:mb-6 flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-zinc-300" />
                 내담자 프로필
               </h2>
@@ -878,50 +923,50 @@ export default function ConsultationPage() {
         </aside>
 
         {/* 중앙: AI 분석 실마리 & 가이드 */}
-        <div className="flex-1 flex flex-col overflow-y-auto bg-zinc-50/30">
-          <div className="p-8 max-w-5xl mx-auto w-full space-y-12">
+        <div className={`flex-1 flex-col overflow-y-auto bg-zinc-50/30 pb-28 xl:pb-0 ${mobileTab === 'guide' ? 'flex' : 'hidden xl:flex'}`}>
+          <div className="p-4 sm:p-8 max-w-5xl mx-auto w-full space-y-6 sm:space-y-12">
             {hasChatData ? (
               <>
                 {/* 1. 사전 상담 요약 */}
                 <section>
-                   <h2 className="text-[11px] font-black text-primary uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                   <h2 className="text-[11px] font-black text-primary uppercase tracking-[0.2em] mb-4 sm:mb-6 flex items-center gap-2">
                     <Sparkles size={14} className="animate-pulse" />
                     사전 상담 분석 및 주요 신호
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     <div className="bg-white p-6 rounded-[2rem] border border-zinc-100 shadow-sm space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                     <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] border border-zinc-100 shadow-sm space-y-3 sm:space-y-4">
                         <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Chat Summary</p>
                         <p className="text-sm text-zinc-700 leading-relaxed font-medium">
                           {data?.chat_summary || data?.ai_insights?.chat_summary || "요약된 내용이 없습니다."}
                         </p>
                      </div>
-                     <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 rounded-[2rem] shadow-xl text-white space-y-4">
+                     <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-xl text-white space-y-3 sm:space-y-4">
                         <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">Key Insights</p>
                         <p className="text-sm font-bold leading-relaxed">
                           {data?.pre_consultation_brief || data?.ai_insights?.pre_consultation_brief || "추출된 인사이트가 없습니다."}
                         </p>
-                        <div className="pt-2">
+                        <div className="pt-1 sm:pt-2">
                            <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold">🎯 핵심: {(() => { const ui = data?.user_interest || data?.ai_insights?.user_interest; if (!ui) return ''; if (typeof ui === 'string') return ui; if (Array.isArray(ui)) return ui.join(', '); return JSON.stringify(ui); })()}</span>
                         </div>
                      </div>
                   </div>
                 </section>
                 {/* 2. 맞춤형 상담 전략 및 로드맵 */}
-                <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                  <div className="space-y-6">
+                <section className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10">
+                  <div className="space-y-4 sm:space-y-6">
                     <h2 className="text-sm font-extrabold text-zinc-900 flex items-center gap-2">
                       <Lightbulb size={18} className="text-amber-500" /> 커스터마이징 전략
                     </h2>
-                    <div className="bg-white p-6 rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[150px]">
+                    <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-[2.5rem] border border-zinc-100 shadow-sm min-h-[120px] sm:min-h-[150px]">
                        {formatGuideText(data?.consultation_guide || data?.ai_insights?.consultation_guide)}
                     </div>
                   </div>
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     <h2 className="text-sm font-extrabold text-zinc-900 flex items-center gap-2">
                        <Compass size={18} className="text-primary" /> 추천 정책 로드맵
                     </h2>
-                     <div className="bg-white p-7 rounded-[2.5rem] border border-primary/10 shadow-sm border-dashed min-h-[150px]">
-                        <div className="space-y-4">
+                     <div className="bg-white p-5 sm:p-7 rounded-2xl sm:rounded-[2.5rem] border border-primary/10 shadow-sm border-dashed min-h-[120px] sm:min-h-[150px]">
+                        <div className="space-y-3 sm:space-y-4">
                            {(() => {
                               let pr = data?.policy_roadmap || data?.ai_insights?.policy_roadmap;
                               if (!pr) return <p className="text-sm text-zinc-800 leading-relaxed font-bold whitespace-pre-wrap">설정된 로드맵이 없습니다.</p>;
@@ -950,7 +995,7 @@ export default function ConsultationPage() {
                                 return validItems.map((item: any) => (
                                   <div key={item.idx} className="flex flex-col">
                                     <span className="text-[13px] font-extrabold text-zinc-800">{item.idx + 1}. {item.title}</span>
-                                    {item.desc && <span className="text-xs text-zinc-500 mt-1.5 pl-4 border-l-2 border-zinc-100 ml-1 leading-relaxed inline-block">{item.desc}</span>}
+                                    {item.desc && <span className="text-xs text-zinc-500 mt-1 pl-3 sm:pl-4 border-l-2 border-zinc-100 ml-1 leading-relaxed inline-block">{item.desc}</span>}
                                   </div>
                                 ));
                               }
@@ -962,12 +1007,12 @@ export default function ConsultationPage() {
                   </div>
                 </section>
                  
-                <section className="space-y-6">
+                <section className="space-y-4 sm:space-y-6">
                   <h2 className="text-sm font-extrabold text-zinc-900 flex items-center gap-2">
                     <FileText size={18} className="text-primary" /> 추천 정책 솔루션
                   </h2>
                   
-                  <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-zinc-200/60 shadow-sm min-h-[150px]">
+                  <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] border border-zinc-200/60 shadow-sm min-h-[120px] sm:min-h-[150px]">
                     {(() => {
                       let rawData = data?.ai_insights?.recommended_policies || data?.recommended_policies || data?.policy_match || data?.ai_insights?.policy_match;
                       
@@ -1041,7 +1086,7 @@ export default function ConsultationPage() {
                 )}
 
                 {/* 2. 프로필 기반 초기 상담 가이드 (밝은 UI 및 간결한 텍스트 반영) */}
-                <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-zinc-200/60 shadow-sm">
+                <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] border border-zinc-200/60 shadow-sm">
                   <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-6 border-b border-zinc-100">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 shadow-inner">
@@ -1057,23 +1102,23 @@ export default function ConsultationPage() {
                   </div>
 
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3 p-4 bg-zinc-50 hover:bg-zinc-100/80 transition-colors rounded-xl border border-zinc-100">
+                    <div className="flex items-center gap-3 p-3.5 sm:p-4 bg-zinc-50 hover:bg-zinc-100/80 transition-colors rounded-xl border border-zinc-100">
                       <div className="w-6 h-6 rounded-full bg-white border border-zinc-200 text-zinc-400 shadow-sm flex items-center justify-center text-[11px] font-bold shrink-0">1</div>
                       <p className="text-[13px] font-bold text-zinc-700">방문하게 된 결정적 계기 및 현재 직면한 주요 어려움 청취하기</p>
                     </div>
                     {data?.interest_areas?.length > 0 && (
-                      <div className="flex items-center gap-3 p-4 bg-zinc-50 hover:bg-zinc-100/80 transition-colors rounded-xl border border-zinc-100">
+                      <div className="flex items-center gap-3 p-3.5 sm:p-4 bg-zinc-50 hover:bg-zinc-100/80 transition-colors rounded-xl border border-zinc-100">
                         <div className="w-6 h-6 rounded-full bg-white border border-zinc-200 text-zinc-400 shadow-sm flex items-center justify-center text-[11px] font-bold shrink-0">2</div>
                         <p className="text-[13px] font-bold text-zinc-700">사전 선택한 관심 분야(<span className="text-indigo-500">{data.interest_areas.join(", ")}</span>) 연관 희망 지원 방향 파악하기</p>
                       </div>
                     )}
                     {(data?.job_status?.includes("구직") || data?.job_status?.includes("준비")) && (
-                      <div className="flex items-center gap-3 p-4 bg-zinc-50 hover:bg-zinc-100/80 transition-colors rounded-xl border border-zinc-100">
+                      <div className="flex items-center gap-3 p-3.5 sm:p-4 bg-zinc-50 hover:bg-zinc-100/80 transition-colors rounded-xl border border-zinc-100">
                         <div className="w-6 h-6 rounded-full bg-white border border-zinc-200 text-zinc-400 shadow-sm flex items-center justify-center text-[11px] font-bold shrink-0">3</div>
                         <p className="text-[13px] font-bold text-zinc-700">취업 및 구직 준비 중 겪고 있는 심리적/경제적 압박 요인 확인하기</p>
                       </div>
                     )}
-                    <div className="flex items-center gap-3 p-4 bg-zinc-50 hover:bg-zinc-100/80 transition-colors rounded-xl border border-zinc-100">
+                    <div className="flex items-center gap-3 p-3.5 sm:p-4 bg-zinc-50 hover:bg-zinc-100/80 transition-colors rounded-xl border border-zinc-100">
                       <div className="w-6 h-6 rounded-full bg-white border border-zinc-200 text-zinc-400 shadow-sm flex items-center justify-center text-[11px] font-bold shrink-0">
                         {(data?.interest_areas?.length > 0 ? 1 : 0) + ((data?.job_status?.includes("구직") || data?.job_status?.includes("준비")) ? 1 : 0) + 2}
                       </div>
@@ -1087,7 +1132,7 @@ export default function ConsultationPage() {
         </div>
 
         {/* 우측: 상담 기록장 & 실시간 STT */}
-        <aside className="w-[450px] bg-white border-l border-zinc-100 flex flex-col shadow-2xl shadow-zinc-200/50 z-[5]">
+        <aside className={`w-full xl:w-[450px] bg-white border-l border-zinc-100 flex-col shadow-2xl shadow-zinc-200/50 z-[5] pb-28 xl:pb-0 ${mobileTab === 'stt' ? 'flex' : 'hidden xl:flex'}`}>
           {/* 실시간 STT 전사 (헤더 및 컨텐츠 영역) */}
           <div className={`border-b border-zinc-100 flex flex-col shrink-0 transition-all duration-300 ${showSTT ? 'h-[40%]' : 'h-auto bg-zinc-50/50'}`}>
             <div className="p-4 border-b border-zinc-50 bg-white flex flex-col gap-3">
@@ -1333,6 +1378,28 @@ export default function ConsultationPage() {
           </div>
         </div>
       )}
+
+      {/* 모바일 전용 하단 고정 녹음 & 종료 제어바 (xl:hidden) */}
+      <div className="xl:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-zinc-200 px-3 py-2.5 z-30 shadow-lg flex items-center gap-2">
+        <button
+          onClick={toggleRecording}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 ${
+            isRecording
+              ? "bg-rose-500 text-white shadow-rose-200 animate-pulse"
+              : "bg-zinc-900 text-white hover:bg-zinc-800"
+          }`}
+        >
+          <Mic size={15} />
+          <span>{isRecording ? "녹음 중단" : "녹음 시작"}</span>
+        </button>
+        <button
+          onClick={handleEndConsultation}
+          disabled={isSaving}
+          className="flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-xs font-bold bg-primary text-white shadow-md shadow-primary/20 active:scale-95 disabled:opacity-50"
+        >
+          <span>{isSaving ? "처리 중..." : "상담 종료 ➔"}</span>
+        </button>
+      </div>
     </div>
   );
 }

@@ -625,61 +625,63 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
         </div>
       </div>
 
-      <nav className="sticky top-0 z-[60] bg-white/80 backdrop-blur-md border-b border-zinc-100 px-8 py-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-4">
+      <nav className="sticky top-0 z-[60] bg-white/80 backdrop-blur-md border-b border-zinc-100 px-4 sm:px-8 py-3 sm:py-4">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div>
-              <h1 className="text-lg font-black text-zinc-900 flex items-center gap-2">
-                최종 상담 리포트 <span className="text-primary text-sm font-bold">#{baseData?.request_id?.slice(-6) || "REPORT"}</span>
+              <h1 className="text-base sm:text-lg font-black text-zinc-900 flex items-center gap-2">
+                최종 상담 리포트 <span className="text-primary text-xs sm:text-sm font-bold">#{baseData?.request_id?.slice(-6) || "REPORT"}</span>
               </h1>
               <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none mt-1">
                 Consultation Analysis Result
               </p>
             </div>
           </div>
-          <div className="flex gap-3 print:hidden items-center">
+          <div className="flex flex-wrap gap-2 sm:gap-3 print:hidden items-center w-full sm:w-auto justify-end">
             <button 
               onClick={() => window.print()} 
-              className="px-5 py-2.5 bg-zinc-100 text-zinc-600 font-bold rounded-xl hover:bg-zinc-200 transition-all text-sm flex items-center gap-2"
+              className="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-zinc-100 text-zinc-600 font-bold rounded-xl hover:bg-zinc-200 transition-all text-xs sm:text-sm flex items-center gap-1.5"
             >
               PDF 저장
             </button>
             <button 
               onClick={handleCopyAll} 
-              className="px-5 py-2.5 bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-900 transition-all text-sm flex items-center gap-2 shadow-sm"
+              className="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-900 transition-all text-xs sm:text-sm flex items-center gap-1.5 shadow-sm"
             >
-              {copiedId === 'all' ? <Check size={16} className="text-emerald-400" /> : <Copy size={16} />}
+              {copiedId === 'all' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
               전체 복사
             </button>
             <button 
               onClick={() => setShowResultModal(true)}
-              className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center gap-2"
+              className="flex-1 sm:flex-initial px-4 sm:px-6 py-2 sm:py-2.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-95 transition-all text-xs sm:text-sm flex items-center justify-center gap-1.5"
             >
-              내담자에게 리포트 전송 <Send size={16} />
+              내담자에게 리포트 전송 <Send size={14} />
             </button>
-            <div className="w-px h-6 bg-zinc-200 mx-1"></div>
+            <div className="hidden sm:block w-px h-6 bg-zinc-200 mx-1"></div>
             <button 
               onClick={() => window.close()}
-              className="p-2.5 bg-zinc-50 hover:bg-rose-50 hover:text-rose-500 text-zinc-400 font-bold rounded-xl transition-all flex items-center shadow-sm border border-zinc-100"
+              className="p-2 sm:p-2.5 bg-zinc-50 hover:bg-rose-50 hover:text-rose-500 text-zinc-400 font-bold rounded-xl transition-all flex items-center shadow-sm border border-zinc-100"
               title="창 닫기"
             >
-              <X size={18} />
+              <X size={16} />
             </button>
-            <UITagBadge id="P-103" label="상담 완료 결과 리포트" />
+            <div className="hidden lg:block">
+              <UITagBadge id="P-103" label="상담 완료 결과 리포트" />
+            </div>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-8 mt-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-1 space-y-8">
-          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-100 print:shadow-none print:border-zinc-300">
-            <div className="flex items-center gap-5 mb-8">
-              <div className="w-16 h-16 rounded-[24px] bg-zinc-50 flex items-center justify-center text-zinc-400 border border-zinc-100">
-                <User size={32} />
+      <main className="max-w-6xl mx-auto px-4 sm:px-8 mt-6 sm:mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-10">
+        <div className="lg:col-span-1 space-y-6 sm:space-y-8">
+          <section className="bg-white rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-sm border border-zinc-100 print:shadow-none print:border-zinc-300">
+            <div className="flex items-center gap-4 sm:gap-5 mb-6 sm:mb-8">
+              <div className="w-12 sm:w-16 h-12 sm:h-16 rounded-xl sm:rounded-[24px] bg-zinc-50 flex items-center justify-center text-zinc-400 border border-zinc-100 shrink-0">
+                <User size={24} className="sm:w-8 sm:h-8" />
               </div>
               <div>
-                <h3 className="text-xl font-black text-zinc-900">{baseData?.name || "내담자"}</h3>
-                <p className="text-sm font-bold text-zinc-400">{baseData?.age}세 · {baseData?.gender === "male" ? "남성" : "여성"}</p>
+                <h3 className="text-lg sm:text-xl font-black text-zinc-900">{baseData?.name || "내담자"}</h3>
+                <p className="text-xs sm:text-sm font-bold text-zinc-400">{baseData?.age}세 · {baseData?.gender === "male" ? "남성" : "여성"}</p>
               </div>
             </div>
             <div className="space-y-4">
@@ -694,14 +696,14 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
             </div>
           </section>
 
-          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-100 overflow-hidden relative print:shadow-none print:border-zinc-300">
-            <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2 mb-6">
+          <section className="bg-white rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-sm border border-zinc-100 overflow-hidden relative print:shadow-none print:border-zinc-300">
+            <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2 mb-4 sm:mb-6">
               <Activity size={18} className="text-primary" /> 위기 진단 지수
             </h3>
             <div className={`px-3 py-1 rounded-full text-[11px] font-black border mb-4 inline-block ${getRiskColor(reportData.summary.risk_score)}`}>
               SCORE {reportData.summary.risk_score}/10
             </div>
-            <div className="relative h-4 w-full bg-zinc-100 rounded-full mb-4 overflow-hidden">
+            <div className="relative h-3.5 sm:h-4 w-full bg-zinc-100 rounded-full mb-4 overflow-hidden">
                <div 
                  className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-out ${getRiskBarColor(reportData.summary.risk_score)}`}
                  style={{ width: `${reportData.summary.risk_score * 10}%` }}
@@ -711,13 +713,13 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
             <p className="text-xs text-zinc-500 leading-relaxed italic">" {reportData.summary.main_issue} "</p>
           </section>
 
-          <section className="bg-zinc-900 rounded-[32px] p-8 text-white shadow-xl shadow-zinc-200 print:bg-zinc-100 print:text-zinc-900 print:shadow-none print:border print:border-zinc-300">
-             <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+          <section className="bg-zinc-900 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 text-white shadow-xl shadow-zinc-200 print:bg-zinc-100 print:text-zinc-900 print:shadow-none print:border print:border-zinc-300">
+             <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-4 sm:mb-6 flex items-center gap-2">
                 <Tag size={14} className="text-zinc-500" /> 핵심 키워드
              </h3>
-             <div className="flex flex-wrap gap-3">
+             <div className="flex flex-wrap gap-2 sm:gap-3">
                 {reportData.summary.keywords.map((word: string, idx: number) => (
-                  <span key={idx} className="px-4 py-2 bg-white/10 rounded-2xl text-xs font-bold print:border print:border-zinc-300 print:bg-white print:text-zinc-800">
+                  <span key={idx} className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 rounded-xl sm:rounded-2xl text-xs font-bold print:border print:border-zinc-300 print:bg-white print:text-zinc-800">
                     {word}
                   </span>
                 ))}
@@ -726,28 +728,28 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
 
           {/* 원본 상담 스크립트 열람 섹션 (Private Storage 대응) */}
           {baseData?.counsel_scripts && (
-            <section className="bg-white rounded-[32px] p-8 shadow-sm border border-zinc-100 print:hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
-              <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2 mb-4">
+            <section className="bg-white rounded-2xl sm:rounded-[32px] p-5 sm:p-8 shadow-sm border border-zinc-100 print:hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2 mb-3 sm:mb-4">
                 <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-500">
                   <FileText size={16} />
                 </div>
                 원본 상담 기록
               </h3>
-              <p className="text-[12px] text-zinc-500 mb-6 leading-relaxed font-medium">
+              <p className="text-xs text-zinc-500 mb-4 sm:mb-6 leading-relaxed font-medium">
                 보안을 위해 암호화된 임시 링크를 생성하여 원본 텍스트 파일을 안전하게 열람할 수 있습니다.
               </p>
               <button
                 onClick={handleOpenScript}
                 disabled={isGeneratingLink}
-                className="w-full py-4 bg-indigo-50 text-indigo-700 font-bold rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-all flex items-center justify-center gap-2 group active:scale-95 disabled:opacity-50"
+                className="w-full py-3 sm:py-4 bg-indigo-50 text-indigo-700 font-bold rounded-xl sm:rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-all flex items-center justify-center gap-2 group active:scale-95 disabled:opacity-50 text-xs sm:text-sm"
               >
                 {isGeneratingLink ? (
                   <>
-                    <Loader2 size={18} className="animate-spin" /> 보안 링크 생성 중...
+                    <Loader2 size={16} className="animate-spin" /> 보안 링크 생성 중...
                   </>
                 ) : (
                   <>
-                    원본 파일 열람하기 <ExternalLink size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    원본 파일 열람하기 <ExternalLink size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </>
                 )}
               </button>
@@ -755,70 +757,70 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
           )}
         </div>
 
-        <div className="lg:col-span-2 space-y-10">
+        <div className="lg:col-span-2 space-y-6 sm:space-y-10">
           <section>
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-4 sm:mb-6">
               <div className="p-2 bg-indigo-50 rounded-xl text-indigo-500 border border-indigo-100 print:bg-transparent print:border-none print:p-0">
                 <MessageCircle size={20} className="print:text-zinc-900" />
               </div>
-              <h2 className="text-lg font-black text-zinc-900 print:text-xl">상담 대화 요약</h2>
+              <h2 className="text-base sm:text-lg font-black text-zinc-900 print:text-xl">상담 대화 요약</h2>
               <button 
                 onClick={() => handleCopy(reportData.analysis.dialog_summary, 'summary')}
-                className="ml-auto p-2 text-zinc-400 hover:text-primary hover:bg-zinc-50 rounded-lg transition-all flex items-center gap-1.5 print:hidden"
+                className="ml-auto p-1.5 sm:p-2 text-zinc-400 hover:text-primary hover:bg-zinc-50 rounded-lg transition-all flex items-center gap-1.5 print:hidden"
               >
                 {copiedId === 'summary' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                 <span className="text-[10px] font-bold">{copiedId === 'summary' ? '복사됨' : '복사'}</span>
               </button>
             </div>
-            <div className="bg-white rounded-[32px] p-10 shadow-sm border border-zinc-100 h-full print:shadow-none print:border-zinc-300">
+            <div className="bg-white rounded-2xl sm:rounded-[32px] p-5 sm:p-10 shadow-sm border border-zinc-100 h-full print:shadow-none print:border-zinc-300">
                <SmartListBlock text={reportData.analysis.dialog_summary} />
             </div>
           </section>
 
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+            <div className="space-y-3 sm:space-y-6">
               <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2">
                 <TrendingUp size={18} className="text-emerald-500" /> 참여도 변화
               </h3>
-              <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm print:shadow-none print:border-zinc-300">
-                 <p className="text-sm text-zinc-600">{reportData.analysis.engagement_change}</p>
+              <div className="bg-white p-5 sm:p-7 rounded-2xl sm:rounded-[2.5rem] border border-zinc-100 shadow-sm print:shadow-none print:border-zinc-300">
+                 <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">{reportData.analysis.engagement_change}</p>
               </div>
             </div>
-            <div className="space-y-6">
+            <div className="space-y-3 sm:space-y-6">
               <h3 className="text-sm font-black text-zinc-900 flex items-center gap-2">
                 <AlertTriangle size={18} className="text-amber-500" /> 상담사 특이사항
               </h3>
-              <div className="bg-white p-7 rounded-[2.5rem] border border-zinc-100 shadow-sm print:shadow-none print:border-zinc-300">
-                 <p className="text-sm text-zinc-600 italic">{reportData.analysis.counselor_note}</p>
+              <div className="bg-white p-5 sm:p-7 rounded-2xl sm:rounded-[2.5rem] border border-zinc-100 shadow-sm print:shadow-none print:border-zinc-300">
+                 <p className="text-xs sm:text-sm text-zinc-600 italic leading-relaxed">{reportData.analysis.counselor_note}</p>
               </div>
             </div>
           </section>
 
-          <section className="bg-primary/5 rounded-[40px] p-10 border border-primary/10 print:bg-white print:border-zinc-300 mt-8">
-            <h2 className="text-lg font-black text-primary flex items-center gap-3 mb-8 print:text-zinc-900">
-              <Target size={24} /> 맞춤형 실행 계획
+          <section className="bg-primary/5 rounded-2xl sm:rounded-[40px] p-5 sm:p-10 border border-primary/10 print:bg-white print:border-zinc-300 mt-6 sm:mt-8">
+            <h2 className="text-base sm:text-lg font-black text-primary flex items-center gap-2.5 sm:gap-3 mb-6 sm:mb-8 print:text-zinc-900">
+              <Target size={22} className="sm:w-6 sm:h-6" /> 맞춤형 실행 계획
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               <div className="space-y-4">
-                  <p className="text-xs font-black text-primary/60 uppercase tracking-widest pl-1">Matching Policies</p>
-                  <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+               <div className="space-y-3 sm:space-y-4">
+                  <p className="text-[11px] sm:text-xs font-black text-primary/60 uppercase tracking-widest pl-1">Matching Policies</p>
+                  <div className="space-y-2.5 sm:space-y-3">
                     {reportData.action_plan.policy_match.map((policy: string, idx: number) => (
-                      <div key={idx} className="bg-white p-5 rounded-2xl border border-primary/5 shadow-sm flex items-start gap-4 print:border-zinc-200">
-                         <div className="mt-1 p-1 bg-primary/10 rounded text-primary print:bg-transparent">
+                      <div key={idx} className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-primary/5 shadow-sm flex items-start gap-3 sm:gap-4 print:border-zinc-200">
+                         <div className="mt-0.5 p-1 bg-primary/10 rounded text-primary print:bg-transparent shrink-0">
                             <ArrowUpRight size={14} />
                          </div>
-                         <span className="text-sm font-bold text-zinc-800 leading-tight">{policy}</span>
+                         <span className="text-xs sm:text-sm font-bold text-zinc-800 leading-snug">{policy}</span>
                       </div>
                     ))}
                   </div>
                </div>
-               <div className="space-y-4">
-                  <p className="text-xs font-black text-primary/60 uppercase tracking-widest pl-1">Next Action Items</p>
-                  <div className="space-y-3">
+               <div className="space-y-3 sm:space-y-4">
+                  <p className="text-[11px] sm:text-xs font-black text-primary/60 uppercase tracking-widest pl-1">Next Action Items</p>
+                  <div className="space-y-2.5 sm:space-y-3">
                     {reportData.action_plan.next_steps.map((step: string, idx: number) => (
-                      <div key={idx} className="bg-white p-4 rounded-2xl border border-zinc-200 flex items-start gap-3">
-                        <CheckCircle2 size={18} className="text-primary mt-0.5" />
-                        <span className="text-sm font-medium text-zinc-700">{step}</span>
+                      <div key={idx} className="bg-white p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-zinc-200 flex items-start gap-2.5 sm:gap-3">
+                        <CheckCircle2 size={16} className="text-primary mt-0.5 shrink-0" />
+                        <span className="text-xs sm:text-sm font-medium text-zinc-700 leading-snug">{step}</span>
                       </div>
                     ))}
                   </div>
@@ -826,19 +828,19 @@ ${reportData.action_plan.next_steps.map((s: string) => "- " + s).join('\n')}
             </div>
           </section>
 
-          <section className="bg-white rounded-[32px] p-10 border-2 border-dashed border-zinc-100 print:border-solid print:border-zinc-300">
-             <h3 className="text-sm font-black text-zinc-900 mb-6 flex items-center gap-2">
+          <section className="bg-white rounded-2xl sm:rounded-[32px] p-5 sm:p-10 border-2 border-dashed border-zinc-100 print:border-solid print:border-zinc-300">
+             <h3 className="text-sm font-black text-zinc-900 mb-4 sm:mb-6 flex items-center gap-2">
                <MessageCircle size={18} className="text-zinc-300" /> 내담자 전달 메시지
              </h3>
-             <div className="p-8 bg-zinc-50 rounded-2xl relative">
+             <div className="p-5 sm:p-8 bg-zinc-50 rounded-xl sm:rounded-2xl relative">
                 <div className="absolute top-0 left-8 -translate-y-1/2 w-4 h-4 bg-zinc-50 rotate-45 border-l border-t border-zinc-100" />
-                <p className="text-zinc-700 font-bold text-lg leading-relaxed">"{reportData.feedback.user_message}"</p>
-                <div className="flex justify-between items-center mt-10">
+                <p className="text-zinc-700 font-bold text-sm sm:text-lg leading-relaxed">"{reportData.feedback.user_message}"</p>
+                <div className="flex justify-between items-center mt-6 sm:mt-10">
                    <div className="flex -space-x-2">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 border-2 border-white" />
-                      <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white" />
+                      <div className="w-7 sm:w-8 h-7 sm:h-8 rounded-full bg-primary/10 border-2 border-white" />
+                      <div className="w-7 sm:w-8 h-7 sm:h-8 rounded-full bg-indigo-100 border-2 border-white" />
                    </div>
-                   <p className="text-[11px] font-bold text-zinc-400">분석 완료: {reportData.feedback.completed_at}</p>
+                   <p className="text-[10px] sm:text-[11px] font-bold text-zinc-400">분석 완료: {reportData.feedback.completed_at}</p>
                 </div>
              </div>
           </section>
